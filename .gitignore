@@ -1,0 +1,4 @@
+src/main/resources/META-INF/persistence.xml
+nb-configuration.xml
+src/main/webapp/WEB-INF/beans.xml
+src/main/webapp/WEB-INF/glassfish-web.xml
