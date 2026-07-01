@@ -7,17 +7,15 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import za.ac.vzap.trytons.frontend.client.AuthRestClient;
-import za.ac.vzap.trytons.frontend.client.LoginRequest;
-import za.ac.vzap.trytons.frontend.client.LoginResponse;
+import za.ac.vzap.trytons.frontend.client.*;
 
 import java.io.IOException;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+
 @WebServlet (name = "AuthServlet" , urlPatterns = {"/login", "/register", "/logout"})
 public class AuthServlet extends HttpServlet {
-    private final Logger LOGGER = Logger.getLogger(AuthServlet.class.getName());
 
     @Inject
     private AuthRestClient authRestClient;
@@ -25,20 +23,56 @@ public class AuthServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String submit = request.getParameter("submit");
+        if (submit == null) {
+            submit = "";
+        }
         String destination = switch (submit){
             case "login" -> {
+                String identifier = request.getParameter("identifier");
+                String password = request.getParameter("password");
+                LoginRequest loginRequest = new LoginRequest(identifier, password);
+                Optional<LoginResponse> loginResponse = authRestClient.login(loginRequest);
+                if (loginResponse.isPresent()) {
+                    HttpSession session = request.getSession(true);
+                    session.setAttribute("userId",  loginResponse.get().getUserId() );
+                    session.setAttribute("username",  loginResponse.get().getUsername());
+                    session.setAttribute("role",  loginResponse.get().getRole());
+                    yield "registeredUser.jsp";
+                }else {
+                    request.setAttribute("error", "Invalid login credentials");
+                    yield "login.jsp";
+                }
 
-                yield null;
             }
             case "register" ->{
-
-                yield null;
+                String email       = request.getParameter("email");
+                String username    = request.getParameter("username");
+                String rawPassword = request.getParameter("rawPassword");
+                RegisteredUserRequest registerRequest = new RegisteredUserRequest(email, username, rawPassword);
+                Optional<RegisteredUserResponse> registerResponse = authRestClient.register(registerRequest);
+                if (registerResponse.isPresent()) {
+                    yield "login.jsp";
+                } else {
+                    request.setAttribute("error", "Registration failed");
+                    yield "register.jsp";
+                }
             }
             case "logout" -> {
-                yield null;
+                authRestClient.logout();
+                HttpSession session = request.getSession(false);
+                if (session != null) {
+                    session.invalidate();
+                }
+                yield "login.jsp";
             }
             default ->"index.jsp";
         };
+        request.getRequestDispatcher(destination).forward(request, response);
+    }
+
+    @Override
+    public String getServletInfo() {
+        return "Auth Servlet, handles login request and register request and logout request";
     }
 
 }
