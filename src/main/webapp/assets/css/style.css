@@ -1,0 +1,738 @@
+/* ============================================================================
+   TryTons — Fantasy Rugby | Authentication screens (Login & Register)
+   Vanilla CSS. Styles the existing JSP markup only; all extra structural
+   chrome (hero pane, password toggle, brand, footer) is injected by script.js.
+   No JSP/servlet markup is modified — selectors target the existing contract:
+     login:    form[action$="/login"]    #identifier #password  button[value=login]
+     register: form[action$="/register"] #email #username #rawPassword button[value=register]
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+/* ---------- Design tokens ------------------------------------------------- */
+:root {
+  /* Palette */
+  --navy: #1f3864;
+  --navy-600: #1a2f54;
+  --navy-700: #142544;
+  --teal: #1d9e75;
+  --teal-600: #178a65;
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+
+  /* Text */
+  --ink: #1f2a44;
+  --ink-muted: #64748b;
+  --ink-faint: #94a3b8;
+
+  /* Feedback */
+  --danger: #dc2626;
+  --danger-bg: #fef2f2;
+  --danger-border: #fca5a5;
+
+  /* Lines & fields */
+  --border: #d8dee9;
+  --field-bg: #f8fafc;
+
+  /* Radii */
+  --radius-card: 12px;
+  --radius-field: 8px;
+
+  /* Spacing scale */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+
+  /* Elevation */
+  --shadow-card: 0 20px 45px -25px rgba(20, 37, 68, 0.35);
+  --shadow-btn: 0 12px 24px -12px rgba(31, 56, 100, 0.55);
+
+  /* Motion */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ---------- Reset (scoped, light-touch) ----------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+
+  /* Two-column split: left = form pane (main), right = hero (injected). */
+  display: flex;
+  align-items: stretch;
+}
+
+/* ============================================================================
+   LEFT PANE — form column ( <main> )
+   ========================================================================== */
+main {
+  flex: 1 1 55%;
+  min-height: 100vh;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: clamp(24px, 5vw, 64px);
+  position: relative;
+}
+
+/* Constrain the actual form content to a readable card width. Everything
+   inside <main> (brand, headings, form, switch link, footer) lines up here. */
+main > * {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Kill the layout <br> tags baked into the JSP — spacing comes from CSS. */
+main br {
+  display: none;
+}
+
+/* ---------- Brand lockup (injected: .brand) ------------------------------- */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-8);
+}
+
+.brand__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-600));
+  color: #fff;
+  box-shadow: 0 8px 18px -8px rgba(29, 158, 117, 0.8);
+  flex: none;
+}
+
+.brand__mark svg {
+  width: 22px;
+  height: 22px;
+}
+
+.brand__name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--navy);
+}
+
+.brand__name b {
+  color: var(--teal);
+}
+
+/* ---------- Headings & intro copy ----------------------------------------- */
+main h1 {
+  margin: 0 0 var(--sp-2);
+  font-size: clamp(1.75rem, 3vw, 2.15rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--navy);
+}
+
+/* The intro sentence directly after <h1> (JSP: the <p> before the form). */
+main h1 + p {
+  margin: 0 0 var(--sp-8);
+  color: var(--ink-muted);
+  font-size: 0.975rem;
+}
+
+/* ---------- Server-side error banner (p.error-message) -------------------- */
+.error-message {
+  margin: 0 0 var(--sp-5);
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--danger-border);
+  border-left-width: 4px;
+  border-radius: var(--radius-field);
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* ============================================================================
+   FORM
+   ========================================================================== */
+main form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+/* Each JSP field is a bare <div> wrapping a <label> + <input>. */
+form > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  position: relative; /* anchor for input icon + password toggle */
+}
+
+form label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+}
+
+/* ---------- Inputs -------------------------------------------------------- */
+form input {
+  width: 100%;
+  height: 48px;
+  padding: 0 var(--sp-4) 0 44px; /* left room for the leading icon */
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--ink);
+  background: var(--field-bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-field);
+  transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease),
+    background-color 0.15s var(--ease);
+
+  /* Leading icon */
+  background-repeat: no-repeat;
+  background-position: 14px center;
+  background-size: 20px 20px;
+}
+
+form input::placeholder {
+  color: var(--ink-faint);
+}
+
+form input:hover {
+  border-color: #c3ccdb;
+}
+
+form input:focus {
+  outline: none;
+  background-color: var(--surface);
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.15);
+}
+
+/* Password field is wrapped (by JS) in .input-wrap to anchor the toggle. */
+.input-wrap {
+  position: relative;
+  display: block;
+}
+
+.input-wrap input {
+  padding-right: 46px; /* room for the show/hide toggle */
+}
+
+/* Leading field icons (data-URI SVG, feather-style, muted stroke) */
+#identifier,
+#username {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
+}
+
+#email {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='4' width='20' height='16' rx='2'/%3E%3Cpath d='m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7'/%3E%3C/svg%3E");
+}
+
+#password,
+#rawPassword {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E");
+}
+
+/* When an icon-bearing input is focused, tint its icon teal. */
+form input:focus {
+  /* (icon recolor handled by swapping stroke via :focus variants below) */
+}
+
+/* ---------- Client-side validation error state ---------------------------- */
+form > div.has-error input {
+  border-color: var(--danger);
+  background-color: var(--danger-bg);
+}
+
+/* On an errored field, recolour the leading icon to danger red. */
+form > div.has-error #identifier,
+form > div.has-error #username {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23dc2626' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
+}
+
+form > div.has-error #email {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23dc2626' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='4' width='20' height='16' rx='2'/%3E%3Cpath d='m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7'/%3E%3C/svg%3E");
+}
+
+form > div.has-error #password,
+form > div.has-error #rawPassword {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23dc2626' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E");
+}
+
+form > div.has-error input:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+.field-error {
+  color: var(--danger);
+  font-size: 0.78rem;
+  font-weight: 500;
+  margin-top: 2px;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.field-error::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  flex: none;
+  background: no-repeat center / contain
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23dc2626' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='12' y1='8' x2='12' y2='12'/%3E%3Cline x1='12' y1='16' x2='12.01' y2='16'/%3E%3C/svg%3E");
+}
+
+/* Neutral inline hint (injected: e.g. forgot-password helper) */
+.field-hint {
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+  margin-top: 2px;
+}
+
+/* ---------- Password show/hide toggle (injected: button.pw-toggle) -------- */
+.pw-toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: color 0.15s var(--ease), background-color 0.15s var(--ease);
+}
+
+.pw-toggle:hover {
+  color: var(--navy);
+  background: rgba(31, 56, 100, 0.06);
+}
+
+.pw-toggle:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 1px;
+}
+
+.pw-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ---------- Options row (injected on login: remember + forgot) ------------ */
+.auth-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-top: calc(var(--sp-2) * -1);
+  flex-wrap: wrap;
+}
+
+.auth-remember {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.auth-remember input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--teal);
+  cursor: pointer;
+}
+
+.auth-link {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--teal);
+  text-decoration: none;
+}
+
+.auth-link:hover {
+  color: var(--teal-600);
+  text-decoration: underline;
+}
+
+/* ---------- Primary CTA ( button[value=login|register] ) ------------------ */
+main form button[type="submit"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  width: 100%;
+  height: 50px;
+  margin-top: var(--sp-1);
+  padding: 0 var(--sp-5);
+  font: inherit;
+  font-size: 0.975rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #fff;
+  background: var(--navy);
+  border: 0;
+  border-radius: var(--radius-field);
+  cursor: pointer;
+  box-shadow: var(--shadow-btn);
+  transition: background-color 0.15s var(--ease), transform 0.08s var(--ease),
+    box-shadow 0.15s var(--ease);
+}
+
+/* Trailing arrow icon */
+main form button[type="submit"]::after {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background: no-repeat center / contain
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='5' y1='12' x2='19' y2='12'/%3E%3Cpolyline points='12 5 19 12 12 19'/%3E%3C/svg%3E");
+  transition: transform 0.15s var(--ease);
+}
+
+main form button[type="submit"]:hover {
+  background: var(--navy-600);
+  box-shadow: 0 16px 30px -12px rgba(31, 56, 100, 0.7);
+}
+
+main form button[type="submit"]:hover::after {
+  transform: translateX(3px);
+}
+
+main form button[type="submit"]:active {
+  background: var(--navy-700);
+  transform: scale(0.985);
+  box-shadow: 0 8px 16px -10px rgba(31, 56, 100, 0.7);
+}
+
+main form button[type="submit"]:focus-visible {
+  outline: 3px solid rgba(29, 158, 117, 0.5);
+  outline-offset: 2px;
+}
+
+/* ---------- Divider + social button (injected: .auth-divider/.btn-google) - */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin: var(--sp-6) 0;
+  color: var(--ink-faint);
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.btn-google {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  width: 100%;
+  height: 48px;
+  font: inherit;
+  font-size: 0.925rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-field);
+  cursor: pointer;
+  transition: background-color 0.15s var(--ease), border-color 0.15s var(--ease),
+    transform 0.08s var(--ease);
+}
+
+.btn-google:hover {
+  background: #f8fafc;
+  border-color: #c3ccdb;
+}
+
+.btn-google:active {
+  transform: scale(0.985);
+}
+
+.btn-google svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+/* ---------- Switch link (JSP: trailing <p> with register/login link) ------ */
+main form ~ p {
+  margin: var(--sp-6) 0 0;
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+main form ~ p a {
+  color: var(--teal);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+main form ~ p a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Footer meta (injected: .auth-footer) -------------------------- */
+.auth-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-top: var(--sp-10);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--border);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+}
+
+.auth-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--ink-muted);
+}
+
+.auth-status__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 0 0 rgba(29, 158, 117, 0.5);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(29, 158, 117, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(29, 158, 117, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(29, 158, 117, 0);
+  }
+}
+
+/* ============================================================================
+   RIGHT PANE — hero (injected: aside.hero)
+   Darkened "stadium at night" built purely from CSS layers (no image dep).
+   ========================================================================== */
+.hero {
+  flex: 1 1 45%;
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: clamp(32px, 4vw, 64px);
+  background: radial-gradient(
+      130% 90% at 50% 0%,
+      rgba(29, 158, 117, 0.32) 0%,
+      rgba(29, 158, 117, 0) 55%
+    ),
+    linear-gradient(180deg, #24365f 0%, #172443 55%, #0d1730 100%);
+}
+
+/* Stadium-floodlight glows + turf hint */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+      40% 30% at 18% 12%,
+      rgba(255, 255, 255, 0.16),
+      transparent 70%
+    ),
+    radial-gradient(
+      40% 30% at 82% 10%,
+      rgba(255, 255, 255, 0.14),
+      transparent 70%
+    ),
+    radial-gradient(
+      120% 55% at 50% 120%,
+      rgba(29, 158, 117, 0.4),
+      transparent 60%
+    );
+  pointer-events: none;
+}
+
+/* Pitch line texture at the base */
+.hero::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 45%;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0 2px,
+    transparent 2px 78px
+  );
+  transform: perspective(340px) rotateX(62deg);
+  transform-origin: bottom;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.hero__content {
+  position: relative;
+  z-index: 1;
+  max-width: 440px;
+}
+
+.hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 6px 12px;
+  margin-bottom: var(--sp-5);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #d7f5e9;
+  background: rgba(29, 158, 117, 0.18);
+  border: 1px solid rgba(29, 158, 117, 0.45);
+  border-radius: 999px;
+  backdrop-filter: blur(4px);
+}
+
+.hero__title {
+  margin: 0 0 var(--sp-3);
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.hero__title em {
+  font-style: normal;
+  color: #35d29c;
+}
+
+.hero__text {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.hero__stats {
+  display: flex;
+  gap: var(--sp-8);
+  margin-top: var(--sp-8);
+}
+
+.hero__stat b {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.hero__stat span {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ============================================================================
+   RESPONSIVE — collapse to a single centered card under 768px
+   ========================================================================== */
+@media (max-width: 768px) {
+  body {
+    background: var(--bg);
+    padding: clamp(16px, 5vw, 40px);
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Hide the hero, per spec */
+  .hero {
+    display: none;
+  }
+
+  main {
+    flex: 1 1 auto;
+    min-height: auto;
+    width: 100%;
+    max-width: 440px;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    padding: clamp(28px, 7vw, 44px);
+  }
+}
+
+@media (max-width: 400px) {
+  .auth-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-2);
+  }
+}
+
+/* Reduced-motion: honour user preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
