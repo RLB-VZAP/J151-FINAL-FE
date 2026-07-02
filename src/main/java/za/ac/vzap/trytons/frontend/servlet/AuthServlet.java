@@ -11,7 +11,6 @@ import za.ac.vzap.trytons.frontend.client.*;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.logging.Logger;
 
 
 @WebServlet (name = "AuthServlet" , urlPatterns = {"/login", "/register", "/logout"})
