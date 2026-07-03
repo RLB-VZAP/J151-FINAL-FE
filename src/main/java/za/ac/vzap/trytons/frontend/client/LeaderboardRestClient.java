@@ -1,12 +1,9 @@
 package za.ac.vzap.trytons.frontend.client;
 
-import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.WebTarget;
-import tools.jackson.databind.ObjectMapper;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,8 +16,8 @@ public class LeaderboardRestClient {
     @Inject
     public APIClient apiClient;
 
-    public Optional<LeaderboardEntryResponse> getLeaderboardForLeague(){
-        String path = GET_LEADERBOARD_FOR_LEAGUE_PATH;
+    public Optional<LeaderboardEntryResponse> getLeaderboardForLeague(UUID leagueId) {
+        String path = GET_LEADERBOARD_FOR_LEAGUE_PATH + "/" + leagueId;
         Optional<LeaderboardEntryResponse> response = apiClient.get(path, LeaderboardEntryResponse.class);
         if (response.isEmpty()){
             LOG.log(Level.SEVERE, "Could not get leaderboard for league.");
@@ -28,8 +25,8 @@ public class LeaderboardRestClient {
         return response;
     }
 
-    public Optional<LeaderboardEntryResponse> getRankingForTeam(){
-        String path = GET_RANKING_FOR_TEAM_PATH;
+    public Optional<LeaderboardEntryResponse> getRankingForTeam(UUID teamId){
+        String path = GET_RANKING_FOR_TEAM_PATH + "/" + teamId;
         Optional<LeaderboardEntryResponse> response = apiClient.get(path, LeaderboardEntryResponse.class);
         if (response.isEmpty()){
             LOG.log(Level.SEVERE, "Could not get ranking for team.");
