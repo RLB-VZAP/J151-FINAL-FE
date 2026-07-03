@@ -11,6 +11,9 @@
         activeNav = "";
     }
     String navUsername = (String) session.getAttribute("username");
+    if (navUsername != null) {
+        navUsername = navUsername.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
+    }
 %>
 <header class="site-header">
 <nav class="site-nav" aria-label="Main navigation">
