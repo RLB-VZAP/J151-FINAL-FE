@@ -1,0 +1,50 @@
+<%--
+  TryTons - Shared site navigation fragment.
+  Include from any page with:  <%@ include file="/WEB-INF/jspf/nav.jspf" %>
+  Pages mark their own link active by setting the "activeNav" request
+  attribute (e.g. "players", "clubs", "create-team") before the include.
+  Styling lives in /assets/css/create-team.css (shared app tokens).
+--%>
+<%
+    String activeNav = (String) request.getAttribute("activeNav");
+    if (activeNav == null) {
+        activeNav = "";
+    }
+    String navUsername = (String) session.getAttribute("username");
+%>
+<header class="site-header">
+<nav class="site-nav" aria-label="Main navigation">
+<a class="site-nav__brand" href="${pageContext.request.contextPath}/">
+<span class="site-nav__mark" aria-hidden="true">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="10" ry="6" transform="rotate(45 12 12)"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="10" y1="10" x2="10" y2="14"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="14" y1="10" x2="14" y2="14"/></svg>
+</span>
+<span class="site-nav__name">Try<b>Tons</b></span>
+</a>
+
+<ul class="site-nav__links">
+<li>
+<a class="site-nav__link <%= "players".equals(activeNav) ? "is-active" : "" %>"
+   href="${pageContext.request.contextPath}/players?submit=players">Players</a>
+</li>
+<li>
+<a class="site-nav__link <%= "clubs".equals(activeNav) ? "is-active" : "" %>"
+   href="${pageContext.request.contextPath}/clubs?submit=clubs">Clubs</a>
+</li>
+<li>
+<a class="site-nav__link <%= "create-team".equals(activeNav) ? "is-active" : "" %>"
+   href="${pageContext.request.contextPath}/create-team">Create Team</a>
+</li>
+</ul>
+
+<div class="site-nav__user">
+<% if (navUsername != null && !navUsername.isBlank()) { %>
+<span class="site-nav__username" title="Logged in as <%= navUsername %>"><%= navUsername %></span>
+<form method="post" action="${pageContext.request.contextPath}/logout" class="site-nav__logout">
+<button type="submit" name="submit" value="logout">Log out</button>
+</form>
+<% } else { %>
+<a class="site-nav__link" href="${pageContext.request.contextPath}/pages/login.jsp">Log in</a>
+<% } %>
+</div>
+</nav>
+</header>
