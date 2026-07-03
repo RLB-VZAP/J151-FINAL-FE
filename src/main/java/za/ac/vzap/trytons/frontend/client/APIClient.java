@@ -1,5 +1,6 @@
 package za.ac.vzap.trytons.frontend.client;
 import jakarta.enterprise.context.Dependent;
+import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
@@ -50,8 +51,40 @@ public class APIClient {
                     .accept(MediaType.APPLICATION_JSON)
                     .get();
             return handle(response, responseType);
-        }catch(Exception e){
+        }catch(ProcessingException e){
             LOG.log(Level.SEVERE,"GET " + path + " failed", e);
+            return Optional.empty();
+        }finally {
+            client.close();
+        }
+    }
+
+    public<T> Optional<T> put(String path, Object body, Class<T> responseType) {
+        Client client = ClientBuilder.newClient();
+        try{
+            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
+            Response response = target.request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.json(body));
+            return handle(response, responseType);
+        }catch(ProcessingException e){
+            LOG.log(Level.SEVERE,"PUT " + path + " failed", e);
+            return Optional.empty();
+        }finally {
+            client.close();
+        }
+    }
+
+    public<T> Optional<T> delete(String path, Class<T> responseType) {
+        Client client = ClientBuilder.newClient();
+        try{
+            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
+            Response response = target.request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .delete();
+            return handle(response, responseType);
+        }catch(ProcessingException e){
+            LOG.log(Level.SEVERE,"DELETE " + path + " failed", e);
             return Optional.empty();
         }finally {
             client.close();
