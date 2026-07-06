@@ -6,11 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import za.ac.vzap.trytons.frontend.client.ClubResponse;
-import za.ac.vzap.trytons.frontend.client.PlayerRequest;
-import za.ac.vzap.trytons.frontend.client.PlayerResponse;
-import za.ac.vzap.trytons.frontend.client.PlayerRestClient;
-import za.ac.vzap.trytons.frontend.client.PositionResponse;
+import za.ac.vzap.trytons.frontend.client.*;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -22,6 +18,8 @@ import java.util.UUID;
 public class PlayerServlet extends HttpServlet {
     @Inject
     private PlayerRestClient playerRestClient;
+    @Inject
+    private ClubRestClient clubRestClient;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -41,23 +39,36 @@ public class PlayerServlet extends HttpServlet {
                     request.setAttribute("error", "Unable to load players");
                     request.setAttribute("players", List.of());
                 }
-                yield "players.jsp";
+
+                Optional<List<ClubResponse>> clubs = clubRestClient.listClubs();
+                request.setAttribute("clubs", clubs.orElse(List.of()));
+                // NOTE: no PositionRestClient exists yet, so "positions" is not
+                // set here. players.jsp reads it defensively (EL null-safe) and
+                // will just show "All Positions" with no other options until
+                // a position REST client is added in a future ticket.
+                // - James
+
+                request.setAttribute("searchTerm", search);
+                request.setAttribute("selectedClubId", clubId);
+                request.setAttribute("selectedPositionId", positionId);
+
+                yield "/pages/players.jsp";
             }
             case "player" -> {
                 Optional<UUID> playerId = parseUuid(request.getParameter("playerId"));
                 if (playerId.isEmpty()) {
                     request.setAttribute("error", "Invalid or missing player id");
-                    yield "players.jsp";
+                    yield "/pages/players.jsp";
                 }
                 Optional<PlayerResponse> player = playerRestClient.getPlayer(playerId.get());
                 if (player.isPresent()) {
                     request.setAttribute("player", player.get());
-                    yield "player.jsp";
+                    yield "/pages/player.jsp";
                 }
                 request.setAttribute("error", "Player not found");
-                yield "players.jsp";
+                yield "/pages/players.jsp";
             }
-            default -> "index.jsp";
+            default -> "/index.jsp";
         };
         request.getRequestDispatcher(destination).forward(request, response);
     }
@@ -73,21 +84,21 @@ public class PlayerServlet extends HttpServlet {
                 PlayerRequest playerRequest = buildPlayerRequest(request);
                 Optional<PlayerResponse> created = playerRestClient.createPlayer(playerRequest);
                 request.setAttribute("error", "Unable to create player");
-                yield "player.jsp";
+                yield "/pages/player.jsp";
             }
             case "player/update" -> {
                 Optional<UUID> playerId = parseUuid(request.getParameter("playerId"));
                 if (playerId.isEmpty()) {
                     request.setAttribute("error", "Invalid or missing player id");
-                    yield "player.jsp";
+                    yield "/pages/player.jsp";
                 }
                 PlayerRequest playerRequest = buildPlayerRequest(request);
                 Optional<PlayerResponse> updated = playerRestClient.updatePlayer(playerId.get(), playerRequest);
 
                 request.setAttribute("error", "Unable to update player");
-                yield "player.jsp";
+                yield "/pages/player.jsp";
             }
-            default -> "index.jsp";
+            default -> "/index.jsp";
         };
         request.getRequestDispatcher(destination).forward(request, response);
     }
