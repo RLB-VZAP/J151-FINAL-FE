@@ -1,0 +1,20 @@
+<%--
+    <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+--%>
+<nav id="mainNav">
+    <a href="${pageContext.request.contextPath}/players?submit=players" id="navPlayersLink">Players</a>
+    <a href="${pageContext.request.contextPath}/clubs?submit=clubs" id="navClubsLink">Clubs</a>
+
+    <c:choose>
+        <c:when test="${not empty sessionScope.username}">
+            <span id="navWelcome">Welcome, ${sessionScope.username}</span>
+            <form action="${pageContext.request.contextPath}/logout" method="post" id="navLogoutForm">
+                <button type="submit" name="submit" value="logout">Log out</button>
+            </form>
+        </c:when>
+        <c:otherwise>
+            <a href="${pageContext.request.contextPath}/pages/login.jsp" id="navLoginLink">Login</a>
+            <a href="${pageContext.request.contextPath}/pages/register.jsp" id="navRegisterLink">Register</a>
+        </c:otherwise>
+    </c:choose>
+</nav>
