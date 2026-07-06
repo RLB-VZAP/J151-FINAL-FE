@@ -1,66 +1,60 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TryTons - Leaderboard</title>
+    <title>Leaderboard</title>
 </head>
-
 <body>
-<main>
-<h1>Leaderboard</h1>
-<p>View the leaderboard below.</p>
 
-<%
-  String errorMessage = (String) request.getAttribute("error");
-  if (errorMessage != null && !errorMessage.isBlank()) {
-%>
-<p class="error-message" role="alert">
-<%= errorMessage %>
-</p>
-<%
-  }
-%>
-<form method="post" action="${pageContext.request.contextPath}/register">
-<div>
-<label for="email">Email Address</label>
-<input
-      type="email"
-      id="email"
-      name="email"
-      required>
-</div>
-<br>
-<div>
-<label for = "username">Username</label>
-<input
-      type="text"
-      id="username"
-      name="username"
-      required>
-</div>
+    <c:if test="${not empty error}">
+        <p>${error}</p>
+    </c:if>
 
-<br>
-<div>
-<label for="rawPassword">Password</label>
-<input
-type="password"
-id="rawPassword"
-name="rawPassword"
-required
-autocomplete="new-password">
-</div>
-<br>
-<button type="submit" name="submit" value="register">Register</button>
-</form>
-<p>
-Already have an account?
-<a href="${pageContext.request.contextPath}/pages/login.jsp">
-Login here my brodie, get cooking. You're missing all the action!
-</a>.
-</p>
-</main>
+    <c:if test="${not empty leaderboard}">
+        <table>
+            <tr>
+                <th>Rank</th>
+                <th>Team</th>
+                <th>Owner</th>
+                <th>Weekly Points</th>
+                <th>Total Points</th>
+                <th>Rank Movement</th>
+            </tr>
+            <c:forEach var="entry" items="${leaderboard}">
+                <tr>
+                    <td>${entry.rank}</td>
+                    <td>${entry.teamName}</td>
+                    <td>${entry.owner}</td>
+                    <td>${entry.weeklyPoints}</td>
+                    <td>${entry.totalPoints}</td>
+                    <td>${entry.rankMovement}</td>
+                </tr>
+            </c:forEach>
+        </table>
+    </c:if>
+
+    <c:if test="${not empty ranking}">
+        <!-- a single entry, no loop needed — just print fields directly off ${ranking} -->
+        <table>
+            <tr>
+                <th>Rank</th>
+                <th>Team</th>
+                <th>Owner</th>
+                <th>Weekly Points</th>
+                <th>Total Points</th>
+                <th>Rank Movement</th>
+            </tr>
+            <tr>
+                <td>${ranking.rank}</td>
+                <td>${ranking.teamName}</td>
+                <td>${ranking.owner}</td>
+                <td>${ranking.weeklyPoints}</td>
+                <td>${ranking.totalPoints}</td>
+                <td>${ranking.rankMovement}</td>
+            </tr>
+        </table>
+    </c:if>
+
 </body>
 </html>
