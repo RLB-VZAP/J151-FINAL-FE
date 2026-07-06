@@ -1,0 +1,1 @@
+<%-- Fixture placeholder stub for W3-T02A --%>
