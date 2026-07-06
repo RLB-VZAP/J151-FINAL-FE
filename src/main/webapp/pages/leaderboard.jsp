@@ -55,6 +55,5 @@
             </tr>
         </table>
     </c:if>
-
 </body>
 </html>
