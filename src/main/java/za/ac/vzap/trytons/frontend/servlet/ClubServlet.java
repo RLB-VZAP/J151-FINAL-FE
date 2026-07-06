@@ -28,6 +28,7 @@ public class ClubServlet extends HttpServlet {
         }
         String destination = switch (submit){
             case "clubs" -> {
+                String search = request.getParameter("search");
                 Optional<List<ClubResponse>> clubs = clubRestClient.listClubs();
                 if (clubs.isPresent()) {
                     request.setAttribute("clubs", clubs.get());
@@ -35,23 +36,24 @@ public class ClubServlet extends HttpServlet {
                     request.setAttribute("error", "Unable to load clubs");
                     request.setAttribute("clubs", List.of());
                 }
-                yield "clubs.jsp";
+                request.setAttribute("searchTerm", search);
+                yield "/pages/clubs.jsp";
             }
             case "club"  -> {
                 Optional<UUID> clubId = parseUuid(request.getParameter("clubId"));
                 if (clubId.isEmpty()) {
                     request.setAttribute("error", "Invalid or missing club id");
-                    yield "clubs.jsp";
+                    yield "/pages/clubs.jsp";
                 }
                 Optional<ClubResponse> club = clubRestClient.getClubById(clubId.get());
                 if (club.isPresent()) {
                     request.setAttribute("club", club.get());
-                    yield "club.jsp";
+                    yield "/pages/club.jsp";
                 }
                 request.setAttribute("error", "Club not found");
-                yield "clubs.jsp";
+                yield "/pages/clubs.jsp";
             }
-            default ->  "index.jsp";
+            default ->  "/index.jsp";
         };
         request.getRequestDispatcher(destination).forward(request, response);
     }
@@ -70,13 +72,13 @@ public class ClubServlet extends HttpServlet {
                     yield reloadClubs(request);
                 }
                 request.setAttribute("error", "Unable to create club");
-                yield "club.jsp";
+                yield "/pages/club.jsp";
             }
             case "club/update" -> {
                 Optional<UUID> clubId = parseUuid(request.getParameter("clubId"));
                 if (clubId.isEmpty()) {
                     request.setAttribute("error", "Invalid or missing club id");
-                    yield "club.jsp";
+                    yield "/pages/club.jsp";
                 }
                 ClubRequest clubRequest = buildClubRequest(request);
                 Optional<ClubResponse> updated = clubRestClient.updateClub(clubId.get(), clubRequest);
@@ -84,9 +86,9 @@ public class ClubServlet extends HttpServlet {
                     yield reloadClubs(request);
                 }
                 request.setAttribute("error", "Unable to update club");
-                yield "club.jsp";
+                yield "/pages/club.jsp";
             }
-            default ->  "index.jsp";
+            default ->  "/index.jsp";
         };
         request.getRequestDispatcher(destination).forward(request, response);
     }
@@ -103,7 +105,7 @@ public class ClubServlet extends HttpServlet {
     private String reloadClubs(HttpServletRequest request) {
         Optional<List<ClubResponse>> clubs = clubRestClient.listClubs();
         request.setAttribute("clubs", clubs.orElse(List.of()));
-        return "clubs.jsp";
+        return "/pages/clubs.jsp";
     }
 
     private Optional<UUID> parseUuid(String value) {
