@@ -5,7 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import za.ac.vzap.trytons.frontend.client.AdminMatchResultRestClient;
 
-@WebServlet()
+@WebServlet(name= "" , urlPatterns = "")
 public class AdminMatchResultServlet extends HttpServlet {
     @Inject
     private AdminMatchResultRestClient adminMatchResultRestClient;
