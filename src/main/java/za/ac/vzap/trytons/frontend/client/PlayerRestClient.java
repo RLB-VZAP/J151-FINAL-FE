@@ -1,5 +1,6 @@
 package za.ac.vzap.trytons.frontend.client;
 
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Dependent
 public class PlayerRestClient {
     private String LIST_PLAYERS ="/player";
     private String GET_PLAYER = "/player";
