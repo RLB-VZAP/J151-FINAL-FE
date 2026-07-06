@@ -1,5 +1,6 @@
 package za.ac.vzap.trytons.frontend.client;
 
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+@Dependent
 public class ClubRestClient {
     private String LIST_CLUBS = "/club";
     private String GET_CLUB_BY_ID = "/club";
