@@ -10,6 +10,7 @@ import za.ac.vzap.trytons.frontend.client.LeaderboardEntryResponse;
 import za.ac.vzap.trytons.frontend.client.LeaderboardRestClient;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,7 +35,7 @@ public class LeaderboardServlet extends HttpServlet {
                 request.setAttribute("error", "Invalid league ID");
                 destination = "/leaderboard.jsp";
             }else {
-                Optional<LeaderboardEntryResponse> result = leaderboardRestClient.getLeaderboardForLeague(leagueId.get());
+                Optional<List<LeaderboardEntryResponse>> result = leaderboardRestClient.getLeaderboardForLeague(leagueId.get());
                 if (result.isPresent()) {
                     request.setAttribute("leaderboard", result.get());
                     destination = "/leaderboard.jsp";
