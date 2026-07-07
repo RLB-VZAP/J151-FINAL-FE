@@ -2,7 +2,9 @@ package za.ac.vzap.trytons.frontend.client;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.GenericType;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -18,9 +20,9 @@ public class LeaderboardRestClient {
     @Inject
     public APIClient apiClient;
 
-    public Optional<LeaderboardEntryResponse> getLeaderboardForLeague(UUID leagueId) {
+    public Optional<List<LeaderboardEntryResponse>> getLeaderboardForLeague(UUID leagueId) {
         String path = GET_LEADERBOARD_FOR_LEAGUE_PATH + "/" + leagueId + "/rankings";
-        Optional<LeaderboardEntryResponse> response = apiClient.get(path, LeaderboardEntryResponse.class);
+        Optional<List<LeaderboardEntryResponse>> response = apiClient.getList(path, new GenericType<List<LeaderboardEntryResponse>>(){});
         if (response.isEmpty()){
             LOG.log(Level.SEVERE, "Could not get leaderboard for league.");
         }
