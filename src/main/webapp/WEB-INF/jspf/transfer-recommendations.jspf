@@ -1,1 +1,21 @@
-<%-- Transfer Recommendation Stub (W3-T12A placeholder) --%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+
+<section id="transferRecommendations">
+    <h2>Recommended Transfers</h2>
+    <c:choose>
+        <c:when test="${empty transferRecommendations}">
+            <p id="transferRecommendationsEmptyState">No transfer recommendations available.</p>
+        </c:when>
+        <c:otherwise>
+            <ul id="transferRecommendationsList">
+                <c:forEach var="rec" items="${transferRecommendations}">
+                    <li class="recommendation-card">
+                        <span class="recommendation-card__name">${rec.playerName}</span>
+                        <span class="recommendation-card__value">${rec.value}</span>
+                        <span class="recommendation-card__reason">${rec.reason}</span>
+                    </li>
+                </c:forEach>
+            </ul>
+        </c:otherwise>
+    </c:choose>
+</section>
