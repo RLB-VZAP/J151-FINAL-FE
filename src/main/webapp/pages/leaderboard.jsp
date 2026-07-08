@@ -17,18 +17,30 @@
                 <th>Rank</th>
                 <th>Team</th>
                 <th>Owner</th>
-                <th>Weekly Points</th>
-                <th>Total Points</th>
-                <th>Rank Movement</th>
+                <th>Played</th>
+                <th>Won</th>
+                <th>Drawn</th>
+                <th>Lost</th>
+                <th>Points For</th>
+                <th>Points Against</th>
+                <th>Difference</th>
+                <th>League Points</th>
+                <th>Total Fantasy Points</th>
             </tr>
             <c:forEach var="entry" items="${leaderboard}">
                 <tr>
                     <td>${entry.rank}</td>
                     <td>${entry.teamName}</td>
                     <td>${entry.owner}</td>
-                    <td>${entry.weeklyPoints}</td>
-                    <td>${entry.totalPoints}</td>
-                    <td>${entry.rankMovement}</td>
+                    <td>${entry.matchesPlayed}</td>
+                    <td>${entry.matchesWon}</td>
+                    <td>${entry.matchesDrawn}</td>
+                    <td>${entry.matchesLost}</td>
+                    <td>${entry.pointsFor}</td>
+                    <td>${entry.pointsAgainst}</td>
+                    <td>${entry.scoreDifference}</td>
+                    <td>${entry.leaguePoints}</td>
+                    <td>${entry.totalFantasyPoints}</td>
                 </tr>
             </c:forEach>
         </table>
@@ -41,17 +53,29 @@
                 <th>Rank</th>
                 <th>Team</th>
                 <th>Owner</th>
-                <th>Weekly Points</th>
-                <th>Total Points</th>
-                <th>Rank Movement</th>
+                <th>Played</th>
+                <th>Won</th>
+                <th>Drawn</th>
+                <th>Lost</th>
+                <th>Points For</th>
+                <th>Points Against</th>
+                <th>Difference</th>
+                <th>League Points</th>
+                <th>Total Fantasy Points</th>
             </tr>
             <tr>
                 <td>${ranking.rank}</td>
                 <td>${ranking.teamName}</td>
                 <td>${ranking.owner}</td>
-                <td>${ranking.weeklyPoints}</td>
-                <td>${ranking.totalPoints}</td>
-                <td>${ranking.rankMovement}</td>
+                <td>${entry.matchesPlayed}</td>
+                <td>${entry.matchesWon}</td>
+                <td>${entry.matchesDrawn}</td>
+                <td>${entry.matchesLost}</td>
+                <td>${entry.pointsFor}</td>
+                <td>${entry.pointsAgainst}</td>
+                <td>${entry.scoreDifference}</td>
+                <td>${entry.leaguePoints}</td>
+                <td>${entry.totalFantasyPoints}</td>
             </tr>
         </table>
     </c:if>
