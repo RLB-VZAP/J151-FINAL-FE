@@ -97,9 +97,8 @@ public class ClubServlet extends HttpServlet {
         String clubName = request.getParameter("clubName");
         String location = request.getParameter("location");
         String homeVenue = request.getParameter("homeVenue");
-        int strengthRating = parseInt(request.getParameter("strengthRating"));
         boolean isActive = parseCheckbox(request.getParameter("isActive"));
-        return new ClubRequest(clubName, location, homeVenue, strengthRating, isActive);
+        return new ClubRequest(clubName, location, homeVenue, isActive);
     }
 
     private String reloadClubs(HttpServletRequest request) {
@@ -116,17 +115,6 @@ public class ClubServlet extends HttpServlet {
             return Optional.of(UUID.fromString(value.trim()));
         } catch (IllegalArgumentException e) {
             return Optional.empty();
-        }
-    }
-
-    private int parseInt(String value) {
-        if (value == null || value.isBlank()) {
-            return 0;
-        }
-        try {
-            return Integer.parseInt(value.trim());
-        } catch (NumberFormatException e) {
-            return 0;
         }
     }
 
