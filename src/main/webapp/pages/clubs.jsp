@@ -34,7 +34,6 @@
                 <th>Club Name</th>
                 <th>Location</th>
                 <th>Home Venue</th>
-                <th>Strength Rating</th>
                 <th>Status</th>
             </tr>
             </thead>
@@ -44,7 +43,6 @@
                     <td>${club.clubName}</td>
                     <td>${club.location}</td>
                     <td>${club.homeVenue}</td>
-                    <td>${club.strengthRating}</td>
                     <td>
                         <c:choose>
                             <c:when test="${club.active}">Active</c:when>
