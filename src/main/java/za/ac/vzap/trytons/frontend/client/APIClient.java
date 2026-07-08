@@ -5,6 +5,7 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import za.ac.vzap.trytons.frontend.util.APIConfig;
@@ -43,6 +44,7 @@ public class APIClient {
             client.close();
         }
     }
+
     public <T>Optional<T> get(String path, Class<T> responseType) {
         Client client = ClientBuilder.newClient();
         try{
@@ -91,4 +93,30 @@ public class APIClient {
         }
     }
 
+    //Added method that accepts a GenericType (overloads the existing handle() method).
+    public <T>Optional<T> handleList(Response response, GenericType<T> ResponseGenericType) {
+        int status = response.getStatus();
+        if(status >= 200 && status < 300) {
+            return Optional.of(response.readEntity(ResponseGenericType));
+        }
+        LOG.log(Level.WARNING, "Backend returned status: {0}", status);
+        return Optional.empty();
+    }
+
+    //Added method that accepts a GenericType (overloads the existing get() method).
+    public <T>Optional<T> getList(String path, GenericType<T> responseGenericType) {
+        Client client = ClientBuilder.newClient();
+        try{
+            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
+            Response response = target.request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .get();
+            return handleList(response, responseGenericType);
+        }catch(ProcessingException e){
+            LOG.log(Level.SEVERE,"GET " + path + " failed", e);
+            return Optional.empty();
+        }finally {
+            client.close();
+        }
+    }
 }
