@@ -4,6 +4,7 @@
 <nav id="mainNav">
     <a href="${pageContext.request.contextPath}/players?submit=players" id="navPlayersLink">Players</a>
     <a href="${pageContext.request.contextPath}/clubs?submit=clubs" id="navClubsLink">Clubs</a>
+    <a href="${pageContext.request.contextPath}/transfers" id="navTransfersLink">Transfers</a>
 
     <c:choose>
         <c:when test="${not empty sessionScope.username}">
