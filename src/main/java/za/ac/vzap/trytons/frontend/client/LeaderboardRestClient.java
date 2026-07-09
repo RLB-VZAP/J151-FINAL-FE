@@ -11,9 +11,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Dependent
-public class LeaderboardRestClient {
-    private String GET_LEADERBOARD_FOR_LEAGUE_PATH = "/leaderboard";
-    private String GET_RANKING_FOR_TEAM_PATH = "/leaderboard";
+public class LeaderboardRestClient { // check the backend endpoints again to get master leaderboard
+    private static final String GET_LEADERBOARD_FOR_LEAGUE_PATH = "/leaderboard";
+    private static final String GET_RANKING_FOR_TEAM_PATH = "/leaderboard";
 
     private static final Logger LOG = Logger.getLogger(LeaderboardRestClient.class.getName());
 
