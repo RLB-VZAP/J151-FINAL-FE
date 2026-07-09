@@ -5,7 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import za.ac.vzap.trytons.frontend.client.LeagueRestClient;
 
-@WebServlet(name= "" , urlPatterns = "")
+@WebServlet(name = "LeagueServlet", urlPatterns = {"/leagues"})
 public class LeagueServlet extends HttpServlet {
     @Inject
     private LeagueRestClient leagueRestClient;
