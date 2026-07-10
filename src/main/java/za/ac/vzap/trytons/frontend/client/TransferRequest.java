@@ -9,9 +9,10 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ClubRequest {
-    private String clubName;
-    private String location;
-    private String homeVenue;
-    private boolean isActive;
+public class TransferRequest {
+    private String teamId;
+    private String roundId;
+    private String removedPlayerId;
+    private String addedPlayerId;
+    private boolean penaltyConfirmed;
 }
