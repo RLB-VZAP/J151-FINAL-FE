@@ -9,13 +9,21 @@
         <c:otherwise>
             <ul id="transferRecommendationsList">
                 <c:forEach var="rec" items="${transferRecommendations}">
-                    <li class="recommendation-card">
+                    <li class="recommendation-card" data-player-id="${rec.playerId}">
                         <span class="recommendation-card__name">${rec.playerName}</span>
                         <span class="recommendation-card__value">${rec.value}</span>
-                        <span class="recommendation-card__reason">${rec.reason}</span>
+                        <button type="button" class="recommendation-card__toggle" aria-expanded="false">
+                            Why?
+                        </button>
+                        <p class="recommendation-card__reason" hidden>${rec.reason}</p>
+                        <button type="button" class="recommendation-card__apply">
+                            Apply to transfer
+                        </button>
                     </li>
                 </c:forEach>
             </ul>
         </c:otherwise>
     </c:choose>
 </section>
+
+<script src="${pageContext.request.contextPath}/assets/js/transfer-recommendations.js"></script>
