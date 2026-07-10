@@ -14,10 +14,10 @@ public class FixtureRestClient {
 
     @Inject
     private APIClient apiClient;
-    public Optional<List<FixtureResponse>> listFixtures(String stausFilter) {
+    public Optional<List<FixtureResponse>> listFixtures(String statusFilter) {
         StringBuilder path = new StringBuilder(LIST_FIXTURE);
-        if(stausFilter != null && !stausFilter.isEmpty()) {
-            path.append("?staus=").append(stausFilter);
+        if(statusFilter != null && !statusFilter.isEmpty()) {
+            path.append("?status=").append(statusFilter);
         }
         Optional<FixtureResponse[]> response = apiClient.get(path.toString(), FixtureResponse[].class);
         if(response.isEmpty()){
