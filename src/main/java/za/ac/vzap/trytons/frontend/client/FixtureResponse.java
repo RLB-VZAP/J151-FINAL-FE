@@ -1,10 +1,10 @@
 package za.ac.vzap.trytons.frontend.client;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.UUID;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class FixtureResponse {
     private String fixtureId;
     private String leagueId;
