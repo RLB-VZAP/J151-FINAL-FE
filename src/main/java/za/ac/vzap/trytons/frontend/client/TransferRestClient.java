@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 public class TransferRestClient {
     private static final String TRANSFERS_PATH = "/transfers";
     private static final String LOCK_STATUS_PATH = "/lock-status";
+    private static final String RECOMMENDATIONS_PATH = "/recommendations";
 
     private static final Logger LOG = Logger.getLogger(TransferRestClient.class.getName());
 
@@ -59,6 +60,25 @@ public class TransferRestClient {
 
         if (response.isEmpty()) {
             LOG.log(Level.WARNING, "Unable to get lock status.");
+        }
+        return response;
+    }
+
+    public Optional<TransferRecommendationResponse> getTransferRecommendation(String teamId, String roundId) {
+        if(isBlank(teamId)){
+            LOG.log(Level.WARNING, "Team id is required to get recommendation.");
+            return Optional.empty();
+        }
+
+        String path = TRANSFERS_PATH + "/" + teamId + RECOMMENDATIONS_PATH;
+        if(roundId != null && !roundId.isBlank()){
+            path += "?roundId=" + roundId;
+        }
+
+        Optional<TransferRecommendationResponse> response = apiClient.get(path, TransferRecommendationResponse.class);
+
+        if(response.isEmpty()){
+            LOG.log(Level.WARNING, "Unable to get recommendation.");
         }
         return response;
     }

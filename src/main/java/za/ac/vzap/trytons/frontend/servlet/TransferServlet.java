@@ -118,7 +118,17 @@ public class TransferServlet extends HttpServlet {
             }
         }
 
-        request.setAttribute("teamId", getTeamId(request));
+        String teamId = getTeamId(request);
+
+        Optional<TransferRecommendationResponse> recommendations = transferRestClient.getTransferRecommendation(teamId, roundId);
+
+        if (recommendations.isPresent() && recommendations.get().getRecommendation() != null) {
+            request.setAttribute("transferRecommendations", recommendations.get().getRecommendation());
+        } else {
+            request.setAttribute("transferRecommendations", List.of());
+        }
+
+        request.setAttribute("teamId", teamId);
         request.setAttribute("roundId", roundId);
 
         request.setAttribute("squad", List.of());
