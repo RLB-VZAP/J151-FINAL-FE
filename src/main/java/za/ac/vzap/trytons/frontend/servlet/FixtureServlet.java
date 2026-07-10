@@ -23,7 +23,7 @@ public class FixtureServlet extends HttpServlet {
             submit = "";
     }
         String destination = switch (submit){
-        case "/fixtures"->{
+        case "fixtures"->{
             String statusFilter = request.getParameter("status");
             Optional<List<FixtureResponse>> fixtures = fixtureRestClient.listFixtures(statusFilter);
             if (fixtures.isPresent()) {
@@ -35,7 +35,7 @@ public class FixtureServlet extends HttpServlet {
             request.setAttribute("statusFilter", statusFilter);
             yield "/pages/fixtures.jsp";
         }
-        case "/fixture"->{
+        case "fixture"->{
             String fixtureId = request.getParameter("fixtureId");
             if (fixtureId == null || fixtureId.isBlank()) {
                 request.setAttribute("error", "Invalid or missing fixtureId");
