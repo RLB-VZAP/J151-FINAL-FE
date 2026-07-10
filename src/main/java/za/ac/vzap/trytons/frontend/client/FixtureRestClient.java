@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 @Dependent
 public class FixtureRestClient {
-    private String LIST_FIXTURE ="/fixture";
+    private String LIST_FIXTURE ="/fixtures";
     private String GET_FIXTURE = "/fixture";
    private static final Logger LOG = Logger.getLogger(FixtureRestClient.class.getName());
 
