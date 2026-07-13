@@ -64,7 +64,7 @@
             <tbody>
             <c:forEach var="player" items="${players}">
                 <tr>
-                    <td>${player.playerName}</td>
+                    <td><a href="${pageContext.request.contextPath}/player?submit=player&amp;playerId=${player.playerId}">${player.playerName}</a></td>
                     <td>${player.club.clubName}</td>
                     <td>${player.position.positionName}</td>
                     <td>${player.value}</td>

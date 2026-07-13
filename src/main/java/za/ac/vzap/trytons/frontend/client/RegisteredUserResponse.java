@@ -9,5 +9,6 @@ import java.util.UUID;
 public class RegisteredUserResponse {
     private UUID userId;
     private String username;
+    private String role;
     private String status;
 }

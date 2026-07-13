@@ -1,24 +1,23 @@
-<%--
-    <%@ taglib prefix="c" uri="jakarta.tags.core" %>
---%>
-<nav id="mainNav">
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<nav id="mainNav" aria-label="Main navigation">
     <a href="${pageContext.request.contextPath}/players?submit=players" id="navPlayersLink">Players</a>
     <a href="${pageContext.request.contextPath}/clubs?submit=clubs" id="navClubsLink">Clubs</a>
-    <a href="${pageContext.request.contextPath}/transfers" id="navTransfersLink">Transfers</a>
-    <a href="${pageContext.request.contextPath}/fixtures?submit=fixtures" id="navFixturesLink">Fixtures</a>
-    <a href="${pageContext.request.contextPath}/admin/match-results" id="navMatchResultsLink">Match Results</a>
-    <a href="${pageContext.request.contextPath}/history" id="navHistoryLink">History</a>
+
+    <span title="This module is still being integrated for the final project.">Transfers (WIP)</span>
+    <span title="This module is still being integrated for the final project.">Fixtures (WIP)</span>
+    <span title="This module is still being integrated for the final project.">Leagues (WIP)</span>
 
     <c:choose>
         <c:when test="${not empty sessionScope.username}">
             <span id="navWelcome">Welcome, ${sessionScope.username}</span>
-            <form action="${pageContext.request.contextPath}/logout" method="post" id="navLogoutForm">
+            <form action="${pageContext.request.contextPath}/logout" method="post" id="navLogoutForm" style="display:inline">
                 <button type="submit" name="submit" value="logout">Log out</button>
             </form>
         </c:when>
         <c:otherwise>
-            <a href="${pageContext.request.contextPath}/pages/login.jsp" id="navLoginLink">Login</a>
-            <a href="${pageContext.request.contextPath}/pages/register.jsp" id="navRegisterLink">Register</a>
+            <a href="${pageContext.request.contextPath}/login" id="navLoginLink">Login</a>
+            <a href="${pageContext.request.contextPath}/register" id="navRegisterLink">Register</a>
         </c:otherwise>
     </c:choose>
 </nav>
+<p role="note"><strong>Lecturer demo build:</strong> authentication, players, positions and clubs are active. Other modules remain work in progress.</p>
