@@ -6,6 +6,7 @@
     <a href="${pageContext.request.contextPath}/clubs?submit=clubs" id="navClubsLink">Clubs</a>
     <a href="${pageContext.request.contextPath}/transfers" id="navTransfersLink">Transfers</a>
     <a href="${pageContext.request.contextPath}/fixtures?submit=fixtures" id="navFixturesLink">Fixtures</a>
+    <a href="${pageContext.request.contextPath}/admin/match-results" id="navMatchResultsLink">Match Results</a>
 
     <c:choose>
         <c:when test="${not empty sessionScope.username}">
