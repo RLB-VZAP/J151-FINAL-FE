@@ -1,0 +1,218 @@
+/* Transfer history page - Fantasy TryTons */
+
+.transfer-history-page {
+    --trytons-navy: #081b2d;
+    --trytons-panel: #102b43;
+    --trytons-gold: #f4b41a;
+    --trytons-cream: #f7f4eb;
+    --trytons-muted: #b9c6d1;
+    --trytons-line: rgba(185, 198, 209, 0.22);
+
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+    color: var(--trytons-cream);
+}
+
+.transfer-history-hero {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    padding: 2.25rem;
+    border: 1px solid rgba(244, 180, 26, 0.34);
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--trytons-navy), var(--trytons-panel));
+    box-shadow: 0 16px 32px rgba(8, 27, 45, 0.2);
+}
+
+.transfer-history-hero::after {
+    position: absolute;
+    right: -2.5rem;
+    bottom: -4.5rem;
+    width: 13rem;
+    height: 13rem;
+    border: 2rem solid rgba(244, 180, 26, 0.12);
+    border-radius: 50%;
+    content: "";
+}
+
+.transfer-history-eyebrow {
+    margin: 0 0 0.5rem;
+    color: var(--trytons-gold);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.transfer-history-page h1,
+.transfer-history-page h2 {
+    margin-top: 0;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.transfer-history-page h1 {
+    margin-bottom: 0.75rem;
+    font-size: clamp(2rem, 5vw, 3.25rem);
+}
+
+.transfer-history-description {
+    max-width: 44rem;
+    margin: 0;
+    color: var(--trytons-muted);
+    font-size: 1.02rem;
+    line-height: 1.65;
+}
+
+.transfer-history-back-link {
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    margin: 1.5rem 0 0;
+}
+
+.transfer-history-back-link a {
+    display: inline-flex;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--trytons-gold);
+    border-radius: 8px;
+    color: var(--trytons-navy);
+    background: var(--trytons-gold);
+    font-weight: 800;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.transfer-history-back-link a:hover,
+.transfer-history-back-link a:focus-visible {
+    color: var(--trytons-cream);
+    background: transparent;
+    transform: translateX(-2px);
+}
+
+.transfer-history-card,
+.transfer-history-empty,
+.transfer-history-error {
+    border-radius: 14px;
+    box-shadow: 0 12px 28px rgba(8, 27, 45, 0.12);
+}
+
+.transfer-history-card,
+.transfer-history-empty {
+    border: 1px solid var(--trytons-line);
+    background: #ffffff;
+    color: var(--trytons-navy);
+}
+
+.transfer-history-card {
+    overflow: hidden;
+}
+
+.transfer-history-card h2 {
+    margin: 0;
+    padding: 1.35rem 1.5rem;
+    color: var(--trytons-cream);
+    background: var(--trytons-panel);
+    font-size: 1.3rem;
+}
+
+.transfer-history-table-wrap {
+    overflow-x: auto;
+}
+
+#transferHistoryTable {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+    font-size: 0.94rem;
+}
+
+#transferHistoryTable th,
+#transferHistoryTable td {
+    padding: 1rem 1.1rem;
+    border-bottom: 1px solid #e4e9ed;
+    text-align: left;
+    vertical-align: top;
+}
+
+#transferHistoryTable th {
+    color: #d7e0e7;
+    background: var(--trytons-navy);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+#transferHistoryTable tbody tr:nth-child(even) {
+    background: #f8fafb;
+}
+
+#transferHistoryTable tbody tr:hover {
+    background: #fff8e6;
+}
+
+#transferHistoryTable tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+#transferHistoryTable td:nth-child(2),
+#transferHistoryTable td:nth-child(4),
+#transferHistoryTable td:last-child {
+    font-weight: 700;
+}
+
+#transferHistoryTable small {
+    display: inline-block;
+    margin-top: 0.35rem;
+    color: #607284;
+    font-size: 0.8rem;
+    font-weight: 400;
+    line-height: 1.35;
+}
+
+.transfer-history-empty {
+    padding: 3rem 1.5rem;
+    text-align: center;
+}
+
+.transfer-history-empty h2 {
+    margin-bottom: 0.6rem;
+    color: var(--trytons-panel);
+}
+
+.transfer-history-empty p {
+    margin: 0;
+    color: #607284;
+}
+
+.transfer-history-error {
+    margin: 0;
+    padding: 1rem 1.2rem;
+    border-left: 5px solid #c63d36;
+    color: #741b16;
+    background: #fff0ef;
+    font-weight: 700;
+}
+
+@media (max-width: 640px) {
+    .transfer-history-page {
+        padding: 1.5rem 1rem 2.5rem;
+    }
+
+    .transfer-history-hero {
+        padding: 1.6rem;
+        border-radius: 14px;
+    }
+
+    .transfer-history-card h2 {
+        padding: 1.15rem;
+    }
+
+    #transferHistoryTable th,
+    #transferHistoryTable td {
+        padding: 0.85rem;
+    }
+}
