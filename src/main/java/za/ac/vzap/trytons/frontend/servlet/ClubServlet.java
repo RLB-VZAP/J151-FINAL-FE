@@ -17,6 +17,7 @@ import java.util.UUID;
 
 @WebServlet(name ="ClubServlet" , urlPatterns = {"/clubs","/club","/club/create","/club/update"})
 public class ClubServlet extends HttpServlet {
+
     @Inject
     private ClubRestClient clubRestClient;
 
