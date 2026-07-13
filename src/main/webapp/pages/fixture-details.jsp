@@ -31,11 +31,11 @@
         </tr>
         <tr>
             <th>Status</th>
-            <td>${fixture.status}</td>
+            <td>${fixture.fixtureStatus}</td>
         </tr>
     </table>
 
-    <c:if test="${fixture.status == 'COMPLETED'}">
+    <c:if test="${fixture.fixtureStatus == 'COMPLETED'}">
         <p id="fixtureResult">Simulated on ${fixture.simulationDate}</p>
     </c:if>
 </c:if>
