@@ -21,7 +21,7 @@
     <input type="text" name="search" placeholder="Search player name"
            value="${searchTerm}" id="playerSearchInput" />
 
-    <select name="clubId" id="clubFilter">
+    <select name="clubId" id="clubFilter" onchange="this.form.submit()">
         <option value="">All Clubs</option>
         <c:forEach var="club" items="${clubs}">
             <option value="${club.clubId}"
@@ -31,7 +31,7 @@
         </c:forEach>
     </select>
 
-    <select name="positionId" id="positionFilter">
+    <select name="positionId" id="positionFilter" onchange="this.form.submit()">
         <option value="">All Positions</option>
         <c:forEach var="position" items="${positions}">
             <option value="${position.positionId}"
