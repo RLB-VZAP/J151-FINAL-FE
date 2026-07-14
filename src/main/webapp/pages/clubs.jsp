@@ -40,7 +40,7 @@
             <tbody>
             <c:forEach var="club" items="${clubs}">
                 <tr>
-                    <td>${club.clubName}</td>
+                    <td><a href="${pageContext.request.contextPath}/club?submit=club&amp;clubId=${club.clubId}">${club.clubName}</a></td>
                     <td>${club.location}</td>
                     <td>${club.homeVenue}</td>
                     <td>

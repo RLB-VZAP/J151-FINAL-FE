@@ -21,7 +21,7 @@
     <input type="text" name="search" placeholder="Search player name"
            value="${searchTerm}" id="playerSearchInput" />
 
-    <select name="clubId" id="clubFilter">
+    <select name="clubId" id="clubFilter" onchange="this.form.submit()">
         <option value="">All Clubs</option>
         <c:forEach var="club" items="${clubs}">
             <option value="${club.clubId}"
@@ -31,7 +31,7 @@
         </c:forEach>
     </select>
 
-    <select name="positionId" id="positionFilter">
+    <select name="positionId" id="positionFilter" onchange="this.form.submit()">
         <option value="">All Positions</option>
         <c:forEach var="position" items="${positions}">
             <option value="${position.positionId}"
@@ -64,7 +64,7 @@
             <tbody>
             <c:forEach var="player" items="${players}">
                 <tr>
-                    <td>${player.playerName}</td>
+                    <td><a href="${pageContext.request.contextPath}/player?submit=player&amp;playerId=${player.playerId}">${player.playerName}</a></td>
                     <td>${player.club.clubName}</td>
                     <td>${player.position.positionName}</td>
                     <td>${player.value}</td>

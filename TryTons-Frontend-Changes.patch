@@ -1,0 +1,3183 @@
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/LECTURER_DEMO_SETUP.md" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/LECTURER_DEMO_SETUP.md"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/LECTURER_DEMO_SETUP.md"	1970-01-01 00:00:00.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/LECTURER_DEMO_SETUP.md"	2026-07-13 21:18:18.576870392 +0000
+@@ -0,0 +1,314 @@
++# TryTons Lecturer Demo Build
++
++## Purpose
++
++This package stabilises the current TryTons backend and frontend for a progress demonstration. It does **not** claim that every final-project feature is complete.
++
++The verified demonstration scope is:
++
++- Backend deployment and database health check
++- User registration
++- User login and logout
++- JWT creation and frontend session storage
++- Players list, search, club filter, position filter and details
++- Clubs list, search and details
++- Positions API used by the player filters
++
++Transfers, fixtures, leagues, leaderboards, history and processing screens remain visible as work in progress only where appropriate. Their navigation links have been disabled in the main demo navigation to prevent accidental failures during the presentation.
++
++## Required software
++
++- Java 17
++- GlassFish 7.1.0
++- MySQL 8
++- Maven through NetBeans or a local Maven installation
++
++## Database setup
++
++1. Open the backend project.
++2. Run `src/main/resources/db/schema.sql` against MySQL.
++3. Run `src/main/resources/db/seed.sql` immediately afterwards.
++
++The active `seed.sql` is now the small lecturer-demo seed and matches the current schema. The original larger, incomplete seed is preserved as `seed_full_wip.sql`.
++
++### Demo accounts
++
++| Role | Login | Password |
++|---|---|---|
++| Administrator | `admin@tritan.com` or `admin` | `Admin@12345` |
++| Registered user | `john@test.com` or `john` | `John@12345` |
++
++Registration through the frontend is also available.
++
++## Backend configuration
++
++The backend reads configuration in this order:
++
++1. Java system property
++2. Environment variable
++3. The local `env` file
++
++A safe template is available as `env.example`. The downloadable demo packages intentionally do not include the real `env` file, so copy your existing local `env` into the backend root or copy `env.example` to `env` and fill in your own values.
++
++For GlassFish, the most reliable local option is to add this JVM option, replacing the path with your backend project directory:
++
++```text
++-DTRYTONS_ENV_DIR=C:/path/to/Backend Content
++```
++
++The directory must contain the file named `env`. You may alternatively configure each `DB_*` and `AUTH_TOKEN_*` value as a GlassFish JVM `-D` property.
++
++Required keys:
++
++```text
++DB_URL
++DB_USERNAME
++DB_PASSWORD
++DB_MIN_IDLE
++DB_MAX_IDLE
++DB_MAX_OPEN_PREPARED_STATEMENTS
++AUTH_TOKEN_SECRET
++AUTH_TOKEN_ISSUER
++AUTH_TOKEN_LIFETIME_MILLIS
++```
++
++Keep the real `env` file private. It has been added to `.gitignore`.
++
++## Build and deployment order
++
++1. Stop GlassFish if stale deployments are locked.
++2. Clean and build the backend project.
++3. Deploy the backend WAR.
++4. Start GlassFish and confirm the backend URLs below.
++5. Clean and build the frontend project.
++6. Deploy the frontend WAR.
++7. Open the frontend root URL and log in.
++
++The context roots are now fixed, so they do not depend on the Maven snapshot version.
++
++### Backend URLs
++
++```text
++http://localhost:8080/J151-FINAL-BE/
++http://localhost:8080/J151-FINAL-BE/api/test/database
++http://localhost:8080/J151-FINAL-BE/api/player
++http://localhost:8080/J151-FINAL-BE/api/club
++http://localhost:8080/J151-FINAL-BE/api/position
++```
++
++### Frontend URL
++
++```text
++http://localhost:8080/J151-FINAL-FE/
++```
++
++The frontend default backend address is:
++
++```text
++http://localhost:8080/J151-FINAL-BE/api
++```
++
++It can be overridden with either:
++
++```text
++-Dapi.base.url=http://host:port/J151-FINAL-BE/api
++```
++
++or the environment variable:
++
++```text
++TRYTONS_API_BASE_URL=http://host:port/J151-FINAL-BE/api
++```
++
++## Recommended presentation flow
++
++1. Open the backend landing page.
++2. Open the database health endpoint and show the successful database response.
++3. Open the frontend.
++4. Log in using the registered-user demo account.
++5. Show the players page.
++6. Search by player name and filter by club or position.
++7. Open a player details page.
++8. Open the clubs page, search for a club and open its details page.
++9. Log out.
++10. Optionally register a new user, then log in with that new account.
++
++## Main backend changes
++
++### Compilation and contracts
++
++- Corrected the database health DAO resource handling.
++- Corrected leaderboard date/time mappings and persistence contracts.
++- Added the missing fantasy-team owner lookup contract.
++- Added the fixture DAO compatibility lookup required by services.
++- Completed player-statistics DAO methods and Optional handling.
++- Removed duplicate zero-field Lombok constructor generation.
++- Corrected several resource path typos.
++- Removed the duplicate application-exception mapper.
++- Kept only one JAX-RS `@ApplicationPath` declaration.
++
++### Authentication and CDI
++
++- Login now generates and returns a JWT.
++- Login and status responses now match the frontend contracts.
++- Logout is protected and the frontend sends the stored Bearer token.
++- Corrected constructor injection in `LeagueServiceImpl`.
++- Removed invalid provider usage from `RoleUtil`.
++- Made application-exception accessors explicit.
++- Added configurable `env` filename/directory support.
++
++### Schema and DAO alignment
++
++- Club DAO now uses the current club columns.
++- Player DAO no longer expects the removed player total-points column.
++- Fantasy-team DAO now uses the current fantasy-team schema.
++- Fantasy-points DAO now uses the current date/final/version columns.
++- Player-statistics DAO and DTOs now use result, team and player IDs from the current schema.
++- Match-result mapping now includes both team scores.
++- The fixture status schema includes the processing state used by the Java enum.
++- Added a schema-compatible minimal lecturer-demo seed.
++
++## Main frontend changes
++
++### Authentication and API integration
++
++- Added a serializable session-scoped authentication context.
++- Stores the JWT, user ID, username, email and role after login.
++- Adds the Bearer token automatically to protected backend calls.
++- Corrected PUT requests that previously sent POST.
++- Added safe response closing and useful backend failure logging.
++- Corrected login, registration and logout servlet routing.
++
++### Demo pages
++
++- Added a root redirect page.
++- Added player details.
++- Added club details.
++- Completed player listing filters using the backend player, club and position APIs.
++- Completed club listing search and details navigation.
++- Added the missing position REST client.
++- Marked unfinished modules as WIP instead of linking to unreliable pages.
++
++### Deployment
++
++- Added frontend CDI `beans.xml`.
++- Added a Jakarta Servlet 6 web descriptor with session settings.
++- Fixed both GlassFish context roots.
++- Simplified the frontend Maven configuration and aligned it to Jakarta EE 10.
++- Made the frontend backend URL configurable.
++
++## Validation performed
++
++The execution environment did not contain Maven, GlassFish or MySQL, so a true live deployment could not be performed here.
++
++The following checks did pass:
++
++- Backend cross-class source-contract compilation: **0 errors**
++- Frontend cross-class source-contract compilation: **0 errors**
++- Demo seed insert columns checked against the current schema: **passed**
++- Literal servlet JSP dispatcher targets: **passed**
++- JSP include targets: **passed**
++- Active demo servlet mappings: **passed**
++- Single backend `@ApplicationPath`: **passed**
++- Backend/frontend context-root and default API URL alignment: **passed**
++
++A final Maven `clean package` and GlassFish deployment must still be run on the development machine before the lecturer demonstration.
++
++## Exact changed-file appendix
++
++### Backend added
++
++- `env.example`
++- `src/main/resources/db/demo_seed.sql`
++- `src/main/resources/db/seed_full_wip.sql`
++
++### Backend removed
++
++- `src/main/java/com/vzap/trytons/mapper/ApplicationExceptionMapper.java` — duplicate exception mapper
++
++### Backend materially updated
++
++- `.gitignore`
++- `src/main/java/com/vzap/trytons/config/DotEnvConfig.java`
++- `src/main/java/com/vzap/trytons/dao/ClubDAOImpl.java`
++- `src/main/java/com/vzap/trytons/dao/DatabaseTestDAO.java`
++- `src/main/java/com/vzap/trytons/dao/FantasyPointsDAOImpl.java`
++- `src/main/java/com/vzap/trytons/dao/FantasyTeamDAO.java`
++- `src/main/java/com/vzap/trytons/dao/FantasyTeamDAOImpl.java`
++- `src/main/java/com/vzap/trytons/dao/FixtureDAO.java`
++- `src/main/java/com/vzap/trytons/dao/LeaderboardDAOImpl.java`
++- `src/main/java/com/vzap/trytons/dao/MatchResultDAOImpl.java`
++- `src/main/java/com/vzap/trytons/dao/PlayerDAOImpl.java`
++- `src/main/java/com/vzap/trytons/dao/PlayerStatisticsDAO.java`
++- `src/main/java/com/vzap/trytons/dao/PlayerStatisticsDAOImpl.java`
++- `src/main/java/com/vzap/trytons/dto/AdminUserSearchResponseDTO.java`
++- `src/main/java/com/vzap/trytons/dto/AdminUserStatusResponseDTO.java`
++- `src/main/java/com/vzap/trytons/dto/CompetitionProcessingSummaryDTO.java`
++- `src/main/java/com/vzap/trytons/dto/FantasyPointCalculationResultDTO.java`
++- `src/main/java/com/vzap/trytons/dto/PlayerPointsHistoryResponseDTO.java`
++- `src/main/java/com/vzap/trytons/dto/PlayerStatisticsRequestDTO.java`
++- `src/main/java/com/vzap/trytons/dto/PlayerStatisticsResponseDTO.java`
++- `src/main/java/com/vzap/trytons/dto/RankMovementDTO.java`
++- `src/main/java/com/vzap/trytons/dto/ScoringRuleRequestDTO.java`
++- `src/main/java/com/vzap/trytons/dto/ScoringRuleResponseDTO.java`
++- `src/main/java/com/vzap/trytons/dto/TeamScoreUpdateResultDTO.java`
++- `src/main/java/com/vzap/trytons/exceptions/ApplicationException.java`
++- `src/main/java/com/vzap/trytons/filter/AuthFilter.java`
++- `src/main/java/com/vzap/trytons/model/Leaderboard.java`
++- `src/main/java/com/vzap/trytons/model/Ranking.java`
++- `src/main/java/com/vzap/trytons/resource/AdminUserResource.java`
++- `src/main/java/com/vzap/trytons/resource/AuthResource.java`
++- `src/main/java/com/vzap/trytons/resource/ClubResource.java`
++- `src/main/java/com/vzap/trytons/resource/FantasyTeamResource.java`
++- `src/main/java/com/vzap/trytons/resource/FixtureResource.java`
++- `src/main/java/com/vzap/trytons/resource/LeaderboardResource.java`
++- `src/main/java/com/vzap/trytons/resource/LeagueResource.java`
++- `src/main/java/com/vzap/trytons/resource/LockStatusResource.java`
++- `src/main/java/com/vzap/trytons/resource/PlayerResource.java`
++- `src/main/java/com/vzap/trytons/resource/PositionResource.java`
++- `src/main/java/com/vzap/trytons/service/AuthServiceImpl.java`
++- `src/main/java/com/vzap/trytons/service/LeaderboardService.java`
++- `src/main/java/com/vzap/trytons/service/LeaderboardServiceImpl.java`
++- `src/main/java/com/vzap/trytons/service/LeagueServiceImpl.java`
++- `src/main/java/com/vzap/trytons/service/MatchProcessingServiceImpl.java`
++- `src/main/java/com/vzap/trytons/service/MatchResultServiceImpl.java`
++- `src/main/java/com/vzap/trytons/service/PlayerStatisticsServiceImpl.java`
++- `src/main/java/com/vzap/trytons/util/DBConnectionManager.java`
++- `src/main/java/com/vzap/trytons/util/RoleUtil.java`
++- `src/main/resources/db/schema.sql`
++- `src/main/resources/db/seed.sql`
++- `src/main/webapp/WEB-INF/glassfish-web.xml`
++- `src/main/webapp/index.html`
++
++### Frontend added
++
++- `src/main/java/za/ac/vzap/trytons/frontend/client/PositionRestClient.java`
++- `src/main/java/za/ac/vzap/trytons/frontend/session/SessionAuthContext.java`
++- `src/main/webapp/WEB-INF/beans.xml`
++- `src/main/webapp/WEB-INF/web.xml`
++- `src/main/webapp/index.jsp`
++- `src/main/webapp/pages/club.jsp`
++- `src/main/webapp/pages/player.jsp`
++
++### Frontend updated
++
++- `pom.xml`
++- `src/main/java/za/ac/vzap/trytons/frontend/client/APIClient.java`
++- `src/main/java/za/ac/vzap/trytons/frontend/client/AuthRestClient.java`
++- `src/main/java/za/ac/vzap/trytons/frontend/client/ClubRestClient.java`
++- `src/main/java/za/ac/vzap/trytons/frontend/client/LoginResponse.java`
++- `src/main/java/za/ac/vzap/trytons/frontend/client/PlayerResponse.java`
++- `src/main/java/za/ac/vzap/trytons/frontend/client/PlayerRestClient.java`
++- `src/main/java/za/ac/vzap/trytons/frontend/client/RegisteredUserResponse.java`
++- `src/main/java/za/ac/vzap/trytons/frontend/client/TransferRecommendationResponse.java`
++- `src/main/java/za/ac/vzap/trytons/frontend/servlet/AdminFixtureServlet.java`
++- `src/main/java/za/ac/vzap/trytons/frontend/servlet/AuthServlet.java`
++- `src/main/java/za/ac/vzap/trytons/frontend/servlet/ClubServlet.java`
++- `src/main/java/za/ac/vzap/trytons/frontend/servlet/PlayerServlet.java`
++- `src/main/java/za/ac/vzap/trytons/frontend/util/APIConfig.java`
++- `src/main/webapp/WEB-INF/glassfish-web.xml`
++- `src/main/webapp/WEB-INF/jspf/navigation.jspf`
++- `src/main/webapp/pages/clubs.jsp`
++- `src/main/webapp/pages/login.jsp`
++- `src/main/webapp/pages/players.jsp`
++- `src/main/webapp/pages/register.jsp`
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/pom.xml" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/pom.xml"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/pom.xml"	2026-07-03 08:46:16.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/pom.xml"	2026-07-13 21:15:36.410429109 +0000
+@@ -1,92 +1,69 @@
+-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+-    <modelVersion>4.0.0</modelVersion>
+-    <groupId>com.vzap</groupId>
+-    <artifactId>J151-FINAL-FE</artifactId>
+-    <version>1.0-SNAPSHOT</version>
+-    <packaging>war</packaging>
+-    <name>J151-FINAL-FE-1.0-SNAPSHOT</name>
+-    
+-    <properties>
+-        <maven.compiler.release>17</maven.compiler.release>
+-        <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
+-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+-        <failOnMissingWebXml>false</failOnMissingWebXml>
+-        <jakartaee>9.1.0</jakartaee>
+-    </properties>
+-    
+-    <dependencies>
+-        <dependency>
+-            <groupId>jakarta.platform</groupId>
+-            <artifactId>jakarta.jakartaee-api</artifactId>
+-            <version>${jakartaee}</version>
+-            <scope>provided</scope>
+-        </dependency>
+-        <!-- Optional: Lombok for reducing boilerplate -->
+-        <dependency>
+-            <groupId>org.projectlombok</groupId>
+-            <artifactId>lombok</artifactId>
+-            <version>1.18.46</version>
+-            <scope>provided</scope>
+-        </dependency>
+-        <!-- Source: https://mvnrepository.com/artifact/tools.jackson.core/jackson-databind -->
+-        <dependency>
+-            <groupId>tools.jackson.core</groupId>
+-            <artifactId>jackson-databind</artifactId>
+-            <version>3.2.0</version>
+-            <scope>compile</scope>
+-        </dependency>
+-    </dependencies>
+-    
+-    <build>
+-        <plugins>
+-            <plugin>
+-    <groupId>org.apache.maven.plugins</groupId>
+-    <artifactId>maven-compiler-plugin</artifactId>
+-    <version>3.10.1</version>
+-
+-    <configuration>
+-        <release>${maven.compiler.release}</release>
+-
+-        <annotationProcessorPaths>
+-            <path>
+-                <groupId>org.projectlombok</groupId>
+-                <artifactId>lombok</artifactId>
+-                <version>1.18.46</version>
+-            </path>
+-        </annotationProcessorPaths>
+-    </configuration>
+-</plugin>
+-            <plugin>
+-                <groupId>org.apache.maven.plugins</groupId>
+-                <artifactId>maven-war-plugin</artifactId>
+-                <version>3.3.2</version>
+-            </plugin>
+-            <plugin>
+-                <groupId>org.apache.maven.plugins</groupId>
+-                <artifactId>maven-dependency-plugin</artifactId>
+-                <version>3.3.0</version>
+-                <executions>
+-                    <execution>
+-                        <phase>validate</phase>
+-                        <goals>
+-                            <goal>copy</goal>
+-                        </goals>
+-                        <configuration>
+-                            <outputDirectory>${endorsed.dir}</outputDirectory>
+-                            <silent>true</silent>
+-                            <artifactItems>
+-                                <artifactItem>
+-                                    <groupId>jakarta.platform</groupId>
+-                                    <artifactId>jakarta.jakartaee-api</artifactId>
+-                                    <version>${jakartaee}</version>
+-                                    <type>jar</type>
+-                                </artifactItem>
+-                            </artifactItems>
+-                        </configuration>
+-                    </execution>
+-                </executions>
+-            </plugin>
+-        </plugins>
+-    </build>
+-</project>
++<project xmlns="http://maven.apache.org/POM/4.0.0"
++         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
++         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
++
++    <modelVersion>4.0.0</modelVersion>
++
++    <groupId>za.ac.vzap.trytons</groupId>
++    <artifactId>J151-FINAL-FE</artifactId>
++    <version>1.0-SNAPSHOT</version>
++    <packaging>war</packaging>
++
++    <name>Fantasy TryTons Frontend</name>
++
++    <properties>
++        <maven.compiler.release>17</maven.compiler.release>
++        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
++        <failOnMissingWebXml>false</failOnMissingWebXml>
++        <jakartaee.version>10.0.0</jakartaee.version>
++        <lombok.version>1.18.46</lombok.version>
++    </properties>
++
++    <dependencies>
++        <dependency>
++            <groupId>jakarta.platform</groupId>
++            <artifactId>jakarta.jakartaee-api</artifactId>
++            <version>${jakartaee.version}</version>
++            <scope>provided</scope>
++        </dependency>
++
++        <dependency>
++            <groupId>org.projectlombok</groupId>
++            <artifactId>lombok</artifactId>
++            <version>${lombok.version}</version>
++            <scope>provided</scope>
++        </dependency>
++    </dependencies>
++
++    <build>
++        <finalName>J151-FINAL-FE</finalName>
++
++        <plugins>
++            <plugin>
++                <groupId>org.apache.maven.plugins</groupId>
++                <artifactId>maven-compiler-plugin</artifactId>
++                <version>3.13.0</version>
++                <configuration>
++                    <release>${maven.compiler.release}</release>
++                    <annotationProcessorPaths>
++                        <path>
++                            <groupId>org.projectlombok</groupId>
++                            <artifactId>lombok</artifactId>
++                            <version>${lombok.version}</version>
++                        </path>
++                    </annotationProcessorPaths>
++                </configuration>
++            </plugin>
++
++            <plugin>
++                <groupId>org.apache.maven.plugins</groupId>
++                <artifactId>maven-war-plugin</artifactId>
++                <version>3.4.0</version>
++                <configuration>
++                    <failOnMissingWebXml>${failOnMissingWebXml}</failOnMissingWebXml>
++                </configuration>
++            </plugin>
++        </plugins>
++    </build>
++
++</project>
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/APIClient.java" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/APIClient.java"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/APIClient.java"	2026-07-08 07:26:23.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/APIClient.java"	2026-07-13 21:10:47.601160988 +0000
+@@ -1,122 +1,175 @@
+-package za.ac.vzap.trytons.frontend.client;
+-import jakarta.enterprise.context.Dependent;
+-import jakarta.ws.rs.ProcessingException;
+-import jakarta.ws.rs.client.Client;
+-import jakarta.ws.rs.client.ClientBuilder;
+-import jakarta.ws.rs.client.Entity;
+-import jakarta.ws.rs.client.WebTarget;
+-import jakarta.ws.rs.core.GenericType;
+-import jakarta.ws.rs.core.MediaType;
+-import jakarta.ws.rs.core.Response;
+-import za.ac.vzap.trytons.frontend.util.APIConfig;
+-import java.util.Optional;
+-import java.util.logging.Level;
+-import java.util.logging.Logger;
+-
+-@Dependent
+-public class APIClient {
+-    private static final Logger LOG = Logger.getLogger(APIClient.class.getName());
+-
+-    public<T> Optional<T> handle(Response response, Class<T> ResponseType) {
+-        int status = response.getStatus();
+-        if(status >= 200 && status < 300) {
+-            if(ResponseType == Void.class) {
+-                return Optional.empty();
+-            }
+-            return Optional.of(response.readEntity(ResponseType));
+-        }
+-        LOG.log(Level.WARNING, "Backend returned status: {0}", status);
+-        return Optional.empty();
+-    }
+-
+-    public <T> Optional<T> post(String path, Object body, Class<T> responseType) {
+-        Client client = ClientBuilder.newClient();
+-        try{
+-            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
+-            Response response = target.request()
+-                    .accept(MediaType.APPLICATION_JSON)
+-                    .post(Entity.json(body));
+-            return handle(response, responseType);
+-        }catch(Exception e){
+-            LOG.log(Level.SEVERE,"POST " + path + " failed", e);
+-            return Optional.empty();
+-        }finally {
+-            client.close();
+-        }
+-    }
+-
+-    public <T>Optional<T> get(String path, Class<T> responseType) {
+-        Client client = ClientBuilder.newClient();
+-        try{
+-            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
+-            Response response = target.request()
+-                    .accept(MediaType.APPLICATION_JSON)
+-                    .get();
+-            return handle(response, responseType);
+-        }catch(ProcessingException e){
+-            LOG.log(Level.SEVERE,"GET " + path + " failed", e);
+-            return Optional.empty();
+-        }finally {
+-            client.close();
+-        }
+-    }
+-
+-    public<T> Optional<T> put(String path, Object body, Class<T> responseType) {
+-        Client client = ClientBuilder.newClient();
+-        try{
+-            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
+-            Response response = target.request()
+-                    .accept(MediaType.APPLICATION_JSON)
+-                    .post(Entity.json(body));
+-            return handle(response, responseType);
+-        }catch(ProcessingException e){
+-            LOG.log(Level.SEVERE,"PUT " + path + " failed", e);
+-            return Optional.empty();
+-        }finally {
+-            client.close();
+-        }
+-    }
+-
+-    public<T> Optional<T> delete(String path, Class<T> responseType) {
+-        Client client = ClientBuilder.newClient();
+-        try{
+-            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
+-            Response response = target.request()
+-                    .accept(MediaType.APPLICATION_JSON)
+-                    .delete();
+-            return handle(response, responseType);
+-        }catch(ProcessingException e){
+-            LOG.log(Level.SEVERE,"DELETE " + path + " failed", e);
+-            return Optional.empty();
+-        }finally {
+-            client.close();
+-        }
+-    }
+-
+-    //Added method that accepts a GenericType (overloads the existing handle() method).
+-    public <T>Optional<T> handleList(Response response, GenericType<T> ResponseGenericType) {
+-        int status = response.getStatus();
+-        if(status >= 200 && status < 300) {
+-            return Optional.of(response.readEntity(ResponseGenericType));
+-        }
+-        LOG.log(Level.WARNING, "Backend returned status: {0}", status);
+-        return Optional.empty();
+-    }
+-
+-    //Added method that accepts a GenericType (overloads the existing get() method).
+-    public <T>Optional<T> getList(String path, GenericType<T> responseGenericType) {
+-        Client client = ClientBuilder.newClient();
+-        try{
+-            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
+-            Response response = target.request()
+-                    .accept(MediaType.APPLICATION_JSON)
+-                    .get();
+-            return handleList(response, responseGenericType);
+-        }catch(ProcessingException e){
+-            LOG.log(Level.SEVERE,"GET " + path + " failed", e);
+-            return Optional.empty();
+-        }finally {
+-            client.close();
+-        }
+-    }
+-}
++package za.ac.vzap.trytons.frontend.client;
++
++import jakarta.enterprise.context.Dependent;
++import jakarta.inject.Inject;
++import jakarta.ws.rs.ProcessingException;
++import jakarta.ws.rs.client.Client;
++import jakarta.ws.rs.client.ClientBuilder;
++import jakarta.ws.rs.client.Entity;
++import jakarta.ws.rs.client.Invocation;
++import jakarta.ws.rs.client.WebTarget;
++import jakarta.ws.rs.core.GenericType;
++import jakarta.ws.rs.core.HttpHeaders;
++import jakarta.ws.rs.core.MediaType;
++import jakarta.ws.rs.core.Response;
++import za.ac.vzap.trytons.frontend.session.SessionAuthContext;
++import za.ac.vzap.trytons.frontend.util.APIConfig;
++
++import java.util.Optional;
++import java.util.logging.Level;
++import java.util.logging.Logger;
++
++@Dependent
++public class APIClient {
++
++    private static final Logger LOG = Logger.getLogger(APIClient.class.getName());
++
++    @Inject
++    private SessionAuthContext authContext;
++
++    public <T> Optional<T> post(String path, Object body, Class<T> responseType) {
++        Client client = ClientBuilder.newClient();
++        try {
++            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
++            try (Response response = request(target).post(jsonEntity(body))) {
++                return handle(response, responseType);
++            }
++        } catch (ProcessingException e) {
++            LOG.log(Level.SEVERE, "POST " + path + " failed", e);
++            return Optional.empty();
++        } finally {
++            client.close();
++        }
++    }
++
++    public boolean postForStatus(String path, Object body) {
++        Client client = ClientBuilder.newClient();
++        try {
++            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
++            try (Response response = request(target).post(jsonEntity(body))) {
++                if (isSuccessful(response)) {
++                    return true;
++                }
++                logBackendFailure(path, response);
++                return false;
++            }
++        } catch (ProcessingException e) {
++            LOG.log(Level.SEVERE, "POST " + path + " failed", e);
++            return false;
++        } finally {
++            client.close();
++        }
++    }
++
++    public <T> Optional<T> get(String path, Class<T> responseType) {
++        Client client = ClientBuilder.newClient();
++        try {
++            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
++            try (Response response = request(target).get()) {
++                return handle(response, responseType);
++            }
++        } catch (ProcessingException e) {
++            LOG.log(Level.SEVERE, "GET " + path + " failed", e);
++            return Optional.empty();
++        } finally {
++            client.close();
++        }
++    }
++
++    public <T> Optional<T> put(String path, Object body, Class<T> responseType) {
++        Client client = ClientBuilder.newClient();
++        try {
++            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
++            try (Response response = request(target).put(jsonEntity(body))) {
++                return handle(response, responseType);
++            }
++        } catch (ProcessingException e) {
++            LOG.log(Level.SEVERE, "PUT " + path + " failed", e);
++            return Optional.empty();
++        } finally {
++            client.close();
++        }
++    }
++
++    public <T> Optional<T> delete(String path, Class<T> responseType) {
++        Client client = ClientBuilder.newClient();
++        try {
++            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
++            try (Response response = request(target).delete()) {
++                return handle(response, responseType);
++            }
++        } catch (ProcessingException e) {
++            LOG.log(Level.SEVERE, "DELETE " + path + " failed", e);
++            return Optional.empty();
++        } finally {
++            client.close();
++        }
++    }
++
++    public <T> Optional<T> getList(String path, GenericType<T> responseType) {
++        Client client = ClientBuilder.newClient();
++        try {
++            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
++            try (Response response = request(target).get()) {
++                if (isSuccessful(response)) {
++                    return Optional.ofNullable(response.readEntity(responseType));
++                }
++                logBackendFailure(path, response);
++                return Optional.empty();
++            }
++        } catch (ProcessingException e) {
++            LOG.log(Level.SEVERE, "GET " + path + " failed", e);
++            return Optional.empty();
++        } finally {
++            client.close();
++        }
++    }
++
++    private Entity<?> jsonEntity(Object body) {
++        return Entity.entity(body == null ? new EmptyRequestBody() : body, MediaType.APPLICATION_JSON_TYPE);
++    }
++
++    private static final class EmptyRequestBody {
++        public EmptyRequestBody() {
++        }
++    }
++
++    private Invocation.Builder request(WebTarget target) {
++        Invocation.Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE)
++                .accept(MediaType.APPLICATION_JSON_TYPE);
++
++        if (authContext != null && authContext.isAuthenticated()) {
++            builder.header(HttpHeaders.AUTHORIZATION, "Bearer " + authContext.getToken());
++        }
++        return builder;
++    }
++
++    private <T> Optional<T> handle(Response response, Class<T> responseType) {
++        if (!isSuccessful(response)) {
++            logBackendFailure(response.getLocation() == null ? "backend request" : response.getLocation().toString(), response);
++            return Optional.empty();
++        }
++
++        if (responseType == Void.class || response.getStatus() == Response.Status.NO_CONTENT.getStatusCode()) {
++            return Optional.empty();
++        }
++        return Optional.ofNullable(response.readEntity(responseType));
++    }
++
++    private boolean isSuccessful(Response response) {
++        return response.getStatus() >= 200 && response.getStatus() < 300;
++    }
++
++    private void logBackendFailure(String path, Response response) {
++        String body = "";
++        try {
++            if (response.hasEntity()) {
++                body = response.readEntity(String.class);
++            }
++        } catch (RuntimeException ignored) {
++            // Logging must not hide the original backend status.
++        }
++        LOG.log(Level.WARNING, "Backend request {0} returned HTTP {1}. {2}",
++                new Object[]{path, response.getStatus(), body});
++    }
++}
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/AuthRestClient.java" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/AuthRestClient.java"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/AuthRestClient.java"	2026-07-03 08:41:59.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/AuthRestClient.java"	2026-07-13 21:05:05.439111800 +0000
+@@ -1,43 +1,42 @@
+-package za.ac.vzap.trytons.frontend.client;
+-
+-import jakarta.enterprise.context.Dependent;
+-import jakarta.inject.Inject;
+-import java.util.Optional;
+-import java.util.logging.Level;
+-import java.util.logging.Logger;
+-
+-@Dependent
+-public class AuthRestClient {
+-    private String LOGIN_PATH = "/auth/login";
+-    private String LOGOUT_PATH = "/auth/logout";
+-    private String STATUS_PATH = "/auth/status";
+-    private String REGISTER_PATH = "/users";
+-
+-    private static final Logger LOG = Logger.getLogger(AuthRestClient.class.getName());
+-    @Inject
+-    private APIClient apiClient ;
+-
+-    public Optional<RegisteredUserResponse> register(RegisteredUserRequest request){
+-        Optional<RegisteredUserResponse> response = apiClient.post(REGISTER_PATH,request,RegisteredUserResponse.class);
+-       if(response.isEmpty()){
+-           LOG.log(Level.SEVERE, "Unable to register user");
+-       }
+-       return response;
+-    }
+-    public Optional<LoginResponse> login(LoginRequest request){
+-        Optional<LoginResponse> response = apiClient.post(LOGIN_PATH,request,LoginResponse.class);
+-        if(response.isEmpty()){
+-            LOG.log(Level.SEVERE, "Unable to login user");
+-        }
+-        return response;
+-    }
+-    public boolean logout(){
+-         apiClient.post(LOGOUT_PATH, null, Void.class);
+-         return true;
+-    }
+-    public Optional<AuthStatusResponse> getAuthStatus(String requestingUserId){
+-        String path = STATUS_PATH + "?requestingUserId=" + requestingUserId;
+-        return apiClient.get(path, AuthStatusResponse.class);
+-    }
+-
+-}
++package za.ac.vzap.trytons.frontend.client;
++
++import jakarta.enterprise.context.Dependent;
++import jakarta.inject.Inject;
++import java.util.Optional;
++import java.util.logging.Level;
++import java.util.logging.Logger;
++
++@Dependent
++public class AuthRestClient {
++    private static final String LOGIN_PATH = "/auth/login";
++    private static final String LOGOUT_PATH = "/auth/logout";
++    private static final String STATUS_PATH = "/auth/status";
++    private static final String REGISTER_PATH = "/users";
++
++    private static final Logger LOG = Logger.getLogger(AuthRestClient.class.getName());
++    @Inject
++    private APIClient apiClient ;
++
++    public Optional<RegisteredUserResponse> register(RegisteredUserRequest request){
++        Optional<RegisteredUserResponse> response = apiClient.post(REGISTER_PATH,request,RegisteredUserResponse.class);
++       if(response.isEmpty()){
++           LOG.log(Level.SEVERE, "Unable to register user");
++       }
++       return response;
++    }
++    public Optional<LoginResponse> login(LoginRequest request){
++        Optional<LoginResponse> response = apiClient.post(LOGIN_PATH,request,LoginResponse.class);
++        if(response.isEmpty()){
++            LOG.log(Level.SEVERE, "Unable to login user");
++        }
++        return response;
++    }
++    public boolean logout(){
++         return apiClient.postForStatus(LOGOUT_PATH, null);
++    }
++    public Optional<AuthStatusResponse> getAuthStatus(String requestingUserId){
++        String path = STATUS_PATH + "?requestingUserId=" + requestingUserId;
++        return apiClient.get(path, AuthStatusResponse.class);
++    }
++
++}
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/ClubRestClient.java" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/ClubRestClient.java"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/ClubRestClient.java"	2026-07-06 11:34:12.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/ClubRestClient.java"	2026-07-13 21:10:47.835629329 +0000
+@@ -1,58 +1,54 @@
+-package za.ac.vzap.trytons.frontend.client;
+-
+-import jakarta.enterprise.context.Dependent;
+-import jakarta.inject.Inject;
+-
+-import java.util.ArrayList;
+-import java.util.Arrays;
+-import java.util.List;
+-import java.util.Optional;
+-import java.util.UUID;
+-import java.util.logging.Level;
+-import java.util.logging.Logger;
+-@Dependent
+-public class ClubRestClient {
+-    private String LIST_CLUBS = "/club";
+-    private String GET_CLUB_BY_ID = "/club";
+-    private String CREATE_CLUB = "/club";
+-    private String UPDATE_CLUB = "/club";
+-
+-    private static final Logger LOG = Logger.getLogger(ClubRestClient.class.getName());
+-
+-    @Inject
+-    private APIClient apiClient;
+-
+-    public Optional<List<ClubResponse>> listClubs() {
+-        Optional<ClubResponse[]> response = apiClient.get(LIST_CLUBS, ClubResponse[].class);
+-        if(response.isEmpty()){
+-            LOG.log(Level.SEVERE, "Unable list Clubs");
+-        }
+-        return response.map(clubs -> new ArrayList<>(Arrays.asList(clubs)));
+-    }
+-
+-    public Optional<ClubResponse> getClubById(UUID clubId) {
+-        String path = GET_CLUB_BY_ID + "/" + clubId;
+-        Optional<ClubResponse> response = apiClient.get(path,ClubResponse.class);
+-        if(response.isEmpty()){
+-            LOG.log(Level.SEVERE, "Unable find Club");
+-        }
+-        return response;
+-    }
+-
+-    public Optional<ClubResponse> createClub(ClubRequest request){
+-        Optional<ClubResponse> response = apiClient.post(CREATE_CLUB,request,ClubResponse.class);
+-        if(response.isEmpty()){
+-            LOG.log(Level.SEVERE, "Unable create Club");
+-        }
+-        return response;
+-    }
+-
+-    public Optional<ClubResponse> updateClub(UUID clubId,ClubRequest request){
+-        String path = UPDATE_CLUB + "/" + clubId;
+-        Optional<ClubResponse> response = apiClient.put(path,request,ClubResponse.class);
+-        if(response.isEmpty()){
+-            LOG.log(Level.SEVERE, "Unable to update Club");
+-        }
+-        return response;
+-    }
+-}
++package za.ac.vzap.trytons.frontend.client;
++
++import jakarta.enterprise.context.Dependent;
++import jakarta.inject.Inject;
++
++import java.util.ArrayList;
++import java.util.Arrays;
++import java.util.List;
++import java.util.Optional;
++import java.util.UUID;
++import java.util.logging.Level;
++import java.util.logging.Logger;
++
++@Dependent
++public class ClubRestClient {
++
++    private static final String CLUB_PATH = "/club";
++    private static final Logger LOG = Logger.getLogger(ClubRestClient.class.getName());
++
++    @Inject
++    private APIClient apiClient;
++
++    public Optional<List<ClubResponse>> listClubs() {
++        Optional<ClubResponse[]> response = apiClient.get(CLUB_PATH, ClubResponse[].class);
++        if (response.isEmpty()) {
++            LOG.log(Level.WARNING, "Unable to load clubs.");
++        }
++        return response.map(clubs -> new ArrayList<>(Arrays.asList(clubs)));
++    }
++
++    public Optional<ClubResponse> getClubById(UUID clubId) {
++        Optional<ClubResponse> response = apiClient.get(CLUB_PATH + "/" + clubId, ClubResponse.class);
++        if (response.isEmpty()) {
++            LOG.log(Level.WARNING, "Unable to find club {0}.", clubId);
++        }
++        return response;
++    }
++
++    public Optional<ClubResponse> createClub(ClubRequest request) {
++        Optional<ClubResponse> response = apiClient.post(CLUB_PATH, request, ClubResponse.class);
++        if (response.isEmpty()) {
++            LOG.log(Level.WARNING, "Unable to create club.");
++        }
++        return response;
++    }
++
++    public Optional<ClubResponse> updateClub(UUID clubId, ClubRequest request) {
++        Optional<ClubResponse> response = apiClient.put(CLUB_PATH + "/" + clubId, request, ClubResponse.class);
++        if (response.isEmpty()) {
++            LOG.log(Level.WARNING, "Unable to update club {0}.", clubId);
++        }
++        return response;
++    }
++}
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/LoginResponse.java" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/LoginResponse.java"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/LoginResponse.java"	2026-07-03 08:41:59.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/LoginResponse.java"	2026-07-13 21:05:05.437393841 +0000
+@@ -1,15 +1,16 @@
+-package za.ac.vzap.trytons.frontend.client;
+-
+-import lombok.Getter;
+-import lombok.Setter;
+-
+-import java.util.UUID;
+-@Getter
+-@Setter
+-public class LoginResponse {
+-    private UUID userId;
+-    private String username;
+-    private String email;
+-    private String role;
+-
+-}
++package za.ac.vzap.trytons.frontend.client;
++
++import lombok.Getter;
++import lombok.Setter;
++
++import java.util.UUID;
++@Getter
++@Setter
++public class LoginResponse {
++    private UUID userId;
++    private String username;
++    private String email;
++    private String role;
++    private String token;
++
++}
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/PlayerResponse.java" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/PlayerResponse.java"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/PlayerResponse.java"	2026-07-03 08:41:59.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/PlayerResponse.java"	2026-07-13 21:05:05.438465653 +0000
+@@ -1,29 +1,28 @@
+-package za.ac.vzap.trytons.frontend.client;
+-
+-import lombok.Getter;
+-import lombok.Setter;
+-
+-import java.math.BigDecimal;
+-import java.util.UUID;
+-@Getter
+-@Setter
+-public class PlayerResponse {
+-    private UUID playerId;
+-    private String playerName;
+-    private BigDecimal value;
+-    private int attackingAbility;
+-    private int defensiveAbility;
+-    private int kickingAbility;
+-    private int discipline;
+-    private int consistency;
+-    private int fitness;
+-    private int currentForm;
+-    private int totalFantasyPoints;
+-    private boolean isActive;
+-    private ClubResponse club;
+-    private PositionResponse position;
+-    private PlayerResponse player;
+-    private boolean isCaptain;
+-    private boolean isViceCaptain;
+-    private boolean isBench;
+-}
++package za.ac.vzap.trytons.frontend.client;
++
++import lombok.Getter;
++import lombok.Setter;
++
++import java.math.BigDecimal;
++import java.util.UUID;
++@Getter
++@Setter
++public class PlayerResponse {
++    private UUID playerId;
++    private String playerName;
++    private BigDecimal value;
++    private int attackingAbility;
++    private int defensiveAbility;
++    private int kickingAbility;
++    private int discipline;
++    private int consistency;
++    private int fitness;
++    private int currentForm;
++    private int totalFantasyPoints;
++    private boolean isActive;
++    private ClubResponse club;
++    private PositionResponse position;
++    private boolean isCaptain;
++    private boolean isViceCaptain;
++    private boolean isBench;
++}
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/PlayerRestClient.java" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/PlayerRestClient.java"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/PlayerRestClient.java"	2026-07-06 11:34:12.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/PlayerRestClient.java"	2026-07-13 21:05:05.669259293 +0000
+@@ -1,60 +1,65 @@
+-package za.ac.vzap.trytons.frontend.client;
+-
+-import jakarta.enterprise.context.Dependent;
+-import jakarta.inject.Inject;
+-
+-import java.util.ArrayList;
+-import java.util.Arrays;
+-import java.util.List;
+-import java.util.Optional;
+-import java.util.UUID;
+-import java.util.logging.Level;
+-import java.util.logging.Logger;
+-
+-@Dependent
+-public class PlayerRestClient {
+-    private String LIST_PLAYERS ="/player";
+-    private String GET_PLAYER = "/player";
+-    private String CREATE_PLAYER = "/player";
+-    private String UPDATE_PLAYER ="/player";
+-
+-    private static final Logger LOG = Logger.getLogger(PlayerRestClient.class.getName());
+-    @Inject
+-    private APIClient apiClient;
+-
+-    public Optional<List<PlayerResponse>> listPlayers(String search , UUID clubId , UUID positionId) {
+-        StringBuilder path = new StringBuilder(LIST_PLAYERS);
+-        List<String> params = new ArrayList<>();
+-        Optional<PlayerResponse[]> response = apiClient.get(path.toString(), PlayerResponse[].class);
+-        if(response.isEmpty()){
+-            LOG.log(Level.SEVERE, "Unable list player");
+-        }
+-        return response.map(players -> new ArrayList<>(Arrays.asList(players)));
+-    }
+-
+-    public Optional<PlayerResponse> getPlayer(UUID playerId) {
+-        String path = GET_PLAYER + "/" + playerId;
+-        Optional<PlayerResponse> response = apiClient.get(path,PlayerResponse.class);
+-        if(response.isEmpty()){
+-            LOG.log(Level.SEVERE, "Unable find player");
+-        }
+-        return response;
+-    }
+-
+-    public Optional<PlayerResponse> createPlayer(PlayerRequest request) {
+-        Optional<PlayerResponse> response = apiClient.post(CREATE_PLAYER,request,PlayerResponse.class);
+-        if(response.isEmpty()){
+-            LOG.log(Level.SEVERE, "Unable to create player");
+-        }
+-        return response;
+-    }
+-
+-    public Optional<PlayerResponse> updatePlayer (UUID playerId , PlayerRequest request) {
+-        String path = UPDATE_PLAYER + "/" + playerId;
+-        Optional<PlayerResponse> response = apiClient.put(path,request,PlayerResponse.class);
+-        if(response.isEmpty()){
+-            LOG.log(Level.SEVERE, "Unable to update player");
+-        }
+-        return response;
+-    }
+-}
++package za.ac.vzap.trytons.frontend.client;
++
++import jakarta.enterprise.context.Dependent;
++import jakarta.inject.Inject;
++
++import java.net.URLEncoder;
++import java.nio.charset.StandardCharsets;
++import java.util.ArrayList;
++import java.util.Arrays;
++import java.util.List;
++import java.util.Optional;
++import java.util.UUID;
++import java.util.logging.Level;
++import java.util.logging.Logger;
++
++@Dependent
++public class PlayerRestClient {
++
++    private static final String PLAYER_PATH = "/player";
++    private static final Logger LOG = Logger.getLogger(PlayerRestClient.class.getName());
++
++    @Inject
++    private APIClient apiClient;
++
++    public Optional<List<PlayerResponse>> listPlayers(String search, UUID clubId, UUID positionId) {
++        List<String> parameters = new ArrayList<>();
++
++        if (search != null && !search.isBlank()) {
++            parameters.add("search=" + encode(search.trim()));
++        }
++        if (clubId != null) {
++            parameters.add("clubId=" + clubId);
++        }
++        if (positionId != null) {
++            parameters.add("positionId=" + positionId);
++        }
++
++        String path = PLAYER_PATH;
++        if (!parameters.isEmpty()) {
++            path += "?" + String.join("&", parameters);
++        }
++
++        Optional<PlayerResponse[]> response = apiClient.get(path, PlayerResponse[].class);
++        if (response.isEmpty()) {
++            LOG.log(Level.WARNING, "Unable to list players.");
++        }
++        return response.map(players -> new ArrayList<>(Arrays.asList(players)));
++    }
++
++    public Optional<PlayerResponse> getPlayer(UUID playerId) {
++        return apiClient.get(PLAYER_PATH + "/" + playerId, PlayerResponse.class);
++    }
++
++    public Optional<PlayerResponse> createPlayer(PlayerRequest request) {
++        return apiClient.post(PLAYER_PATH, request, PlayerResponse.class);
++    }
++
++    public Optional<PlayerResponse> updatePlayer(UUID playerId, PlayerRequest request) {
++        return apiClient.put(PLAYER_PATH + "/" + playerId, request, PlayerResponse.class);
++    }
++
++    private String encode(String value) {
++        return URLEncoder.encode(value, StandardCharsets.UTF_8);
++    }
++}
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/PositionRestClient.java" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/PositionRestClient.java"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/PositionRestClient.java"	1970-01-01 00:00:00.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/PositionRestClient.java"	2026-07-13 21:05:05.656450844 +0000
+@@ -0,0 +1,34 @@
++package za.ac.vzap.trytons.frontend.client;
++
++import jakarta.enterprise.context.Dependent;
++import jakarta.inject.Inject;
++
++import java.util.ArrayList;
++import java.util.Arrays;
++import java.util.List;
++import java.util.Optional;
++import java.util.UUID;
++import java.util.logging.Level;
++import java.util.logging.Logger;
++
++@Dependent
++public class PositionRestClient {
++
++    private static final String POSITION_PATH = "/position";
++    private static final Logger LOG = Logger.getLogger(PositionRestClient.class.getName());
++
++    @Inject
++    private APIClient apiClient;
++
++    public Optional<List<PositionResponse>> listPositions() {
++        Optional<PositionResponse[]> response = apiClient.get(POSITION_PATH, PositionResponse[].class);
++        if (response.isEmpty()) {
++            LOG.log(Level.WARNING, "Unable to load positions.");
++        }
++        return response.map(items -> new ArrayList<>(Arrays.asList(items)));
++    }
++
++    public Optional<PositionResponse> getPosition(UUID positionId) {
++        return apiClient.get(POSITION_PATH + "/" + positionId, PositionResponse.class);
++    }
++}
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/RegisteredUserResponse.java" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/RegisteredUserResponse.java"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/RegisteredUserResponse.java"	2026-07-03 08:41:59.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/RegisteredUserResponse.java"	2026-07-13 21:05:05.437948875 +0000
+@@ -1,13 +1,14 @@
+-package za.ac.vzap.trytons.frontend.client;
+-
+-import lombok.Getter;
+-import lombok.Setter;
+-
+-import java.util.UUID;
+-@Getter
+-@Setter
+-public class RegisteredUserResponse {
+-    private UUID userId;
+-    private String username;
+-    private String status;
+-}
++package za.ac.vzap.trytons.frontend.client;
++
++import lombok.Getter;
++import lombok.Setter;
++
++import java.util.UUID;
++@Getter
++@Setter
++public class RegisteredUserResponse {
++    private UUID userId;
++    private String username;
++    private String role;
++    private String status;
++}
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/TransferRecommendationResponse.java" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/TransferRecommendationResponse.java"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/TransferRecommendationResponse.java"	2026-07-10 11:40:55.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/client/TransferRecommendationResponse.java"	2026-07-13 21:13:14.499306689 +0000
+@@ -1,29 +1,74 @@
+-package za.ac.vzap.trytons.frontend.client;
+-
+-import lombok.*;
+-
+-import java.math.BigDecimal;
+-import java.util.List;
+-import java.util.UUID;
+-
+-@Getter
+-@Setter
+-@NoArgsConstructor
+-@AllArgsConstructor
+-@Builder
+-
+-public class TransferRecommendationResponse {
+-    private List<RecommendedPlayer> recommendation;
+-
+-    @Getter
+-    @Setter
+-    @NoArgsConstructor
+-    @AllArgsConstructor
+-    @Builder
+-    public static class RecommendedPlayer {
+-        private UUID playerId;
+-        private String playerName;
+-        private BigDecimal value;
+-        private String reason;
+-    }
+-}
++package za.ac.vzap.trytons.frontend.client;
++
++import java.math.BigDecimal;
++import java.util.List;
++import java.util.UUID;
++
++public class TransferRecommendationResponse {
++
++    private List<RecommendedPlayer> recommendation;
++
++    public TransferRecommendationResponse() {
++    }
++
++    public TransferRecommendationResponse(List<RecommendedPlayer> recommendation) {
++        this.recommendation = recommendation;
++    }
++
++    public List<RecommendedPlayer> getRecommendation() {
++        return recommendation;
++    }
++
++    public void setRecommendation(List<RecommendedPlayer> recommendation) {
++        this.recommendation = recommendation;
++    }
++
++    public static class RecommendedPlayer {
++        private UUID playerId;
++        private String playerName;
++        private BigDecimal value;
++        private String reason;
++
++        public RecommendedPlayer() {
++        }
++
++        public RecommendedPlayer(UUID playerId, String playerName, BigDecimal value, String reason) {
++            this.playerId = playerId;
++            this.playerName = playerName;
++            this.value = value;
++            this.reason = reason;
++        }
++
++        public UUID getPlayerId() {
++            return playerId;
++        }
++
++        public void setPlayerId(UUID playerId) {
++            this.playerId = playerId;
++        }
++
++        public String getPlayerName() {
++            return playerName;
++        }
++
++        public void setPlayerName(String playerName) {
++            this.playerName = playerName;
++        }
++
++        public BigDecimal getValue() {
++            return value;
++        }
++
++        public void setValue(BigDecimal value) {
++            this.value = value;
++        }
++
++        public String getReason() {
++            return reason;
++        }
++
++        public void setReason(String reason) {
++            this.reason = reason;
++        }
++    }
++}
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/servlet/AdminFixtureServlet.java" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/servlet/AdminFixtureServlet.java"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/servlet/AdminFixtureServlet.java"	2026-07-06 11:34:12.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/servlet/AdminFixtureServlet.java"	2026-07-13 21:07:22.539610252 +0000
+@@ -1,12 +1,24 @@
+-package za.ac.vzap.trytons.frontend.servlet;
+-
+-import jakarta.inject.Inject;
+-import jakarta.servlet.annotation.WebServlet;
+-import jakarta.servlet.http.HttpServlet;
+-import za.ac.vzap.trytons.frontend.client.AdminFixtureRestClient;
+-
+-@WebServlet(name= "" , urlPatterns = "")
+-public class AdminFixtureServlet extends HttpServlet {
+-    @Inject
+-    private AdminFixtureRestClient adminFixtureRestClient;
+-}
++package za.ac.vzap.trytons.frontend.servlet;
++
++import jakarta.inject.Inject;
++import jakarta.servlet.ServletException;
++import jakarta.servlet.annotation.WebServlet;
++import jakarta.servlet.http.HttpServlet;
++import jakarta.servlet.http.HttpServletRequest;
++import jakarta.servlet.http.HttpServletResponse;
++import za.ac.vzap.trytons.frontend.client.AdminFixtureRestClient;
++
++import java.io.IOException;
++
++@WebServlet(name = "AdminFixtureServlet", urlPatterns = "/admin/fixtures")
++public class AdminFixtureServlet extends HttpServlet {
++
++    @Inject
++    private AdminFixtureRestClient adminFixtureRestClient;
++
++    @Override
++    protected void doGet(HttpServletRequest request, HttpServletResponse response)
++            throws ServletException, IOException {
++        request.getRequestDispatcher("/pages/admin-fixtures.jsp").forward(request, response);
++    }
++}
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/servlet/AuthServlet.java" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/servlet/AuthServlet.java"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/servlet/AuthServlet.java"	2026-07-03 08:41:59.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/servlet/AuthServlet.java"	2026-07-13 21:04:52.090277830 +0000
+@@ -1,78 +1,128 @@
+-package za.ac.vzap.trytons.frontend.servlet;
+-
+-import jakarta.inject.Inject;
+-import jakarta.servlet.ServletException;
+-import jakarta.servlet.annotation.WebServlet;
+-import jakarta.servlet.http.HttpServlet;
+-import jakarta.servlet.http.HttpServletRequest;
+-import jakarta.servlet.http.HttpServletResponse;
+-import jakarta.servlet.http.HttpSession;
+-import za.ac.vzap.trytons.frontend.client.*;
+-
+-import java.io.IOException;
+-import java.util.Optional;
+-
+-
+-@WebServlet (name = "AuthServlet" , urlPatterns = {"/login", "/register", "/logout"})
+-public class AuthServlet extends HttpServlet {
+-
+-    @Inject
+-    private AuthRestClient authRestClient;
+-
+-    @Override
+-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+-        String submit = request.getParameter("submit");
+-        if (submit == null) {
+-            submit = "";
+-        }
+-        String destination = switch (submit){
+-            case "login" -> {
+-                String identifier = request.getParameter("identifier");
+-                String password = request.getParameter("password");
+-                LoginRequest loginRequest = new LoginRequest(identifier, password);
+-                Optional<LoginResponse> loginResponse = authRestClient.login(loginRequest);
+-                if (loginResponse.isPresent()) {
+-                    HttpSession session = request.getSession(true);
+-                    session.setAttribute("userId",  loginResponse.get().getUserId() );
+-                    session.setAttribute("username",  loginResponse.get().getUsername());
+-                    session.setAttribute("role",  loginResponse.get().getRole());
+-                    yield "registeredUser.jsp";
+-                }else {
+-                    request.setAttribute("error", "Invalid login credentials");
+-                    yield "login.jsp";
+-                }
+-
+-            }
+-            case "register" ->{
+-                String email       = request.getParameter("email");
+-                String username    = request.getParameter("username");
+-                String rawPassword = request.getParameter("rawPassword");
+-                RegisteredUserRequest registerRequest = new RegisteredUserRequest(email, username, rawPassword);
+-                Optional<RegisteredUserResponse> registerResponse = authRestClient.register(registerRequest);
+-                if (registerResponse.isPresent()) {
+-                    yield "login.jsp";
+-                } else {
+-                    request.setAttribute("error", "Registration failed");
+-                    yield "register.jsp";
+-                }
+-            }
+-            case "logout" -> {
+-                authRestClient.logout();
+-                HttpSession session = request.getSession(false);
+-                if (session != null) {
+-                    session.invalidate();
+-                }
+-                yield "login.jsp";
+-            }
+-            default ->"index.jsp";
+-        };
+-        request.getRequestDispatcher(destination).forward(request, response);
+-    }
+-
+-    @Override
+-    public String getServletInfo() {
+-        return "Auth Servlet, handles login request and register request and logout request";
+-    }
+-
+-}
+-
++package za.ac.vzap.trytons.frontend.servlet;
++
++import jakarta.inject.Inject;
++import jakarta.servlet.ServletException;
++import jakarta.servlet.annotation.WebServlet;
++import jakarta.servlet.http.HttpServlet;
++import jakarta.servlet.http.HttpServletRequest;
++import jakarta.servlet.http.HttpServletResponse;
++import jakarta.servlet.http.HttpSession;
++import za.ac.vzap.trytons.frontend.client.AuthRestClient;
++import za.ac.vzap.trytons.frontend.client.LoginRequest;
++import za.ac.vzap.trytons.frontend.client.LoginResponse;
++import za.ac.vzap.trytons.frontend.client.RegisteredUserRequest;
++import za.ac.vzap.trytons.frontend.client.RegisteredUserResponse;
++import za.ac.vzap.trytons.frontend.session.SessionAuthContext;
++
++import java.io.IOException;
++import java.util.Optional;
++
++@WebServlet(name = "AuthServlet", urlPatterns = {"/login", "/register", "/logout"})
++public class AuthServlet extends HttpServlet {
++
++    @Inject
++    private AuthRestClient authRestClient;
++
++    @Inject
++    private SessionAuthContext authContext;
++
++    @Override
++    protected void doGet(HttpServletRequest request, HttpServletResponse response)
++            throws ServletException, IOException {
++
++        switch (request.getServletPath()) {
++            case "/register" -> request.getRequestDispatcher("/pages/register.jsp").forward(request, response);
++            case "/logout" -> performLogout(request, response);
++            default -> {
++                if (authContext.isAuthenticated()) {
++                    response.sendRedirect(request.getContextPath() + "/players?submit=players");
++                } else {
++                    request.getRequestDispatcher("/pages/login.jsp").forward(request, response);
++                }
++            }
++        }
++    }
++
++    @Override
++    protected void doPost(HttpServletRequest request, HttpServletResponse response)
++            throws ServletException, IOException {
++
++        String action = request.getParameter("submit");
++        if (action == null || action.isBlank()) {
++            action = request.getServletPath().replace("/", "");
++        }
++
++        switch (action) {
++            case "login" -> login(request, response);
++            case "register" -> register(request, response);
++            case "logout" -> performLogout(request, response);
++            default -> response.sendRedirect(request.getContextPath() + "/login");
++        }
++    }
++
++    private void login(HttpServletRequest request, HttpServletResponse response)
++            throws ServletException, IOException {
++
++        LoginRequest loginRequest = new LoginRequest(
++                request.getParameter("identifier"),
++                request.getParameter("password")
++        );
++
++        Optional<LoginResponse> loginResponse = authRestClient.login(loginRequest);
++        if (loginResponse.isEmpty() || loginResponse.get().getToken() == null) {
++            request.setAttribute("error", "Invalid login credentials or the backend is unavailable.");
++            request.getRequestDispatcher("/pages/login.jsp").forward(request, response);
++            return;
++        }
++
++        LoginResponse loggedInUser = loginResponse.get();
++        authContext.signIn(loggedInUser);
++
++        HttpSession session = request.getSession(true);
++        session.setAttribute("userId", loggedInUser.getUserId());
++        session.setAttribute("username", loggedInUser.getUsername());
++        session.setAttribute("email", loggedInUser.getEmail());
++        session.setAttribute("role", loggedInUser.getRole());
++        session.setAttribute("authToken", loggedInUser.getToken());
++
++        response.sendRedirect(request.getContextPath() + "/players?submit=players");
++    }
++
++    private void register(HttpServletRequest request, HttpServletResponse response)
++            throws ServletException, IOException {
++
++        RegisteredUserRequest registerRequest = new RegisteredUserRequest(
++                request.getParameter("email"),
++                request.getParameter("username"),
++                request.getParameter("rawPassword")
++        );
++
++        Optional<RegisteredUserResponse> registerResponse = authRestClient.register(registerRequest);
++        if (registerResponse.isPresent()) {
++            request.setAttribute("message", "Registration successful. You can now log in.");
++            request.getRequestDispatcher("/pages/login.jsp").forward(request, response);
++            return;
++        }
++
++        request.setAttribute("error", "Registration failed. Check the details or try another email/username.");
++        request.getRequestDispatcher("/pages/register.jsp").forward(request, response);
++    }
++
++    private void performLogout(HttpServletRequest request, HttpServletResponse response) throws IOException {
++        if (authContext.isAuthenticated()) {
++            authRestClient.logout();
++        }
++        authContext.clear();
++
++        HttpSession session = request.getSession(false);
++        if (session != null) {
++            session.invalidate();
++        }
++        response.sendRedirect(request.getContextPath() + "/login");
++    }
++
++    @Override
++    public String getServletInfo() {
++        return "Handles frontend registration, login and logout.";
++    }
++}
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/servlet/ClubServlet.java" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/servlet/ClubServlet.java"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/servlet/ClubServlet.java"	2026-07-13 20:26:35.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/servlet/ClubServlet.java"	2026-07-13 21:10:47.847563127 +0000
+@@ -1,125 +1,165 @@
+-package za.ac.vzap.trytons.frontend.servlet;
+-
+-import jakarta.inject.Inject;
+-import jakarta.servlet.ServletException;
+-import jakarta.servlet.annotation.WebServlet;
+-import jakarta.servlet.http.HttpServlet;
+-import jakarta.servlet.http.HttpServletRequest;
+-import jakarta.servlet.http.HttpServletResponse;
+-import za.ac.vzap.trytons.frontend.client.ClubRequest;
+-import za.ac.vzap.trytons.frontend.client.ClubResponse;
+-import za.ac.vzap.trytons.frontend.client.ClubRestClient;
+-
+-import java.io.IOException;
+-import java.util.List;
+-import java.util.Optional;
+-import java.util.UUID;
+-
+-@WebServlet(name ="ClubServlet" , urlPatterns = {"/clubs","/club","/club/create","/club/update"})
+-public class ClubServlet extends HttpServlet {
+-
+-    @Inject
+-    private ClubRestClient clubRestClient;
+-
+-    @Override
+-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+-        String submit = request.getParameter("submit");
+-        if (submit == null) {
+-            submit = "";
+-        }
+-        String destination = switch (submit){
+-            case "clubs" -> {
+-                String search = request.getParameter("search");
+-                Optional<List<ClubResponse>> clubs = clubRestClient.listClubs();
+-                if (clubs.isPresent()) {
+-                    request.setAttribute("clubs", clubs.get());
+-                } else {
+-                    request.setAttribute("error", "Unable to load clubs");
+-                    request.setAttribute("clubs", List.of());
+-                }
+-                request.setAttribute("searchTerm", search);
+-                yield "/pages/clubs.jsp";
+-            }
+-            case "club"  -> {
+-                Optional<UUID> clubId = parseUuid(request.getParameter("clubId"));
+-                if (clubId.isEmpty()) {
+-                    request.setAttribute("error", "Invalid or missing club id");
+-                    yield "/pages/clubs.jsp";
+-                }
+-                Optional<ClubResponse> club = clubRestClient.getClubById(clubId.get());
+-                if (club.isPresent()) {
+-                    request.setAttribute("club", club.get());
+-                    yield "/pages/club.jsp";
+-                }
+-                request.setAttribute("error", "Club not found");
+-                yield "/pages/clubs.jsp";
+-            }
+-            default ->  "/index.jsp";
+-        };
+-        request.getRequestDispatcher(destination).forward(request, response);
+-    }
+-
+-    @Override
+-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+-        String submit = request.getParameter("submit");
+-        if (submit == null) {
+-            submit = "";
+-        }
+-        String destination = switch (submit){
+-            case "club/create" -> {
+-                ClubRequest clubRequest = buildClubRequest(request);
+-                Optional<ClubResponse> created = clubRestClient.createClub(clubRequest);
+-                if (created.isPresent()) {
+-                    yield reloadClubs(request);
+-                }
+-                request.setAttribute("error", "Unable to create club");
+-                yield "/pages/club.jsp";
+-            }
+-            case "club/update" -> {
+-                Optional<UUID> clubId = parseUuid(request.getParameter("clubId"));
+-                if (clubId.isEmpty()) {
+-                    request.setAttribute("error", "Invalid or missing club id");
+-                    yield "/pages/club.jsp";
+-                }
+-                ClubRequest clubRequest = buildClubRequest(request);
+-                Optional<ClubResponse> updated = clubRestClient.updateClub(clubId.get(), clubRequest);
+-                if (updated.isPresent()) {
+-                    yield reloadClubs(request);
+-                }
+-                request.setAttribute("error", "Unable to update club");
+-                yield "/pages/club.jsp";
+-            }
+-            default ->  "/index.jsp";
+-        };
+-        request.getRequestDispatcher(destination).forward(request, response);
+-    }
+-
+-    private ClubRequest buildClubRequest(HttpServletRequest request) {
+-        String clubName = request.getParameter("clubName");
+-        String location = request.getParameter("location");
+-        String homeVenue = request.getParameter("homeVenue");
+-        boolean isActive = parseCheckbox(request.getParameter("isActive"));
+-        return new ClubRequest(clubName, location, homeVenue, isActive);
+-    }
+-
+-    private String reloadClubs(HttpServletRequest request) {
+-        Optional<List<ClubResponse>> clubs = clubRestClient.listClubs();
+-        request.setAttribute("clubs", clubs.orElse(List.of()));
+-        return "/pages/clubs.jsp";
+-    }
+-
+-    private Optional<UUID> parseUuid(String value) {
+-        if (value == null || value.isBlank()) {
+-            return Optional.empty();
+-        }
+-        try {
+-            return Optional.of(UUID.fromString(value.trim()));
+-        } catch (IllegalArgumentException e) {
+-            return Optional.empty();
+-        }
+-    }
+-
+-    private boolean parseCheckbox(String value) {
+-        return "on".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value);
+-    }
+-}
++package za.ac.vzap.trytons.frontend.servlet;
++
++import jakarta.inject.Inject;
++import jakarta.servlet.ServletException;
++import jakarta.servlet.annotation.WebServlet;
++import jakarta.servlet.http.HttpServlet;
++import jakarta.servlet.http.HttpServletRequest;
++import jakarta.servlet.http.HttpServletResponse;
++import za.ac.vzap.trytons.frontend.client.ClubRequest;
++import za.ac.vzap.trytons.frontend.client.ClubResponse;
++import za.ac.vzap.trytons.frontend.client.ClubRestClient;
++
++import java.io.IOException;
++import java.util.List;
++import java.util.Locale;
++import java.util.Optional;
++import java.util.UUID;
++
++@WebServlet(name = "ClubServlet", urlPatterns = {"/clubs", "/club", "/club/create", "/club/update"})
++public class ClubServlet extends HttpServlet {
++
++    @Inject
++    private ClubRestClient clubRestClient;
++
++    @Override
++    protected void doGet(HttpServletRequest request, HttpServletResponse response)
++            throws ServletException, IOException {
++
++        String action = request.getParameter("submit");
++        if (action == null || action.isBlank()) {
++            action = "/club".equals(request.getServletPath()) ? "club" : "clubs";
++        }
++
++        if ("club".equals(action)) {
++            showClub(request, response);
++        } else {
++            showClubs(request, response);
++        }
++    }
++
++    @Override
++    protected void doPost(HttpServletRequest request, HttpServletResponse response)
++            throws ServletException, IOException {
++
++        String action = request.getParameter("submit");
++        if (action == null || action.isBlank()) {
++            action = request.getServletPath().replaceFirst("^/", "");
++        }
++
++        switch (action) {
++            case "club/create" -> createClub(request, response);
++            case "club/update" -> updateClub(request, response);
++            default -> response.sendRedirect(request.getContextPath() + "/clubs?submit=clubs");
++        }
++    }
++
++    private void showClubs(HttpServletRequest request, HttpServletResponse response)
++            throws ServletException, IOException {
++
++        String search = request.getParameter("search");
++        Optional<List<ClubResponse>> loadedClubs = clubRestClient.listClubs();
++        List<ClubResponse> clubs = loadedClubs.orElse(List.of());
++
++        if (search != null && !search.isBlank()) {
++            String term = search.trim().toLowerCase(Locale.ROOT);
++            clubs = clubs.stream()
++                    .filter(club -> containsIgnoreCase(club.getClubName(), term)
++                            || containsIgnoreCase(club.getLocation(), term)
++                            || containsIgnoreCase(club.getHomeVenue(), term))
++                    .toList();
++        }
++
++        if (loadedClubs.isEmpty()) {
++            request.setAttribute("error", "Unable to load clubs. Confirm that the backend and database are running.");
++        }
++
++        request.setAttribute("clubs", clubs);
++        request.setAttribute("searchTerm", search);
++        request.getRequestDispatcher("/pages/clubs.jsp").forward(request, response);
++    }
++
++    private void showClub(HttpServletRequest request, HttpServletResponse response)
++            throws ServletException, IOException {
++
++        Optional<UUID> clubId = parseUuid(request.getParameter("clubId"));
++        if (clubId.isEmpty()) {
++            request.setAttribute("error", "Invalid or missing club ID.");
++            showClubs(request, response);
++            return;
++        }
++
++        Optional<ClubResponse> club = clubRestClient.getClubById(clubId.get());
++        if (club.isEmpty()) {
++            request.setAttribute("error", "Club was not found.");
++            showClubs(request, response);
++            return;
++        }
++
++        request.setAttribute("club", club.get());
++        request.getRequestDispatcher("/pages/club.jsp").forward(request, response);
++    }
++
++    private void createClub(HttpServletRequest request, HttpServletResponse response)
++            throws ServletException, IOException {
++
++        Optional<ClubResponse> created = clubRestClient.createClub(buildClubRequest(request));
++        if (created.isPresent()) {
++            response.sendRedirect(request.getContextPath()
++                    + "/club?submit=club&clubId=" + created.get().getClubId());
++            return;
++        }
++
++        request.setAttribute("error", "Unable to create club.");
++        showClubs(request, response);
++    }
++
++    private void updateClub(HttpServletRequest request, HttpServletResponse response)
++            throws ServletException, IOException {
++
++        Optional<UUID> clubId = parseUuid(request.getParameter("clubId"));
++        if (clubId.isEmpty()) {
++            request.setAttribute("error", "Invalid or missing club ID.");
++            showClubs(request, response);
++            return;
++        }
++
++        Optional<ClubResponse> updated = clubRestClient.updateClub(clubId.get(), buildClubRequest(request));
++        if (updated.isPresent()) {
++            response.sendRedirect(request.getContextPath()
++                    + "/club?submit=club&clubId=" + clubId.get());
++            return;
++        }
++
++        request.setAttribute("error", "Unable to update club.");
++        showClub(request, response);
++    }
++
++    private ClubRequest buildClubRequest(HttpServletRequest request) {
++        return new ClubRequest(
++                request.getParameter("clubName"),
++                request.getParameter("location"),
++                request.getParameter("homeVenue"),
++                parseCheckbox(request.getParameter("isActive"))
++        );
++    }
++
++    private boolean containsIgnoreCase(String value, String lowerCaseTerm) {
++        return value != null && value.toLowerCase(Locale.ROOT).contains(lowerCaseTerm);
++    }
++
++    private Optional<UUID> parseUuid(String value) {
++        if (value == null || value.isBlank()) {
++            return Optional.empty();
++        }
++        try {
++            return Optional.of(UUID.fromString(value.trim()));
++        } catch (IllegalArgumentException e) {
++            return Optional.empty();
++        }
++    }
++
++    private boolean parseCheckbox(String value) {
++        return "on".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value);
++    }
++}
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/servlet/PlayerServlet.java" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/servlet/PlayerServlet.java"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/servlet/PlayerServlet.java"	2026-07-06 11:34:12.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/servlet/PlayerServlet.java"	2026-07-13 21:05:30.551209037 +0000
+@@ -1,171 +1,206 @@
+-package za.ac.vzap.trytons.frontend.servlet;
+-
+-import jakarta.inject.Inject;
+-import jakarta.servlet.ServletException;
+-import jakarta.servlet.annotation.WebServlet;
+-import jakarta.servlet.http.HttpServlet;
+-import jakarta.servlet.http.HttpServletRequest;
+-import jakarta.servlet.http.HttpServletResponse;
+-import za.ac.vzap.trytons.frontend.client.*;
+-
+-import java.io.IOException;
+-import java.math.BigDecimal;
+-import java.util.List;
+-import java.util.Optional;
+-import java.util.UUID;
+-
+-@WebServlet(name ="PlayerServlet", urlPatterns = {"/players", "/player", "/player/create" , "/player/update"} )
+-public class PlayerServlet extends HttpServlet {
+-    @Inject
+-    private PlayerRestClient playerRestClient;
+-    @Inject
+-    private ClubRestClient clubRestClient;
+-
+-    @Override
+-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+-        String submit = request.getParameter("submit");
+-        if (submit == null) {
+-            submit = "";
+-        }
+-        String destination = switch (submit){
+-            case "players" -> {
+-                String search = request.getParameter("search");
+-                UUID clubId = parseUuid(request.getParameter("clubId")).orElse(null);
+-                UUID positionId = parseUuid(request.getParameter("positionId")).orElse(null);
+-                Optional<List<PlayerResponse>> players = playerRestClient.listPlayers(search, clubId, positionId);
+-                if (players.isPresent()) {
+-                    request.setAttribute("players", players.get());
+-                } else {
+-                    request.setAttribute("error", "Unable to load players");
+-                    request.setAttribute("players", List.of());
+-                }
+-
+-                Optional<List<ClubResponse>> clubs = clubRestClient.listClubs();
+-                request.setAttribute("clubs", clubs.orElse(List.of()));
+-                // NOTE: no PositionRestClient exists yet, so "positions" is not
+-                // set here. players.jsp reads it defensively (EL null-safe) and
+-                // will just show "All Positions" with no other options until
+-                // a position REST client is added in a future ticket.
+-                // - James
+-
+-                request.setAttribute("searchTerm", search);
+-                request.setAttribute("selectedClubId", clubId);
+-                request.setAttribute("selectedPositionId", positionId);
+-
+-                yield "/pages/players.jsp";
+-            }
+-            case "player" -> {
+-                Optional<UUID> playerId = parseUuid(request.getParameter("playerId"));
+-                if (playerId.isEmpty()) {
+-                    request.setAttribute("error", "Invalid or missing player id");
+-                    yield "/pages/players.jsp";
+-                }
+-                Optional<PlayerResponse> player = playerRestClient.getPlayer(playerId.get());
+-                if (player.isPresent()) {
+-                    request.setAttribute("player", player.get());
+-                    yield "/pages/player.jsp";
+-                }
+-                request.setAttribute("error", "Player not found");
+-                yield "/pages/players.jsp";
+-            }
+-            default -> "/index.jsp";
+-        };
+-        request.getRequestDispatcher(destination).forward(request, response);
+-    }
+-
+-    @Override
+-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+-        String submit = request.getParameter("submit");
+-        if (submit == null){
+-            submit = "";
+-        }
+-        String destination = switch (submit){
+-            case "player/create" -> {
+-                PlayerRequest playerRequest = buildPlayerRequest(request);
+-                Optional<PlayerResponse> created = playerRestClient.createPlayer(playerRequest);
+-                request.setAttribute("error", "Unable to create player");
+-                yield "/pages/player.jsp";
+-            }
+-            case "player/update" -> {
+-                Optional<UUID> playerId = parseUuid(request.getParameter("playerId"));
+-                if (playerId.isEmpty()) {
+-                    request.setAttribute("error", "Invalid or missing player id");
+-                    yield "/pages/player.jsp";
+-                }
+-                PlayerRequest playerRequest = buildPlayerRequest(request);
+-                Optional<PlayerResponse> updated = playerRestClient.updatePlayer(playerId.get(), playerRequest);
+-
+-                request.setAttribute("error", "Unable to update player");
+-                yield "/pages/player.jsp";
+-            }
+-            default -> "/index.jsp";
+-        };
+-        request.getRequestDispatcher(destination).forward(request, response);
+-    }
+-
+-    private PlayerRequest buildPlayerRequest(HttpServletRequest request) {
+-        PlayerRequest playerRequest = new PlayerRequest();
+-        playerRequest.setPlayerName(request.getParameter("playerName"));
+-        playerRequest.setValue(parseDecimal(request.getParameter("value")));
+-        playerRequest.setAttackingAbility(parseInt(request.getParameter("attackingAbility")));
+-        playerRequest.setDefensiveAbility(parseInt(request.getParameter("defensiveAbility")));
+-        playerRequest.setKickingAbility(parseInt(request.getParameter("kickingAbility")));
+-        playerRequest.setDiscipline(parseInt(request.getParameter("discipline")));
+-        playerRequest.setConsistency(parseInt(request.getParameter("consistency")));
+-        playerRequest.setFitness(parseInt(request.getParameter("fitness")));
+-        playerRequest.setCurrentForm(parseInt(request.getParameter("currentForm")));
+-        playerRequest.setTotalFantasyPoints(parseInt(request.getParameter("totalFantasyPoints")));
+-        playerRequest.setActive(parseCheckbox(request.getParameter("isActive")));
+-
+-        parseUuid(request.getParameter("clubId")).ifPresent(clubId -> {
+-            ClubResponse club = new ClubResponse();
+-            club.setClubId(clubId);
+-            playerRequest.setClub(club);
+-        });
+-        parseUuid(request.getParameter("positionId")).ifPresent(positionId -> {
+-            PositionResponse position = new PositionResponse();
+-            position.setPositionId(positionId);
+-            playerRequest.setPosition(position);
+-        });
+-        return playerRequest;
+-    }
+-
+-
+-
+-    private Optional<UUID> parseUuid(String value) {
+-        if (value == null || value.isBlank()) {
+-            return Optional.empty();
+-        }
+-        try {
+-            return Optional.of(UUID.fromString(value.trim()));
+-        } catch (IllegalArgumentException e) {
+-            return Optional.empty();
+-        }
+-    }
+-
+-    private int parseInt(String value) {
+-        if (value == null || value.isBlank()) {
+-            return 0;
+-        }
+-        try {
+-            return Integer.parseInt(value.trim());
+-        } catch (NumberFormatException e) {
+-            return 0;
+-        }
+-    }
+-
+-    private BigDecimal parseDecimal(String value) {
+-        if (value == null || value.isBlank()) {
+-            return BigDecimal.ZERO;
+-        }
+-        try {
+-            return new BigDecimal(value.trim());
+-        } catch (NumberFormatException e) {
+-            return BigDecimal.ZERO;
+-        }
+-    }
+-
+-    private boolean parseCheckbox(String value) {
+-        return "on".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value);
+-    }
+-}
++package za.ac.vzap.trytons.frontend.servlet;
++
++import jakarta.inject.Inject;
++import jakarta.servlet.ServletException;
++import jakarta.servlet.annotation.WebServlet;
++import jakarta.servlet.http.HttpServlet;
++import jakarta.servlet.http.HttpServletRequest;
++import jakarta.servlet.http.HttpServletResponse;
++import za.ac.vzap.trytons.frontend.client.ClubResponse;
++import za.ac.vzap.trytons.frontend.client.ClubRestClient;
++import za.ac.vzap.trytons.frontend.client.PlayerRequest;
++import za.ac.vzap.trytons.frontend.client.PlayerResponse;
++import za.ac.vzap.trytons.frontend.client.PlayerRestClient;
++import za.ac.vzap.trytons.frontend.client.PositionResponse;
++import za.ac.vzap.trytons.frontend.client.PositionRestClient;
++
++import java.io.IOException;
++import java.math.BigDecimal;
++import java.util.List;
++import java.util.Optional;
++import java.util.UUID;
++
++@WebServlet(name = "PlayerServlet", urlPatterns = {"/players", "/player", "/player/create", "/player/update"})
++public class PlayerServlet extends HttpServlet {
++
++    @Inject
++    private PlayerRestClient playerRestClient;
++
++    @Inject
++    private ClubRestClient clubRestClient;
++
++    @Inject
++    private PositionRestClient positionRestClient;
++
++    @Override
++    protected void doGet(HttpServletRequest request, HttpServletResponse response)
++            throws ServletException, IOException {
++
++        String action = request.getParameter("submit");
++        if (action == null || action.isBlank()) {
++            action = "/player".equals(request.getServletPath()) ? "player" : "players";
++        }
++
++        switch (action) {
++            case "player" -> showPlayer(request, response);
++            default -> showPlayers(request, response);
++        }
++    }
++
++    @Override
++    protected void doPost(HttpServletRequest request, HttpServletResponse response)
++            throws ServletException, IOException {
++
++        String action = request.getParameter("submit");
++        if (action == null || action.isBlank()) {
++            action = request.getServletPath().replaceFirst("^/", "");
++        }
++
++        switch (action) {
++            case "player/create" -> createPlayer(request, response);
++            case "player/update" -> updatePlayer(request, response);
++            default -> response.sendRedirect(request.getContextPath() + "/players?submit=players");
++        }
++    }
++
++    private void showPlayers(HttpServletRequest request, HttpServletResponse response)
++            throws ServletException, IOException {
++
++        String search = request.getParameter("search");
++        UUID clubId = parseUuid(request.getParameter("clubId")).orElse(null);
++        UUID positionId = parseUuid(request.getParameter("positionId")).orElse(null);
++
++        Optional<List<PlayerResponse>> players = playerRestClient.listPlayers(search, clubId, positionId);
++        request.setAttribute("players", players.orElse(List.of()));
++        if (players.isEmpty()) {
++            request.setAttribute("error", "Unable to load players. Confirm that the backend and database are running.");
++        }
++
++        request.setAttribute("clubs", clubRestClient.listClubs().orElse(List.of()));
++        request.setAttribute("positions", positionRestClient.listPositions().orElse(List.of()));
++        request.setAttribute("searchTerm", search);
++        request.setAttribute("selectedClubId", clubId);
++        request.setAttribute("selectedPositionId", positionId);
++
++        request.getRequestDispatcher("/pages/players.jsp").forward(request, response);
++    }
++
++    private void showPlayer(HttpServletRequest request, HttpServletResponse response)
++            throws ServletException, IOException {
++
++        Optional<UUID> playerId = parseUuid(request.getParameter("playerId"));
++        if (playerId.isEmpty()) {
++            request.setAttribute("error", "Invalid or missing player ID.");
++            showPlayers(request, response);
++            return;
++        }
++
++        Optional<PlayerResponse> player = playerRestClient.getPlayer(playerId.get());
++        if (player.isEmpty()) {
++            request.setAttribute("error", "Player was not found.");
++            showPlayers(request, response);
++            return;
++        }
++
++        request.setAttribute("player", player.get());
++        request.getRequestDispatcher("/pages/player.jsp").forward(request, response);
++    }
++
++    private void createPlayer(HttpServletRequest request, HttpServletResponse response)
++            throws ServletException, IOException {
++
++        Optional<PlayerResponse> created = playerRestClient.createPlayer(buildPlayerRequest(request));
++        if (created.isPresent()) {
++            response.sendRedirect(request.getContextPath() + "/player?submit=player&playerId=" + created.get().getPlayerId());
++            return;
++        }
++
++        request.setAttribute("error", "Unable to create player.");
++        showPlayers(request, response);
++    }
++
++    private void updatePlayer(HttpServletRequest request, HttpServletResponse response)
++            throws ServletException, IOException {
++
++        Optional<UUID> playerId = parseUuid(request.getParameter("playerId"));
++        if (playerId.isEmpty()) {
++            request.setAttribute("error", "Invalid or missing player ID.");
++            showPlayers(request, response);
++            return;
++        }
++
++        Optional<PlayerResponse> updated = playerRestClient.updatePlayer(playerId.get(), buildPlayerRequest(request));
++        if (updated.isPresent()) {
++            response.sendRedirect(request.getContextPath() + "/player?submit=player&playerId=" + playerId.get());
++            return;
++        }
++
++        request.setAttribute("error", "Unable to update player.");
++        showPlayer(request, response);
++    }
++
++    private PlayerRequest buildPlayerRequest(HttpServletRequest request) {
++        PlayerRequest playerRequest = new PlayerRequest();
++        playerRequest.setPlayerName(request.getParameter("playerName"));
++        playerRequest.setValue(parseDecimal(request.getParameter("value")));
++        playerRequest.setAttackingAbility(parseInt(request.getParameter("attackingAbility")));
++        playerRequest.setDefensiveAbility(parseInt(request.getParameter("defensiveAbility")));
++        playerRequest.setKickingAbility(parseInt(request.getParameter("kickingAbility")));
++        playerRequest.setDiscipline(parseInt(request.getParameter("discipline")));
++        playerRequest.setConsistency(parseInt(request.getParameter("consistency")));
++        playerRequest.setFitness(parseInt(request.getParameter("fitness")));
++        playerRequest.setCurrentForm(parseInt(request.getParameter("currentForm")));
++        playerRequest.setTotalFantasyPoints(parseInt(request.getParameter("totalFantasyPoints")));
++        playerRequest.setActive(parseCheckbox(request.getParameter("isActive")));
++
++        parseUuid(request.getParameter("clubId")).ifPresent(clubId -> {
++            ClubResponse club = new ClubResponse();
++            club.setClubId(clubId);
++            playerRequest.setClub(club);
++        });
++
++        parseUuid(request.getParameter("positionId")).ifPresent(positionId -> {
++            PositionResponse position = new PositionResponse();
++            position.setPositionId(positionId);
++            playerRequest.setPosition(position);
++        });
++        return playerRequest;
++    }
++
++    private Optional<UUID> parseUuid(String value) {
++        if (value == null || value.isBlank()) {
++            return Optional.empty();
++        }
++        try {
++            return Optional.of(UUID.fromString(value.trim()));
++        } catch (IllegalArgumentException e) {
++            return Optional.empty();
++        }
++    }
++
++    private int parseInt(String value) {
++        if (value == null || value.isBlank()) {
++            return 0;
++        }
++        try {
++            return Integer.parseInt(value.trim());
++        } catch (NumberFormatException e) {
++            return 0;
++        }
++    }
++
++    private BigDecimal parseDecimal(String value) {
++        if (value == null || value.isBlank()) {
++            return BigDecimal.ZERO;
++        }
++        try {
++            return new BigDecimal(value.trim());
++        } catch (NumberFormatException e) {
++            return BigDecimal.ZERO;
++        }
++    }
++
++    private boolean parseCheckbox(String value) {
++        return "on".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value);
++    }
++}
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/session/SessionAuthContext.java" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/session/SessionAuthContext.java"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/session/SessionAuthContext.java"	1970-01-01 00:00:00.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/session/SessionAuthContext.java"	2026-07-13 21:04:52.062893043 +0000
+@@ -0,0 +1,59 @@
++package za.ac.vzap.trytons.frontend.session;
++
++import jakarta.enterprise.context.SessionScoped;
++import za.ac.vzap.trytons.frontend.client.LoginResponse;
++
++import java.io.Serializable;
++import java.util.UUID;
++
++@SessionScoped
++public class SessionAuthContext implements Serializable {
++
++    private static final long serialVersionUID = 1L;
++
++    private UUID userId;
++    private String username;
++    private String email;
++    private String role;
++    private String token;
++
++    public void signIn(LoginResponse response) {
++        this.userId = response.getUserId();
++        this.username = response.getUsername();
++        this.email = response.getEmail();
++        this.role = response.getRole();
++        this.token = response.getToken();
++    }
++
++    public void clear() {
++        userId = null;
++        username = null;
++        email = null;
++        role = null;
++        token = null;
++    }
++
++    public boolean isAuthenticated() {
++        return userId != null && token != null && !token.isBlank();
++    }
++
++    public UUID getUserId() {
++        return userId;
++    }
++
++    public String getUsername() {
++        return username;
++    }
++
++    public String getEmail() {
++        return email;
++    }
++
++    public String getRole() {
++        return role;
++    }
++
++    public String getToken() {
++        return token;
++    }
++}
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/util/APIConfig.java" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/util/APIConfig.java"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/util/APIConfig.java"	2026-07-03 08:41:59.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/java/za/ac/vzap/trytons/frontend/util/APIConfig.java"	2026-07-13 21:10:45.912088807 +0000
+@@ -1,15 +1,30 @@
+-package za.ac.vzap.trytons.frontend.util;
+-
+-public class APIConfig {
+-    private static String DEFAULT_BASE_URL = "http://localhost:8080/J151-FINAL-BE/api";
+-    public APIConfig(){
+-    }
+-    public static String getBaseUrl() {
+-        String override = System.getProperty("api.base.url");
+-        if(override != null && !override.isBlank()){
+-            return override;
+-        }
+-        return DEFAULT_BASE_URL;
+-    }
+-
+-}
++package za.ac.vzap.trytons.frontend.util;
++
++public final class APIConfig {
++
++    private static final String DEFAULT_BASE_URL = "http://localhost:8080/J151-FINAL-BE/api";
++
++    private APIConfig() {
++    }
++
++    public static String getBaseUrl() {
++        String configuredUrl = firstNonBlank(
++                System.getProperty("api.base.url"),
++                System.getenv("TRYTONS_API_BASE_URL")
++        );
++
++        String baseUrl = configuredUrl == null ? DEFAULT_BASE_URL : configuredUrl;
++        return baseUrl.endsWith("/")
++                ? baseUrl.substring(0, baseUrl.length() - 1)
++                : baseUrl;
++    }
++
++    private static String firstNonBlank(String... values) {
++        for (String value : values) {
++            if (value != null && !value.isBlank()) {
++                return value.trim();
++            }
++        }
++        return null;
++    }
++}
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/WEB-INF/beans.xml" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/WEB-INF/beans.xml"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/WEB-INF/beans.xml"	1970-01-01 00:00:00.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/WEB-INF/beans.xml"	2026-07-13 21:13:52.705247469 +0000
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<beans xmlns="https://jakarta.ee/xml/ns/jakartaee"
++       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
++       xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/beans_4_0.xsd"
++       bean-discovery-mode="all"
++       version="4.0">
++</beans>
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/WEB-INF/glassfish-web.xml" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/WEB-INF/glassfish-web.xml"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/WEB-INF/glassfish-web.xml"	2026-07-09 13:03:37.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/WEB-INF/glassfish-web.xml"	2026-07-13 21:13:52.666853049 +0000
+@@ -1,25 +1,11 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<!--
+-    Copyright (c) 1997, 2018 Oracle and/or its affiliates. All rights reserved.
+-    
+-    This program and the accompanying materials are made available under the
+-    terms of the Eclipse Public License v. 2.0, which is available at
+-    http://www.eclipse.org/legal/epl-2.0.
+-
+-    This Source Code may also be made available under the following Secondary
+-    Licenses when the conditions for such availability set forth in the
+-    Eclipse Public License v. 2.0 are satisfied: GNU General Public License,
+-    version 2 with the GNU Classpath Exception, which is available at
+-    https://www.gnu.org/software/classpath/license.html.
+-
+-    SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
+--->
+-<!DOCTYPE glassfish-web-app PUBLIC "-//GlassFish.org//DTD GlassFish Application Server 3.1 Servlet 3.0//EN" "http://glassfish.org/dtds/glassfish-web-app_3_0-1.dtd">
+-<glassfish-web-app error-url="">
+-  <class-loader delegate="true"/>
+-  <jsp-config>
+-    <property name="keepgenerated" value="true">
+-      <description>Keep a copy of the generated servlet class' java code.</description>
+-    </property>
+-  </jsp-config>
+-</glassfish-web-app>
++<?xml version="1.0" encoding="UTF-8"?>
++<!DOCTYPE glassfish-web-app PUBLIC "-//GlassFish.org//DTD GlassFish Application Server 3.1 Servlet 3.0//EN" "http://glassfish.org/dtds/glassfish-web-app_3_0-1.dtd">
++<glassfish-web-app error-url="">
++    <context-root>/J151-FINAL-FE</context-root>
++    <class-loader delegate="true"/>
++    <jsp-config>
++        <property name="keepgenerated" value="true">
++            <description>Keep generated JSP servlet source for easier demo troubleshooting.</description>
++        </property>
++    </jsp-config>
++</glassfish-web-app>
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/WEB-INF/jspf/navigation.jspf" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/WEB-INF/jspf/navigation.jspf"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/WEB-INF/jspf/navigation.jspf"	2026-07-13 20:26:35.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/WEB-INF/jspf/navigation.jspf"	2026-07-13 21:10:49.841882889 +0000
+@@ -1,24 +1,23 @@
+-<%--
+-    <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+---%>
+-<nav id="mainNav">
+-    <a href="${pageContext.request.contextPath}/players?submit=players" id="navPlayersLink">Players</a>
+-    <a href="${pageContext.request.contextPath}/clubs?submit=clubs" id="navClubsLink">Clubs</a>
+-    <a href="${pageContext.request.contextPath}/transfers" id="navTransfersLink">Transfers</a>
+-    <a href="${pageContext.request.contextPath}/fixtures?submit=fixtures" id="navFixturesLink">Fixtures</a>
+-    <a href="${pageContext.request.contextPath}/admin/match-results" id="navMatchResultsLink">Match Results</a>
+-    <a href="${pageContext.request.contextPath}/history" id="navHistoryLink">History</a>
+-
+-    <c:choose>
+-        <c:when test="${not empty sessionScope.username}">
+-            <span id="navWelcome">Welcome, ${sessionScope.username}</span>
+-            <form action="${pageContext.request.contextPath}/logout" method="post" id="navLogoutForm">
+-                <button type="submit" name="submit" value="logout">Log out</button>
+-            </form>
+-        </c:when>
+-        <c:otherwise>
+-            <a href="${pageContext.request.contextPath}/pages/login.jsp" id="navLoginLink">Login</a>
+-            <a href="${pageContext.request.contextPath}/pages/register.jsp" id="navRegisterLink">Register</a>
+-        </c:otherwise>
+-    </c:choose>
+-</nav>
+\ No newline at end of file
++<%@ taglib prefix="c" uri="jakarta.tags.core" %>
++<nav id="mainNav" aria-label="Main navigation">
++    <a href="${pageContext.request.contextPath}/players?submit=players" id="navPlayersLink">Players</a>
++    <a href="${pageContext.request.contextPath}/clubs?submit=clubs" id="navClubsLink">Clubs</a>
++
++    <span title="This module is still being integrated for the final project.">Transfers (WIP)</span>
++    <span title="This module is still being integrated for the final project.">Fixtures (WIP)</span>
++    <span title="This module is still being integrated for the final project.">Leagues (WIP)</span>
++
++    <c:choose>
++        <c:when test="${not empty sessionScope.username}">
++            <span id="navWelcome">Welcome, ${sessionScope.username}</span>
++            <form action="${pageContext.request.contextPath}/logout" method="post" id="navLogoutForm" style="display:inline">
++                <button type="submit" name="submit" value="logout">Log out</button>
++            </form>
++        </c:when>
++        <c:otherwise>
++            <a href="${pageContext.request.contextPath}/login" id="navLoginLink">Login</a>
++            <a href="${pageContext.request.contextPath}/register" id="navRegisterLink">Register</a>
++        </c:otherwise>
++    </c:choose>
++</nav>
++<p role="note"><strong>Lecturer demo build:</strong> authentication, players, positions and clubs are active. Other modules remain work in progress.</p>
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/WEB-INF/web.xml" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/WEB-INF/web.xml"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/WEB-INF/web.xml"	1970-01-01 00:00:00.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/WEB-INF/web.xml"	2026-07-13 21:13:52.692779044 +0000
+@@ -0,0 +1,12 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
++         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
++         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
++         version="6.0">
++    <session-config>
++        <session-timeout>30</session-timeout>
++        <cookie-config>
++            <http-only>true</http-only>
++        </cookie-config>
++    </session-config>
++</web-app>
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/index.jsp" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/index.jsp"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/index.jsp"	1970-01-01 00:00:00.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/index.jsp"	2026-07-13 21:05:30.585860563 +0000
+@@ -0,0 +1,8 @@
++<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
++<%
++    if (session.getAttribute("userId") == null) {
++        response.sendRedirect(request.getContextPath() + "/login");
++    } else {
++        response.sendRedirect(request.getContextPath() + "/players?submit=players");
++    }
++%>
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/club.jsp" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/club.jsp"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/club.jsp"	1970-01-01 00:00:00.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/club.jsp"	2026-07-13 21:10:47.858892134 +0000
+@@ -0,0 +1,23 @@
++<%@ page contentType="text/html;charset=UTF-8" language="java" %>
++<%@ taglib prefix="c" uri="jakarta.tags.core" %>
++<!DOCTYPE html>
++<html lang="en">
++<head>
++    <meta charset="UTF-8">
++    <title>${club.clubName} - TryTons</title>
++</head>
++<body>
++<%@ include file="/WEB-INF/jspf/navigation.jspf" %>
++
++<main>
++    <p><a href="${pageContext.request.contextPath}/clubs?submit=clubs">&larr; Back to clubs</a></p>
++    <h1>${club.clubName}</h1>
++
++    <dl>
++        <dt>Location</dt><dd>${empty club.location ? 'Not supplied' : club.location}</dd>
++        <dt>Home venue</dt><dd>${empty club.homeVenue ? 'Not supplied' : club.homeVenue}</dd>
++        <dt>Status</dt><dd>${club.active ? 'Active' : 'Inactive'}</dd>
++    </dl>
++</main>
++</body>
++</html>
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/clubs.jsp" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/clubs.jsp"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/clubs.jsp"	2026-07-09 11:56:10.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/clubs.jsp"	2026-07-13 21:10:49.591197873 +0000
+@@ -1,61 +1,61 @@
+-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+-
+-<!DOCTYPE html>
+-<html>
+-<head>
+-    <meta charset="UTF-8">
+-    <title>Clubs - Fantasy TryTons</title>
+-</head>
+-<body>
+-<%@ include file="/WEB-INF/jspf/navigation.jspf" %>
+-
+-<h1>Clubs</h1>
+-
+-<c:if test="${not empty error}">
+-    <p class="error-message" role="alert">${error}</p>
+-</c:if>
+-
+-<form action="${pageContext.request.contextPath}/clubs" method="get" id="clubSearchForm">
+-    <input type="hidden" name="submit" value="clubs" />
+-    <input type="text" name="search" placeholder="Search club name"
+-           value="${searchTerm}" id="clubSearchInput" />
+-    <button type="submit">Search</button>
+-</form>
+-
+-<c:choose>
+-    <c:when test="${empty clubs}">
+-        <p id="clubsEmptyState">No clubs found matching your search.</p>
+-    </c:when>
+-    <c:otherwise>
+-        <table id="clubsTable">
+-            <thead>
+-            <tr>
+-                <th>Club Name</th>
+-                <th>Location</th>
+-                <th>Home Venue</th>
+-                <th>Status</th>
+-            </tr>
+-            </thead>
+-            <tbody>
+-            <c:forEach var="club" items="${clubs}">
+-                <tr>
+-                    <td>${club.clubName}</td>
+-                    <td>${club.location}</td>
+-                    <td>${club.homeVenue}</td>
+-                    <td>
+-                        <c:choose>
+-                            <c:when test="${club.active}">Active</c:when>
+-                            <c:otherwise>Inactive</c:otherwise>
+-                        </c:choose>
+-                    </td>
+-                </tr>
+-            </c:forEach>
+-            </tbody>
+-        </table>
+-    </c:otherwise>
+-</c:choose>
+-
+-<script src="${pageContext.request.contextPath}/assets/js/search-filter.js"></script>
+-</body>
++<%@ page contentType="text/html;charset=UTF-8" language="java" %>
++<%@ taglib prefix="c" uri="jakarta.tags.core" %>
++
++<!DOCTYPE html>
++<html>
++<head>
++    <meta charset="UTF-8">
++    <title>Clubs - Fantasy TryTons</title>
++</head>
++<body>
++<%@ include file="/WEB-INF/jspf/navigation.jspf" %>
++
++<h1>Clubs</h1>
++
++<c:if test="${not empty error}">
++    <p class="error-message" role="alert">${error}</p>
++</c:if>
++
++<form action="${pageContext.request.contextPath}/clubs" method="get" id="clubSearchForm">
++    <input type="hidden" name="submit" value="clubs" />
++    <input type="text" name="search" placeholder="Search club name"
++           value="${searchTerm}" id="clubSearchInput" />
++    <button type="submit">Search</button>
++</form>
++
++<c:choose>
++    <c:when test="${empty clubs}">
++        <p id="clubsEmptyState">No clubs found matching your search.</p>
++    </c:when>
++    <c:otherwise>
++        <table id="clubsTable">
++            <thead>
++            <tr>
++                <th>Club Name</th>
++                <th>Location</th>
++                <th>Home Venue</th>
++                <th>Status</th>
++            </tr>
++            </thead>
++            <tbody>
++            <c:forEach var="club" items="${clubs}">
++                <tr>
++                    <td><a href="${pageContext.request.contextPath}/club?submit=club&amp;clubId=${club.clubId}">${club.clubName}</a></td>
++                    <td>${club.location}</td>
++                    <td>${club.homeVenue}</td>
++                    <td>
++                        <c:choose>
++                            <c:when test="${club.active}">Active</c:when>
++                            <c:otherwise>Inactive</c:otherwise>
++                        </c:choose>
++                    </td>
++                </tr>
++            </c:forEach>
++            </tbody>
++        </table>
++    </c:otherwise>
++</c:choose>
++
++<script src="${pageContext.request.contextPath}/assets/js/search-filter.js"></script>
++</body>
+ </html>
+\ No newline at end of file
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/login.jsp" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/login.jsp"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/login.jsp"	2026-07-06 11:34:02.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/login.jsp"	2026-07-13 21:05:32.322176911 +0000
+@@ -1,57 +1,65 @@
+-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+-
+-<!DOCTYPE html>
+-<html lang="en">
+-<head>
+-<meta charset="UTF-8">
+-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>TryTons - Login</title>
+-</head>
+-
+-<body>
+-<main>
+-<h1>Login</h1>
+-<p>Please log in using your username or email address.</p>
+-
+-<%
+-  String errorMessage = (String) request.getAttribute("error");
+-  if (errorMessage != null && !errorMessage.isBlank()) {
+-%>
+-<p class="error-message" role="alert">
+-<%= errorMessage %>
+-</p>
+-<%
+-  }
+-%>
+-<form method="post" action="${pageContext.request.contextPath}/login">
+-<div>
+-<label for="identifier">Username or email address</label>
+-<input
+-      type="text"
+-      id="identifier"
+-      name="identifier"
+-      required
+-      autocomplete="username">
+-</div>
+-<br>
+-<div>
+-<label for="password">Password</label>
+-<input
+-type="password"
+-id="password"
+-name="password"
+-required
+-autocomplete="current-password">
+-</div>
+-<br>
+-<button type="submit" name="submit" value="login">Log in</button>
+-</form>
+-<p>
+-Don't have an account?
+-<a href="${pageContext.request.contextPath}/pages/register.jsp">
+-Register here my brodie, get cooking. You're missing all the action!
+-</a>.
+-</p>
+-</main>
+-</body>
++<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
++
++<!DOCTYPE html>
++<html lang="en">
++<head>
++<meta charset="UTF-8">
++<meta name="viewport" content="width=device-width, initial-scale=1.0">
++<title>TryTons - Login</title>
++</head>
++
++<body>
++<main>
++<h1>Login</h1>
++<p>Please log in using your username or email address.</p>
++
++<%
++  String successMessage = (String) request.getAttribute("message");
++  if (successMessage != null && !successMessage.isBlank()) {
++%>
++<p class="success-message" role="status"><%= successMessage %></p>
++<%
++  }
++%>
++<%
++  String errorMessage = (String) request.getAttribute("error");
++  if (errorMessage != null && !errorMessage.isBlank()) {
++%>
++<p class="error-message" role="alert">
++<%= errorMessage %>
++</p>
++<%
++  }
++%>
++<form method="post" action="${pageContext.request.contextPath}/login">
++<div>
++<label for="identifier">Username or email address</label>
++<input
++      type="text"
++      id="identifier"
++      name="identifier"
++      required
++      autocomplete="username">
++</div>
++<br>
++<div>
++<label for="password">Password</label>
++<input
++type="password"
++id="password"
++name="password"
++required
++autocomplete="current-password">
++</div>
++<br>
++<button type="submit" name="submit" value="login">Log in</button>
++</form>
++<p>
++Don't have an account?
++<a href="${pageContext.request.contextPath}/register">
++Register here my brodie, get cooking. You're missing all the action!
++</a>.
++</p>
++</main>
++</body>
+ </html>
+\ No newline at end of file
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/player.jsp" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/player.jsp"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/player.jsp"	1970-01-01 00:00:00.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/player.jsp"	2026-07-13 21:05:30.598273921 +0000
+@@ -0,0 +1,26 @@
++<%@ page contentType="text/html;charset=UTF-8" language="java" %>
++<%@ taglib prefix="c" uri="jakarta.tags.core" %>
++<!DOCTYPE html>
++<html lang="en">
++<head>
++    <meta charset="UTF-8">
++    <title>${player.playerName} - TryTons</title>
++</head>
++<body>
++<%@ include file="/WEB-INF/jspf/navigation.jspf" %>
++
++<main>
++    <p><a href="${pageContext.request.contextPath}/players?submit=players">&larr; Back to players</a></p>
++    <h1>${player.playerName}</h1>
++
++    <dl>
++        <dt>Club</dt><dd>${player.club.clubName}</dd>
++        <dt>Position</dt><dd>${player.position.positionName}</dd>
++        <dt>Value</dt><dd>${player.value}</dd>
++        <dt>Current form</dt><dd>${player.currentForm}</dd>
++        <dt>Fantasy points</dt><dd>${player.totalFantasyPoints}</dd>
++        <dt>Status</dt><dd>${player.active ? 'Active' : 'Inactive'}</dd>
++    </dl>
++</main>
++</body>
++</html>
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/players.jsp" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/players.jsp"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/players.jsp"	2026-07-06 11:34:12.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/players.jsp"	2026-07-13 21:05:32.324263646 +0000
+@@ -1,88 +1,88 @@
+-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+-
+-<!DOCTYPE html>
+-<html>
+-<head>
+-    <meta charset="UTF-8">
+-    <title>Players - Fantasy TryTons</title>
+-</head>
+-<body>
+-<%@ include file="/WEB-INF/jspf/navigation.jspf" %>
+-
+-<h1>Players</h1>
+-
+-<c:if test="${not empty error}">
+-    <p class="error-message" role="alert">${error}</p>
+-</c:if>
+-
+-<form action="${pageContext.request.contextPath}/players" method="get" id="playerSearchForm">
+-    <input type="hidden" name="submit" value="players" />
+-    <input type="text" name="search" placeholder="Search player name"
+-           value="${searchTerm}" id="playerSearchInput" />
+-
+-    <select name="clubId" id="clubFilter">
+-        <option value="">All Clubs</option>
+-        <c:forEach var="club" items="${clubs}">
+-            <option value="${club.clubId}"
+-                    ${club.clubId == selectedClubId ? 'selected' : ''}>
+-                    ${club.clubName}
+-            </option>
+-        </c:forEach>
+-    </select>
+-
+-    <select name="positionId" id="positionFilter">
+-        <option value="">All Positions</option>
+-        <c:forEach var="position" items="${positions}">
+-            <option value="${position.positionId}"
+-                    ${position.positionId == selectedPositionId ? 'selected' : ''}>
+-                    ${position.positionName}
+-            </option>
+-        </c:forEach>
+-    </select>
+-
+-    <button type="submit">Search</button>
+-</form>
+-
+-<c:choose>
+-    <c:when test="${empty players}">
+-        <p id="playersEmptyState">No players found matching your search.</p>
+-    </c:when>
+-    <c:otherwise>
+-        <table id="playersTable">
+-            <thead>
+-            <tr>
+-                <th>Name</th>
+-                <th>Club</th>
+-                <th>Position</th>
+-                <th>Value</th>
+-                <th>Form</th>
+-                <th>Fantasy Points</th>
+-                <th>Availability</th>
+-            </tr>
+-            </thead>
+-            <tbody>
+-            <c:forEach var="player" items="${players}">
+-                <tr>
+-                    <td>${player.playerName}</td>
+-                    <td>${player.club.clubName}</td>
+-                    <td>${player.position.positionName}</td>
+-                    <td>${player.value}</td>
+-                    <td>${player.currentForm}</td>
+-                    <td>${player.totalFantasyPoints}</td>
+-                    <td>
+-                        <c:choose>
+-                            <c:when test="${player.active}">Active</c:when>
+-                            <c:otherwise>Unavailable</c:otherwise>
+-                        </c:choose>
+-                    </td>
+-                </tr>
+-            </c:forEach>
+-            </tbody>
+-        </table>
+-    </c:otherwise>
+-</c:choose>
+-
+-<script src="${pageContext.request.contextPath}/assets/js/search-filter.js"></script>
+-</body>
++<%@ page contentType="text/html;charset=UTF-8" language="java" %>
++<%@ taglib prefix="c" uri="jakarta.tags.core" %>
++
++<!DOCTYPE html>
++<html>
++<head>
++    <meta charset="UTF-8">
++    <title>Players - Fantasy TryTons</title>
++</head>
++<body>
++<%@ include file="/WEB-INF/jspf/navigation.jspf" %>
++
++<h1>Players</h1>
++
++<c:if test="${not empty error}">
++    <p class="error-message" role="alert">${error}</p>
++</c:if>
++
++<form action="${pageContext.request.contextPath}/players" method="get" id="playerSearchForm">
++    <input type="hidden" name="submit" value="players" />
++    <input type="text" name="search" placeholder="Search player name"
++           value="${searchTerm}" id="playerSearchInput" />
++
++    <select name="clubId" id="clubFilter">
++        <option value="">All Clubs</option>
++        <c:forEach var="club" items="${clubs}">
++            <option value="${club.clubId}"
++                    ${club.clubId == selectedClubId ? 'selected' : ''}>
++                    ${club.clubName}
++            </option>
++        </c:forEach>
++    </select>
++
++    <select name="positionId" id="positionFilter">
++        <option value="">All Positions</option>
++        <c:forEach var="position" items="${positions}">
++            <option value="${position.positionId}"
++                    ${position.positionId == selectedPositionId ? 'selected' : ''}>
++                    ${position.positionName}
++            </option>
++        </c:forEach>
++    </select>
++
++    <button type="submit">Search</button>
++</form>
++
++<c:choose>
++    <c:when test="${empty players}">
++        <p id="playersEmptyState">No players found matching your search.</p>
++    </c:when>
++    <c:otherwise>
++        <table id="playersTable">
++            <thead>
++            <tr>
++                <th>Name</th>
++                <th>Club</th>
++                <th>Position</th>
++                <th>Value</th>
++                <th>Form</th>
++                <th>Fantasy Points</th>
++                <th>Availability</th>
++            </tr>
++            </thead>
++            <tbody>
++            <c:forEach var="player" items="${players}">
++                <tr>
++                    <td><a href="${pageContext.request.contextPath}/player?submit=player&amp;playerId=${player.playerId}">${player.playerName}</a></td>
++                    <td>${player.club.clubName}</td>
++                    <td>${player.position.positionName}</td>
++                    <td>${player.value}</td>
++                    <td>${player.currentForm}</td>
++                    <td>${player.totalFantasyPoints}</td>
++                    <td>
++                        <c:choose>
++                            <c:when test="${player.active}">Active</c:when>
++                            <c:otherwise>Unavailable</c:otherwise>
++                        </c:choose>
++                    </td>
++                </tr>
++            </c:forEach>
++            </tbody>
++        </table>
++    </c:otherwise>
++</c:choose>
++
++<script src="${pageContext.request.contextPath}/assets/js/search-filter.js"></script>
++</body>
+ </html>
+\ No newline at end of file
+diff -ruN '--exclude=.git' '--exclude=target' '--exclude=.idea' '--exclude=node_modules' '--exclude=nbproject/private' "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/register.jsp" "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/register.jsp"
+--- "/mnt/data/trytons_scan/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/register.jsp"	2026-07-06 11:34:02.000000000 +0000
++++ "/mnt/data/trytons_work/fe/Current project contents(FE)/FrontEnd/J151-FINAL-FE/src/main/webapp/pages/register.jsp"	2026-07-13 21:05:32.322857963 +0000
+@@ -1,66 +1,66 @@
+-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+-
+-<!DOCTYPE html>
+-<html lang="en">
+-<head>
+-<meta charset="UTF-8">
+-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>TryTons - Register</title>
+-</head>
+-
+-<body>
+-<main>
+-<h1>Register</h1>
+-<p>Please register a new account with your details.</p>
+-
+-<%
+-  String errorMessage = (String) request.getAttribute("error");
+-  if (errorMessage != null && !errorMessage.isBlank()) {
+-%>
+-<p class="error-message" role="alert">
+-<%= errorMessage %>
+-</p>
+-<%
+-  }
+-%>
+-<form method="post" action="${pageContext.request.contextPath}/register">
+-<div>
+-<label for="email">Email Address</label>
+-<input
+-      type="email"
+-      id="email"
+-      name="email"
+-      required>
+-</div>
+-<br>
+-<div>
+-<label for = "username">Username</label>
+-<input
+-      type="text"
+-      id="username"
+-      name="username"
+-      required>
+-</div>
+-
+-<br>
+-<div>
+-<label for="rawPassword">Password</label>
+-<input
+-type="password"
+-id="rawPassword"
+-name="rawPassword"
+-required
+-autocomplete="new-password">
+-</div>
+-<br>
+-<button type="submit" name="submit" value="register">Register</button>
+-</form>
+-<p>
+-Already have an account?
+-<a href="${pageContext.request.contextPath}/pages/login.jsp">
+-Login here my brodie, get cooking. You're missing all the action!
+-</a>.
+-</p>
+-</main>
+-</body>
++<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
++
++<!DOCTYPE html>
++<html lang="en">
++<head>
++<meta charset="UTF-8">
++<meta name="viewport" content="width=device-width, initial-scale=1.0">
++<title>TryTons - Register</title>
++</head>
++
++<body>
++<main>
++<h1>Register</h1>
++<p>Please register a new account with your details.</p>
++
++<%
++  String errorMessage = (String) request.getAttribute("error");
++  if (errorMessage != null && !errorMessage.isBlank()) {
++%>
++<p class="error-message" role="alert">
++<%= errorMessage %>
++</p>
++<%
++  }
++%>
++<form method="post" action="${pageContext.request.contextPath}/register">
++<div>
++<label for="email">Email Address</label>
++<input
++      type="email"
++      id="email"
++      name="email"
++      required>
++</div>
++<br>
++<div>
++<label for = "username">Username</label>
++<input
++      type="text"
++      id="username"
++      name="username"
++      required>
++</div>
++
++<br>
++<div>
++<label for="rawPassword">Password</label>
++<input
++type="password"
++id="rawPassword"
++name="rawPassword"
++required
++autocomplete="new-password">
++</div>
++<br>
++<button type="submit" name="submit" value="register">Register</button>
++</form>
++<p>
++Already have an account?
++<a href="${pageContext.request.contextPath}/login">
++Login here my brodie, get cooking. You're missing all the action!
++</a>.
++</p>
++</main>
++</body>
+ </html>
+\ No newline at end of file
