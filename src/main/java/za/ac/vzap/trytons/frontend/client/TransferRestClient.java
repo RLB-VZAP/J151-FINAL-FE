@@ -26,10 +26,8 @@ public class TransferRestClient {
             return Optional.empty();
         }
 
-        Optional<TransferResponse> response = apiClient.post(TRANSFERS_PATH, request, TransferResponse.class);
-        if (response.isEmpty()) {
-            LOG.log(Level.WARNING, "Unable to execute transfer.");
-        }
+        Optional<TransferResponse> response = apiClient.postForEnvelopeData(
+                TRANSFERS_PATH, request, new GenericType<ApiEnvelope<TransferResponse>>() {});
         return response;
     }
 
@@ -40,12 +38,9 @@ public class TransferRestClient {
         }
 
         String path = TRANSFERS_PATH + "/" + teamId + "/history";
-        Optional<List<TransferHistoryResponse>> response =
-                apiClient.getList(path, new GenericType<List<TransferHistoryResponse>>() {});
 
-        if (response.isEmpty()) {
-            LOG.log(Level.WARNING, "Unable to get transfer history.");
-        }
+        Optional<List<TransferHistoryResponse>> response = apiClient.getForEnvelopeData(
+                path, new GenericType<ApiEnvelope<List<TransferHistoryResponse>>>() {});
         return response;
     }
 

@@ -172,4 +172,50 @@ public class APIClient {
         LOG.log(Level.WARNING, "Backend request {0} returned HTTP {1}. {2}",
                 new Object[]{path, response.getStatus(), body});
     }
+
+    public <T> Optional<T> postForEnvelopeData(String path, Object body, GenericType<ApiEnvelope<T>> envelopeType) {
+        Client client = ClientBuilder.newClient();
+        try {
+            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
+            try (Response response = request(target).post(jsonEntity(body))) {
+                if (!isSuccessful(response)) {
+                    logBackendFailure(path, response);
+                    return Optional.empty();
+                }
+                if (response.getStatus() == Response.Status.NO_CONTENT.getStatusCode() || !response.hasEntity()) {
+                    return Optional.empty();
+                }
+                ApiEnvelope<T> envelope = response.readEntity(envelopeType);
+                return Optional.ofNullable(envelope == null ? null : envelope.getData());
+            }
+        } catch (ProcessingException e) {
+            LOG.log(Level.SEVERE, "POST " + path + " failed", e);
+            return Optional.empty();
+        } finally {
+            client.close();
+        }
+    }
+
+    public <T> Optional<T> getForEnvelopeData(String path, GenericType<ApiEnvelope<T>> envelopeType) {
+        Client client = ClientBuilder.newClient();
+        try {
+            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
+            try (Response response = request(target).get()) {
+                if (!isSuccessful(response)) {
+                    logBackendFailure(path, response);
+                    return Optional.empty();
+                }
+                if (!response.hasEntity()) {
+                    return Optional.empty();
+                }
+                ApiEnvelope<T> envelope = response.readEntity(envelopeType);
+                return Optional.ofNullable(envelope == null ? null : envelope.getData());
+            }
+        } catch (ProcessingException e) {
+            LOG.log(Level.SEVERE, "GET " + path + " failed", e);
+            return Optional.empty();
+        } finally {
+            client.close();
+        }
+    }
 }
