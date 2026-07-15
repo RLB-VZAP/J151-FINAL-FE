@@ -21,7 +21,7 @@ public class TransferRestClient {
     private APIClient apiClient;
 
     public Optional<TransferResponse> executeTransfer(TransferRequest request) {
-        if (!isValidTransferRequest(request)) {
+        if (!TransferRequestValidator.isValid(request)) {
             LOG.log(Level.WARNING, "Transfer request is invalid.");
             return Optional.empty();
         }
@@ -81,15 +81,6 @@ public class TransferRestClient {
             LOG.log(Level.WARNING, "Unable to get recommendation.");
         }
         return response;
-    }
-
-    private boolean isValidTransferRequest(TransferRequest request) {
-        return request != null
-                && !isBlank(request.getTeamId())
-                && !isBlank(request.getRoundId())
-                && !isBlank(request.getRemovedPlayerId())
-                && !isBlank(request.getAddedPlayerId())
-                && !request.getRemovedPlayerId().equals(request.getAddedPlayerId());
     }
 
     private boolean isBlank(String value) {
