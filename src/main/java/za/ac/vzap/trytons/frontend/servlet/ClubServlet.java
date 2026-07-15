@@ -6,106 +6,85 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import za.ac.vzap.trytons.frontend.client.ClubRequest;
 import za.ac.vzap.trytons.frontend.client.ClubResponse;
 import za.ac.vzap.trytons.frontend.client.ClubRestClient;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
-@WebServlet(name ="ClubServlet" , urlPatterns = {"/clubs","/club","/club/create","/club/update"})
+@WebServlet(name = "ClubServlet", urlPatterns = {"/clubs", "/club"})
 public class ClubServlet extends HttpServlet {
 
     @Inject
     private ClubRestClient clubRestClient;
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String submit = request.getParameter("submit");
-        if (submit == null) {
-            submit = "";
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String action = request.getParameter("submit");
+        if (action == null || action.isBlank()) {
+            action = "/club".equals(request.getServletPath()) ? "club" : "clubs";
         }
-        String destination = switch (submit){
-            case "clubs" -> {
-                String search = request.getParameter("search");
-                Optional<List<ClubResponse>> clubs = clubRestClient.listClubs();
-                if (clubs.isPresent()) {
-                    request.setAttribute("clubs", clubs.get());
-                } else {
-                    request.setAttribute("error", "Unable to load clubs");
-                    request.setAttribute("clubs", List.of());
-                }
-                request.setAttribute("searchTerm", search);
-                yield "/pages/clubs.jsp";
-            }
-            case "club"  -> {
-                Optional<UUID> clubId = parseUuid(request.getParameter("clubId"));
-                if (clubId.isEmpty()) {
-                    request.setAttribute("error", "Invalid or missing club id");
-                    yield "/pages/clubs.jsp";
-                }
-                Optional<ClubResponse> club = clubRestClient.getClubById(clubId.get());
-                if (club.isPresent()) {
-                    request.setAttribute("club", club.get());
-                    yield "/pages/club.jsp";
-                }
-                request.setAttribute("error", "Club not found");
-                yield "/pages/clubs.jsp";
-            }
-            default ->  "/index.jsp";
-        };
-        request.getRequestDispatcher(destination).forward(request, response);
-    }
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String submit = request.getParameter("submit");
-        if (submit == null) {
-            submit = "";
+        if ("club".equals(action)) {
+            showClub(request, response);
+        } else {
+            showClubs(request, response);
         }
-        String destination = switch (submit){
-            case "club/create" -> {
-                ClubRequest clubRequest = buildClubRequest(request);
-                Optional<ClubResponse> created = clubRestClient.createClub(clubRequest);
-                if (created.isPresent()) {
-                    yield reloadClubs(request);
-                }
-                request.setAttribute("error", "Unable to create club");
-                yield "/pages/club.jsp";
-            }
-            case "club/update" -> {
-                Optional<UUID> clubId = parseUuid(request.getParameter("clubId"));
-                if (clubId.isEmpty()) {
-                    request.setAttribute("error", "Invalid or missing club id");
-                    yield "/pages/club.jsp";
-                }
-                ClubRequest clubRequest = buildClubRequest(request);
-                Optional<ClubResponse> updated = clubRestClient.updateClub(clubId.get(), clubRequest);
-                if (updated.isPresent()) {
-                    yield reloadClubs(request);
-                }
-                request.setAttribute("error", "Unable to update club");
-                yield "/pages/club.jsp";
-            }
-            default ->  "/index.jsp";
-        };
-        request.getRequestDispatcher(destination).forward(request, response);
     }
 
-    private ClubRequest buildClubRequest(HttpServletRequest request) {
-        String clubName = request.getParameter("clubName");
-        String location = request.getParameter("location");
-        String homeVenue = request.getParameter("homeVenue");
-        boolean isActive = parseCheckbox(request.getParameter("isActive"));
-        return new ClubRequest(clubName, location, homeVenue, isActive);
+    private void showClubs(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String search = request.getParameter("search");
+        Optional<List<ClubResponse>> loadedClubs = clubRestClient.listClubs();
+        List<ClubResponse> clubs = loadedClubs.orElse(List.of());
+
+        if (search != null && !search.isBlank()) {
+            String term = search.trim().toLowerCase(Locale.ROOT);
+            clubs = clubs.stream()
+                    .filter(club -> containsIgnoreCase(club.getClubName(), term)
+                            || containsIgnoreCase(club.getLocation(), term)
+                            || containsIgnoreCase(club.getHomeVenue(), term))
+                    .toList();
+        }
+
+        if (loadedClubs.isEmpty()) {
+            request.setAttribute("error", "Unable to load clubs. Confirm that the backend and database are running.");
+        }
+
+        request.setAttribute("clubs", clubs);
+        request.setAttribute("searchTerm", search);
+        request.getRequestDispatcher("/pages/clubs.jsp").forward(request, response);
     }
 
-    private String reloadClubs(HttpServletRequest request) {
-        Optional<List<ClubResponse>> clubs = clubRestClient.listClubs();
-        request.setAttribute("clubs", clubs.orElse(List.of()));
-        return "/pages/clubs.jsp";
+    private void showClub(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        Optional<UUID> clubId = parseUuid(request.getParameter("clubId"));
+        if (clubId.isEmpty()) {
+            request.setAttribute("error", "Invalid or missing club ID.");
+            showClubs(request, response);
+            return;
+        }
+
+        Optional<ClubResponse> club = clubRestClient.getClubById(clubId.get());
+        if (club.isEmpty()) {
+            request.setAttribute("error", "Club was not found.");
+            showClubs(request, response);
+            return;
+        }
+
+        request.setAttribute("club", club.get());
+        request.getRequestDispatcher("/pages/club.jsp").forward(request, response);
+    }
+
+    private boolean containsIgnoreCase(String value, String lowerCaseTerm) {
+        return value != null && value.toLowerCase(Locale.ROOT).contains(lowerCaseTerm);
     }
 
     private Optional<UUID> parseUuid(String value) {
@@ -117,9 +96,5 @@ public class ClubServlet extends HttpServlet {
         } catch (IllegalArgumentException e) {
             return Optional.empty();
         }
-    }
-
-    private boolean parseCheckbox(String value) {
-        return "on".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value);
     }
 }

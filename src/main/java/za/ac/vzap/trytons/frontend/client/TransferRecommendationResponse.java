@@ -1,29 +1,74 @@
 package za.ac.vzap.trytons.frontend.client;
 
-import lombok.*;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-
 public class TransferRecommendationResponse {
+
     private List<RecommendedPlayer> recommendation;
 
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
+    public TransferRecommendationResponse() {
+    }
+
+    public TransferRecommendationResponse(List<RecommendedPlayer> recommendation) {
+        this.recommendation = recommendation;
+    }
+
+    public List<RecommendedPlayer> getRecommendation() {
+        return recommendation;
+    }
+
+    public void setRecommendation(List<RecommendedPlayer> recommendation) {
+        this.recommendation = recommendation;
+    }
+
     public static class RecommendedPlayer {
         private UUID playerId;
         private String playerName;
         private BigDecimal value;
         private String reason;
+
+        public RecommendedPlayer() {
+        }
+
+        public RecommendedPlayer(UUID playerId, String playerName, BigDecimal value, String reason) {
+            this.playerId = playerId;
+            this.playerName = playerName;
+            this.value = value;
+            this.reason = reason;
+        }
+
+        public UUID getPlayerId() {
+            return playerId;
+        }
+
+        public void setPlayerId(UUID playerId) {
+            this.playerId = playerId;
+        }
+
+        public String getPlayerName() {
+            return playerName;
+        }
+
+        public void setPlayerName(String playerName) {
+            this.playerName = playerName;
+        }
+
+        public BigDecimal getValue() {
+            return value;
+        }
+
+        public void setValue(BigDecimal value) {
+            this.value = value;
+        }
+
+        public String getReason() {
+            return reason;
+        }
+
+        public void setReason(String reason) {
+            this.reason = reason;
+        }
     }
 }

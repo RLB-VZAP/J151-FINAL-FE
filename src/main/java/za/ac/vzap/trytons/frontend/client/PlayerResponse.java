@@ -22,7 +22,6 @@ public class PlayerResponse {
     private boolean isActive;
     private ClubResponse club;
     private PositionResponse position;
-    private PlayerResponse player;
     private boolean isCaptain;
     private boolean isViceCaptain;
     private boolean isBench;
