@@ -12,6 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MatchResultRequest {
+    private UUID actorId;
     private UUID fixtureId;
     private int teamAScore;
     private int teamBScore;
