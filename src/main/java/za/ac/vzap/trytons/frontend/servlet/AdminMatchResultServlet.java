@@ -57,9 +57,16 @@ public class AdminMatchResultServlet extends HttpServlet {
         String fixtureId = request.getParameter("fixtureId");
         UUID fixtureUuid = parseUuid(fixtureId);
 
+        String actorId = request.getParameter("actorId");
+        UUID actorUuid = parseUuid(actorId);
+
         if (fixtureUuid == null) {
             request.setAttribute("error", "Please select a valid fixture before capturing a result");
             return;
+        }
+
+        if (actorUuid == null) {
+            request.setAttribute("error", "Actor Id can't be null");
         }
 
         int teamAScore = parseNonNegativeInt(request.getParameter("teamAScore"));
@@ -72,6 +79,7 @@ public class AdminMatchResultServlet extends HttpServlet {
 
         MatchResultRequest matchResultRequest = new MatchResultRequest();
         matchResultRequest.setFixtureId(fixtureUuid);
+        matchResultRequest.setActorId(actorUuid);
         matchResultRequest.setTeamAScore(teamAScore);
         matchResultRequest.setTeamBScore(teamBScore);
         matchResultRequest.setSimulationReason(request.getParameter("simulationReason"));
