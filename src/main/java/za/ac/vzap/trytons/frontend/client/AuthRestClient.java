@@ -11,7 +11,7 @@ public class AuthRestClient {
     private String LOGIN_PATH = "/auth/login";
     private String LOGOUT_PATH = "/auth/logout";
     private String STATUS_PATH = "/auth/status";
-    private String REGISTER_PATH = "/users";
+    private String REGISTER_PATH = "/auth/register";
 
     private static final Logger LOG = Logger.getLogger(AuthRestClient.class.getName());
     @Inject

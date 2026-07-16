@@ -10,33 +10,49 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 @Dependent
 public class ClubRestClient {
+    private String LIST_CLUBS = "/club";
+    private String GET_CLUB_BY_ID = "/club";
+    private String CREATE_CLUB = "/club";
+    private String UPDATE_CLUB = "/club";
 
-    private static final String CLUB_PATH = "/club";
     private static final Logger LOG = Logger.getLogger(ClubRestClient.class.getName());
 
     @Inject
     private APIClient apiClient;
 
     public Optional<List<ClubResponse>> listClubs() {
-        Optional<ClubResponse[]> response = apiClient.get(CLUB_PATH, ClubResponse[].class);
-        // TODO [W4-FE-FIXES-15]: "if (response.isEmpty()) log" boilerplate repeats ~12x across the six
-        //   populated RestClients — APIClient already logs backend failures, so this second-layer
-        //   logging is largely duplicate (representative marker; pattern recurs) (see W4-CR-FE-16)
-        if (response.isEmpty()) {
-            LOG.log(Level.WARNING, "Unable to load clubs.");
+        Optional<ClubResponse[]> response = apiClient.get(LIST_CLUBS, ClubResponse[].class);
+        if(response.isEmpty()){
+            LOG.log(Level.SEVERE, "Unable list Clubs");
         }
         return response.map(clubs -> new ArrayList<>(Arrays.asList(clubs)));
     }
 
     public Optional<ClubResponse> getClubById(UUID clubId) {
-        Optional<ClubResponse> response = apiClient.get(CLUB_PATH + "/" + clubId, ClubResponse.class);
-        if (response.isEmpty()) {
-            LOG.log(Level.WARNING, "Unable to find club {0}.", clubId);
+        String path = GET_CLUB_BY_ID + "/" + clubId;
+        Optional<ClubResponse> response = apiClient.get(path,ClubResponse.class);
+        if(response.isEmpty()){
+            LOG.log(Level.SEVERE, "Unable find Club");
         }
         return response;
     }
 
+    public Optional<ClubResponse> createClub(ClubRequest request){
+        Optional<ClubResponse> response = apiClient.post(CREATE_CLUB,request,ClubResponse.class);
+        if(response.isEmpty()){
+            LOG.log(Level.SEVERE, "Unable create Club");
+        }
+        return response;
+    }
+
+    public Optional<ClubResponse> updateClub(UUID clubId,ClubRequest request){
+        String path = UPDATE_CLUB + "/" + clubId;
+        Optional<ClubResponse> response = apiClient.put(path,request,ClubResponse.class);
+        if(response.isEmpty()){
+            LOG.log(Level.SEVERE, "Unable to update Club");
+        }
+        return response;
+    }
 }
