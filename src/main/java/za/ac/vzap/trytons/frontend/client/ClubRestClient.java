@@ -22,6 +22,9 @@ public class ClubRestClient {
 
     public Optional<List<ClubResponse>> listClubs() {
         Optional<ClubResponse[]> response = apiClient.get(CLUB_PATH, ClubResponse[].class);
+        // TODO [W4-FE-FIXES-15]: "if (response.isEmpty()) log" boilerplate repeats ~12x across the six
+        //   populated RestClients — APIClient already logs backend failures, so this second-layer
+        //   logging is largely duplicate (representative marker; pattern recurs) (see W4-CR-FE-16)
         if (response.isEmpty()) {
             LOG.log(Level.WARNING, "Unable to load clubs.");
         }

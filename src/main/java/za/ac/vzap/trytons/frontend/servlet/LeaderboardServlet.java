@@ -21,6 +21,10 @@ public class LeaderboardServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // TODO [W4-FE-FIXES-07]: leaderboard page never renders — all 8 branches (lines 29,36,41,44,
+        //   53,58,63,66,74) assign destination="/leaderboard.jsp" but the page lives at
+        //   /pages/leaderboard.jsp; also the `destination` variable is redundant (every branch sets
+        //   the same constant) — fold to a single "/pages/leaderboard.jsp" forward (see W4-CR-FE-01)
         String destination;
 
         //Request contains both 'leagueId' and 'teamId':
@@ -77,6 +81,9 @@ public class LeaderboardServlet extends HttpServlet {
     }
 
     //Credit goes to Jaunte Garcia for writing this helper method.
+    // TODO [W4-FE-FIXES-09]: parseUuid duplicated across 4 servlets (PlayerServlet, LeaderboardServlet,
+    //   ClubServlet, AdminMatchResultServlet) — extract one shared helper in util/ alongside APIConfig
+    //   (see W4-CR-FE-12)
     private Optional<UUID> parseUuid(String value) {
         if (value == null || value.isBlank()) {
             return Optional.empty();

@@ -9,6 +9,9 @@ import java.util.logging.Logger;
 
 @Dependent
 public class AdminMatchResultRestClient {
+    // TODO [W4-FE-FIXES-11]: wrong backend routes — client targets /match_result/{fixtureId} and
+    //   /match_player/{fixtureId} (constants lines 12-14); backend exposes /match-results
+    //   (POST /, GET /fixture/{fixtureId}) and /player-statistics — every call 404s (see W4-CR-FE-07)
     private String SUBMIT_MATCH_RESULT = "/match_result";
     private String GET_MATCH_RESULT = "/match_result";
     private String SUBMIT_PLAYER_RESULT = "/match_player";

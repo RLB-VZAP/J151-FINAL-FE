@@ -29,6 +29,8 @@ public class FixtureServlet extends HttpServlet {
             if (fixtures.isPresent()) {
                 request.setAttribute("fixtures", fixtures.get());
             } else {
+                // TODO [W4-FE-FIXES-06]: copy-pasted error message — says "Unable to load players" on a
+                //   fixtures-load failure; should reference fixtures (see W4-CR-FE-10)
                 request.setAttribute("error", "Unable to load players");
                 request.setAttribute("fixtures", List.of());
             }
@@ -49,6 +51,8 @@ public class FixtureServlet extends HttpServlet {
             request.setAttribute("error", "Fixture not found");
             yield "/pages/fixtures.jsp";
         }
+            // TODO [W4-FE-FIXES-06]: default branch forwards to /index.jsp so a plain GET /fixtures (no
+            //   ?submit=) never renders the fixtures page from its own URL (see W4-CR-FE-10)
             default -> "/index.jsp";
         };
         request.getRequestDispatcher(destination).forward(request, response);

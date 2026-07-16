@@ -12,6 +12,11 @@ public class TransferResponse {
     private String teamId;
     private String roundId;
 
+    // TODO [W4-FE-FIXES-25]: DTO field-casing drift — backend TransferResponseDTO serializes
+    //   snake_case keys (removed_player_id, added_player_id, ...) but these fields are camelCase, so
+    //   the removed/added player fields never populate from executeTransfer. It also declares no
+    //   penaltyApplied, remaining-budget, total-value, transfer-window, confirmedAt, or message fields;
+    //   align the model or add @JsonProperty (distinct from the envelope mismatch FIXES-26).
     private String removedPlayerId;
     private String removedPlayerName;
     private BigDecimal removedPlayerValue;

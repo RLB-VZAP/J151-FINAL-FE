@@ -87,6 +87,7 @@ public class ClubServlet extends HttpServlet {
         return value != null && value.toLowerCase(Locale.ROOT).contains(lowerCaseTerm);
     }
 
+    // TODO [W4-FE-FIXES-09]: duplicated parseUuid — extract shared util/ helper (see W4-CR-FE-12)
     private Optional<UUID> parseUuid(String value) {
         if (value == null || value.isBlank()) {
             return Optional.empty();

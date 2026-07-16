@@ -16,6 +16,8 @@ public class AdminFixtureServlet extends HttpServlet {
     @Inject
     private AdminFixtureRestClient adminFixtureRestClient;
 
+    // TODO [W4-FE-FIXES-01]: admin doGet forwards with no SessionAuthContext.isAuthenticated()/role gate
+    //   gate /admin/* on an authenticated admin before forwarding (see W4-CR-FE-05)
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

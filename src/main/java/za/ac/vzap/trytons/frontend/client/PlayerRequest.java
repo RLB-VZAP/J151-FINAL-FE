@@ -11,6 +11,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PlayerRequest {
+    // TODO [DTO-ALIGNMENT]: Align with PlayerRequestDTO: send clubId and positionId UUIDs,
+    //   not nested ClubResponse/PositionResponse objects, and remove totalFantasyPoints, which
+    //   is not accepted by the backend creation contract.
     private String playerName;
     private BigDecimal value;
     private int attackingAbility;

@@ -12,6 +12,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MatchResultRequest {
+    // TODO [DTO-ALIGNMENT]: Match MatchResultRequestDTO, which accepts only fixtureId,
+    //   teamAScore, and teamBScore. actorId and simulationReason are frontend-only fields that
+    //   should not be emitted in this endpoint's request body.
     private UUID actorId;
     private UUID fixtureId;
     private int teamAScore;

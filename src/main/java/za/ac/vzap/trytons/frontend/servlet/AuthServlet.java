@@ -78,7 +78,15 @@ public class AuthServlet extends HttpServlet {
         LoginResponse loggedInUser = loginResponse.get();
         authContext.signIn(loggedInUser);
 
+        // TODO [W4-FE-FIXES-04]: session ID not rotated on login (session fixation)
+        //   getSession(true) reuses any pre-existing (pre-auth) session; invalidate the old session
+        //   and create a fresh one before storing auth state (performLogout already invalidates)
+        //   (see W4-CR-FE-06)
         HttpSession session = request.getSession(true);
+        // TODO [W4-FE-FIXES-05]: auth state stored twice — SessionAuthContext.signIn() (line 79) plus
+        //   these five manual session.setAttribute copies (userId/username/email/role/authToken);
+        //   two parallel stores that can drift — make SessionAuthContext the single source
+        //   (see W4-CR-FE-15)
         session.setAttribute("userId", loggedInUser.getUserId());
         session.setAttribute("username", loggedInUser.getUsername());
         session.setAttribute("email", loggedInUser.getEmail());

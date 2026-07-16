@@ -18,6 +18,7 @@
 
 <form action="${pageContext.request.contextPath}/players" method="get" id="playerSearchForm">
     <input type="hidden" name="submit" value="players" />
+    <%-- TODO [W4-FE-FIXES-44]: raw `search` param echoed unescaped via value="${searchTerm}" (reflected XSS) and ${player.*} fields unescaped in the table (line 67+, stored XSS via admin data); session holds the backend JWT — use c:out/fn:escapeXml (see W4-CR-FE-04) --%>
     <input type="text" name="search" placeholder="Search player name"
            value="${searchTerm}" id="playerSearchInput" />
 

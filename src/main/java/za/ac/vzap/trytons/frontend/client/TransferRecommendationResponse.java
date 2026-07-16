@@ -6,6 +6,10 @@ import java.util.UUID;
 
 public class TransferRecommendationResponse {
 
+    // TODO [DTO-ALIGNMENT]: Align with TransferRecommendationResponseDTO: use teamId plus
+    //   `recommendations` (plural). Its RecommendedPlayerDTO also includes positionName, clubName,
+    //   currentForm, availabilityStatus, and replacesPlayerId, all missing from this nested model.
+
     private List<RecommendedPlayer> recommendation;
 
     public TransferRecommendationResponse() {

@@ -9,6 +9,7 @@
 
     <c:choose>
         <c:when test="${not empty sessionScope.username}">
+            <%-- TODO [W4-FE-FIXES-41]: session username rendered unescaped — stored XSS propagated to every page that includes this fragment; the sibling nav.jspf escapes the same value — use c:out/fn:escapeXml --%>
             <span id="navWelcome">Welcome, ${sessionScope.username}</span>
             <form action="${pageContext.request.contextPath}/logout" method="post" id="navLogoutForm" style="display:inline">
                 <button type="submit" name="submit" value="logout">Log out</button>
