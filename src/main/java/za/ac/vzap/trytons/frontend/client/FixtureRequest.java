@@ -5,20 +5,21 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.UUID;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class FixtureRequest {
-    // TODO [DTO-ALIGNMENT]: Match FixtureRequestDTO's UUID identifiers, LocalDate/LocalTime,
-    //   and FixtureStatus field before relying on this payload; this client model currently
-    //   serializes every contract value as String.
-    private String leagueId;
-    private String roundId;
-    private String teamAId;
-    private String teamBId;
-    private String fixtureDate;
-    private String fixtureTime;
+    private UUID leagueId;
+    private UUID roundId;
+    private UUID teamAId;
+    private UUID teamBId;
+    private LocalDate fixtureDate;
+    private LocalTime fixtureTime;
     private String fixtureStatus;
 
 }
