@@ -23,5 +23,5 @@ public class MatchResultResponse {
     private boolean approved;
     private boolean current;
     private LocalDateTime resultDate;
-    private LocalDateTime approvedAt;
+    private UUID approvedByAdminUserId;
 }
