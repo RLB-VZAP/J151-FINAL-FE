@@ -58,7 +58,7 @@ autocomplete="new-password">
 </form>
 <p>
 Already have an account?
-<a href="${pageContext.request.contextPath}/login">
+<a href="${pageContext.request.contextPath}/pages/login.jsp">
 Login here my brodie, get cooking. You're missing all the action!
 </a>.
 </p>

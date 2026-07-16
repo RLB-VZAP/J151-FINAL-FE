@@ -8,8 +8,10 @@ import java.util.logging.Logger;
 
 @Dependent
 public class AuthRestClient {
-    private static final String LOGIN_PATH = "/auth/login";
-    private static final String REGISTER_PATH = "/auth/register";
+    private String LOGIN_PATH = "/auth/login";
+    private String LOGOUT_PATH = "/auth/logout";
+    private String STATUS_PATH = "/auth/status";
+    private String REGISTER_PATH = "/users";
 
     private static final Logger LOG = Logger.getLogger(AuthRestClient.class.getName());
     @Inject
@@ -29,4 +31,13 @@ public class AuthRestClient {
         }
         return response;
     }
+    public boolean logout(){
+         apiClient.post(LOGOUT_PATH, null, Void.class);
+         return true;
+    }
+    public Optional<AuthStatusResponse> getAuthStatus(String requestingUserId){
+        String path = STATUS_PATH + "?requestingUserId=" + requestingUserId;
+        return apiClient.get(path, AuthStatusResponse.class);
+    }
+
 }

@@ -6,85 +6,131 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import za.ac.vzap.trytons.frontend.client.ClubRestClient;
-import za.ac.vzap.trytons.frontend.client.PlayerResponse;
-import za.ac.vzap.trytons.frontend.client.PlayerRestClient;
-import za.ac.vzap.trytons.frontend.client.PositionRestClient;
+import za.ac.vzap.trytons.frontend.client.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@WebServlet(name = "PlayerServlet", urlPatterns = {"/players", "/player"})
+@WebServlet(name ="PlayerServlet", urlPatterns = {"/players", "/player", "/player/create" , "/player/update"} )
 public class PlayerServlet extends HttpServlet {
-
     @Inject
     private PlayerRestClient playerRestClient;
-
     @Inject
     private ClubRestClient clubRestClient;
 
-    @Inject
-    private PositionRestClient positionRestClient;
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String submit = request.getParameter("submit");
+        if (submit == null) {
+            submit = "";
+        }
+        String destination = switch (submit){
+            case "players" -> {
+                String search = request.getParameter("search");
+                UUID clubId = parseUuid(request.getParameter("clubId")).orElse(null);
+                UUID positionId = parseUuid(request.getParameter("positionId")).orElse(null);
+                Optional<List<PlayerResponse>> players = playerRestClient.listPlayers(search, clubId, positionId);
+                if (players.isPresent()) {
+                    request.setAttribute("players", players.get());
+                } else {
+                    request.setAttribute("error", "Unable to load players");
+                    request.setAttribute("players", List.of());
+                }
+
+                Optional<List<ClubResponse>> clubs = clubRestClient.listClubs();
+                request.setAttribute("clubs", clubs.orElse(List.of()));
+                // NOTE: no PositionRestClient exists yet, so "positions" is not
+                // set here. players.jsp reads it defensively (EL null-safe) and
+                // will just show "All Positions" with no other options until
+                // a position REST client is added in a future ticket.
+                // - James
+
+                request.setAttribute("searchTerm", search);
+                request.setAttribute("selectedClubId", clubId);
+                request.setAttribute("selectedPositionId", positionId);
+
+                yield "/pages/players.jsp";
+            }
+            case "player" -> {
+                Optional<UUID> playerId = parseUuid(request.getParameter("playerId"));
+                if (playerId.isEmpty()) {
+                    request.setAttribute("error", "Invalid or missing player id");
+                    yield "/pages/players.jsp";
+                }
+                Optional<PlayerResponse> player = playerRestClient.getPlayer(playerId.get());
+                if (player.isPresent()) {
+                    request.setAttribute("player", player.get());
+                    yield "/pages/player.jsp";
+                }
+                request.setAttribute("error", "Player not found");
+                yield "/pages/players.jsp";
+            }
+            default -> "/index.jsp";
+        };
+        request.getRequestDispatcher(destination).forward(request, response);
+    }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        String action = request.getParameter("submit");
-        if (action == null || action.isBlank()) {
-            action = "/player".equals(request.getServletPath()) ? "player" : "players";
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String submit = request.getParameter("submit");
+        if (submit == null){
+            submit = "";
         }
+        String destination = switch (submit){
+            case "player/create" -> {
+                PlayerRequest playerRequest = buildPlayerRequest(request);
+                Optional<PlayerResponse> created = playerRestClient.createPlayer(playerRequest);
+                request.setAttribute("error", "Unable to create player");
+                yield "/pages/player.jsp";
+            }
+            case "player/update" -> {
+                Optional<UUID> playerId = parseUuid(request.getParameter("playerId"));
+                if (playerId.isEmpty()) {
+                    request.setAttribute("error", "Invalid or missing player id");
+                    yield "/pages/player.jsp";
+                }
+                PlayerRequest playerRequest = buildPlayerRequest(request);
+                Optional<PlayerResponse> updated = playerRestClient.updatePlayer(playerId.get(), playerRequest);
 
-        switch (action) {
-            case "player" -> showPlayer(request, response);
-            default -> showPlayers(request, response);
-        }
+                request.setAttribute("error", "Unable to update player");
+                yield "/pages/player.jsp";
+            }
+            default -> "/index.jsp";
+        };
+        request.getRequestDispatcher(destination).forward(request, response);
     }
 
-    private void showPlayers(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    private PlayerRequest buildPlayerRequest(HttpServletRequest request) {
+        PlayerRequest playerRequest = new PlayerRequest();
+        playerRequest.setPlayerName(request.getParameter("playerName"));
+        playerRequest.setValue(parseDecimal(request.getParameter("value")));
+        playerRequest.setAttackingAbility(parseInt(request.getParameter("attackingAbility")));
+        playerRequest.setDefensiveAbility(parseInt(request.getParameter("defensiveAbility")));
+        playerRequest.setKickingAbility(parseInt(request.getParameter("kickingAbility")));
+        playerRequest.setDiscipline(parseInt(request.getParameter("discipline")));
+        playerRequest.setConsistency(parseInt(request.getParameter("consistency")));
+        playerRequest.setFitness(parseInt(request.getParameter("fitness")));
+        playerRequest.setCurrentForm(parseInt(request.getParameter("currentForm")));
+        playerRequest.setTotalFantasyPoints(parseInt(request.getParameter("totalFantasyPoints")));
+        playerRequest.setActive(parseCheckbox(request.getParameter("isActive")));
 
-        String search = request.getParameter("search");
-        UUID clubId = parseUuid(request.getParameter("clubId")).orElse(null);
-        UUID positionId = parseUuid(request.getParameter("positionId")).orElse(null);
-
-        Optional<List<PlayerResponse>> players = playerRestClient.listPlayers(search, clubId, positionId);
-        request.setAttribute("players", players.orElse(List.of()));
-        if (players.isEmpty()) {
-            request.setAttribute("error", "Unable to load players. Confirm that the backend and database are running.");
-        }
-
-        request.setAttribute("clubs", clubRestClient.listClubs().orElse(List.of()));
-        request.setAttribute("positions", positionRestClient.listPositions().orElse(List.of()));
-        request.setAttribute("searchTerm", search);
-        request.setAttribute("selectedClubId", clubId);
-        request.setAttribute("selectedPositionId", positionId);
-
-        request.getRequestDispatcher("/pages/players.jsp").forward(request, response);
+        parseUuid(request.getParameter("clubId")).ifPresent(clubId -> {
+            ClubResponse club = new ClubResponse();
+            club.setClubId(clubId);
+            playerRequest.setClub(club);
+        });
+        parseUuid(request.getParameter("positionId")).ifPresent(positionId -> {
+            PositionResponse position = new PositionResponse();
+            position.setPositionId(positionId);
+            playerRequest.setPosition(position);
+        });
+        return playerRequest;
     }
 
-    private void showPlayer(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
 
-        Optional<UUID> playerId = parseUuid(request.getParameter("playerId"));
-        if (playerId.isEmpty()) {
-            request.setAttribute("error", "Invalid or missing player ID.");
-            showPlayers(request, response);
-            return;
-        }
-
-        Optional<PlayerResponse> player = playerRestClient.getPlayer(playerId.get());
-        if (player.isEmpty()) {
-            request.setAttribute("error", "Player was not found.");
-            showPlayers(request, response);
-            return;
-        }
-
-        request.setAttribute("player", player.get());
-        request.getRequestDispatcher("/pages/player.jsp").forward(request, response);
-    }
 
     // TODO [W4-FE-FIXES-09]: parseUuid duplicated across 4 servlets (PlayerServlet, LeaderboardServlet,
     //   ClubServlet, AdminMatchResultServlet) — extract one shared helper in util/ alongside APIConfig
@@ -100,4 +146,29 @@ public class PlayerServlet extends HttpServlet {
         }
     }
 
+    private int parseInt(String value) {
+        if (value == null || value.isBlank()) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private BigDecimal parseDecimal(String value) {
+        if (value == null || value.isBlank()) {
+            return BigDecimal.ZERO;
+        }
+        try {
+            return new BigDecimal(value.trim());
+        } catch (NumberFormatException e) {
+            return BigDecimal.ZERO;
+        }
+    }
+
+    private boolean parseCheckbox(String value) {
+        return "on".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value);
+    }
 }
