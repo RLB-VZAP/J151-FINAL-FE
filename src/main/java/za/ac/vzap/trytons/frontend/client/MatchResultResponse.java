@@ -9,6 +9,8 @@ import java.util.UUID;
 @Getter
 @Setter
 public class MatchResultResponse {
+    // TODO [DTO-ALIGNMENT]: Match MatchResultResponseDTO: replace approvedAt with UUID
+    //   approvedByAdminUserId and align winnerSide with the backend MatchTeamSide enum.
     private UUID resultId;
     private UUID fixtureId;
     private UUID teamAId;

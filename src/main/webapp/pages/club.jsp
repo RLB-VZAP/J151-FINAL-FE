@@ -4,6 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <%-- TODO [W4-FE-FIXES-33]: unescaped admin-supplied club data (${club.clubName} here and lines 14,17,18: name, location, homeVenue) — stored XSS; use c:out/fn:escapeXml --%>
     <title>${club.clubName} - TryTons</title>
 </head>
 <body>

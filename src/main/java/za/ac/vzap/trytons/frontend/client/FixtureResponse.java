@@ -6,6 +6,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FixtureResponse {
+    // TODO [DTO-ALIGNMENT]: Match FixtureResponseDTO's UUID/Java-time/FixtureStatus types and
+    //   add its createdAt field. The current all-String representation hides contract drift.
     private String fixtureId;
     private String leagueId;
     private String roundId;

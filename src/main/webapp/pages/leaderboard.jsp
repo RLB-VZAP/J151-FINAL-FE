@@ -30,6 +30,7 @@
             <c:forEach var="entry" items="${leaderboard}">
                 <tr>
                     <td>${entry.rank}</td>
+                    <%-- TODO [W4-FE-FIXES-38]: unescaped ${entry.teamName}/${entry.owner} (line 34) — user-chosen team name/username — stored XSS; use c:out/fn:escapeXml --%>
                     <td>${entry.teamName}</td>
                     <td>${entry.owner}</td>
                     <td>${entry.matchesPlayed}</td>
@@ -67,6 +68,7 @@
                 <td>${ranking.rank}</td>
                 <td>${ranking.teamName}</td>
                 <td>${ranking.owner}</td>
+                <%-- TODO [W4-FE-FIXES-39]: wrong loop variable in the single-ranking block — this c:if(not empty ranking) section reads ${entry.*} for the stat columns (matchesPlayed onward, line 70+) but only ${ranking} is in scope here, so every stat column renders blank; use ${ranking.*} --%>
                 <td>${entry.matchesPlayed}</td>
                 <td>${entry.matchesWon}</td>
                 <td>${entry.matchesDrawn}</td>

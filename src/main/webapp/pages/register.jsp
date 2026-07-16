@@ -18,6 +18,7 @@
   if (errorMessage != null && !errorMessage.isBlank()) {
 %>
 <p class="error-message" role="alert">
+<%-- TODO [W4-FE-FIXES-45]: errorMessage written via unescaped scriptlet <%= %> on the unauthenticated registration page — reflected XSS if a validation error echoes submitted email/username; escape output --%>
 <%= errorMessage %>
 </p>
 <%

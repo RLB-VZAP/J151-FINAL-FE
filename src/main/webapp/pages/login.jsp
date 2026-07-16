@@ -17,6 +17,7 @@
   String successMessage = (String) request.getAttribute("message");
   if (successMessage != null && !successMessage.isBlank()) {
 %>
+<%-- TODO [W4-FE-FIXES-40]: successMessage (line 20) and errorMessage (line 29) written via unescaped scriptlet <%= %> on an unauthenticated page — reflected XSS if the text ever echoes the submitted identifier; escape output --%>
 <p class="success-message" role="status"><%= successMessage %></p>
 <%
   }

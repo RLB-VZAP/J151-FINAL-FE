@@ -28,6 +28,9 @@ public class APIClient {
     private SessionAuthContext authContext;
 
     public <T> Optional<T> post(String path, Object body, Class<T> responseType) {
+        // TODO [W4-FE-FIXES-13]: a new JAX-RS Client is built and torn down on every HTTP call —
+        //   recurs in all six methods (lines 31,46,65,80,95,110); no connection pooling, full runtime
+        //   setup per request; use one @ApplicationScoped Client with WebTargets per call (see W4-CR-FE-13)
         Client client = ClientBuilder.newClient();
         try {
             WebTarget target = client.target(APIConfig.getBaseUrl() + path);
@@ -144,6 +147,10 @@ public class APIClient {
         return builder;
     }
 
+    // TODO [W4-FE-FIXES-14]: every non-2xx collapses to Optional.empty() — UI can't distinguish
+    //   400/404/409/500 and no error reason reaches the user (drives the silent failures of
+    //   FIXES-11/26/27/29); also logs response.getLocation() as "path" (nearly always null) —
+    //   pass the request path into handle() (see W4-CR-FE-09)
     private <T> Optional<T> handle(Response response, Class<T> responseType) {
         if (!isSuccessful(response)) {
             logBackendFailure(response.getLocation() == null ? "backend request" : response.getLocation().toString(), response);

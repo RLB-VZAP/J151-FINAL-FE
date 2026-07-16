@@ -22,6 +22,7 @@
                 String errorMessage = (String) request.getAttribute("error");
                 if (errorMessage != null && !errorMessage.isBlank()) {
             %>
+            <%-- TODO [W4-FE-FIXES-35]: error/validationErrors/message request attributes written via raw scriptlet <%= %> with no HTML escaping (lines 26, ~40, 52) — reflected XSS if any echoes user-submitted content; escape via c:out/fn:escapeXml --%>
             <p class="error-message" role="alert">
                 <%= errorMessage %>
             </p>

@@ -19,6 +19,7 @@
     <table id="fixtureDetailsTable">
         <tr>
             <th>Matchup</th>
+            <%-- TODO [W4-FE-FIXES-36]: unescaped user-chosen fantasy team names (${fixture.teamAName}/${fixture.teamBName}) — stored XSS; use c:out/fn:escapeXml --%>
             <td>${fixture.teamAName} vs ${fixture.teamBName}</td>
         </tr>
         <tr>

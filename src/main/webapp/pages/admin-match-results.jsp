@@ -48,6 +48,7 @@
                         <option value="">-- Choose a fixture --</option>
                         <c:forEach var="fixture" items="${fixtures}">
                             <option value="${fixture.fixtureId}" ${fixture.fixtureId eq selectedFixtureId ? 'selected' : ''}>
+                                <%-- TODO [W4-FE-FIXES-31]: unescaped ${fixture.teamAName}/${fixture.teamBName} (user-chosen names) — stored XSS; also ${playerStatistics.playerId} echoed unescaped at line ~190; use c:out/fn:escapeXml --%>
                                 ${fixture.teamAName} vs ${fixture.teamBName}
                                 <c:if test="${not empty fixture.fixtureDate}"> (${fixture.fixtureDate})</c:if>
                             </option>

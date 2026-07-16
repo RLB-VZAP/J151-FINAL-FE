@@ -6,6 +6,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class LockStatusResponse {
+    // TODO [DTO-ALIGNMENT]: Align with backend LockStatusResponseDTO. This class expects
+    //   transfer-window/deadline timestamp fields, while the backend sends lockedPlayerIds,
+    //   lockedTeamIds, and snapshotsCreated; callers therefore receive incomplete lock data.
     private String roundId;
     private String roundStatus;
     private String transferWindowStatus;

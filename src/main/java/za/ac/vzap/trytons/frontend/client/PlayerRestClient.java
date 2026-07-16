@@ -40,6 +40,13 @@ public class PlayerRestClient {
             path += "?" + String.join("&", parameters);
         }
 
+        // TODO [W4-FE-FIXES-23]: BLOCKED BY BACKEND — PlayerResource @Path("/{player}") and
+        //   LockStatusResource @Path("/{lock-status}") are catch-all templates (not literals), so
+        //   /player and /player/{id} can dispatch to the lock-status stub and 501; tripwire at the FE
+        //   call site, fix is backend-side literal @Path values (see W4-CR-BE-05)
+        // TODO [DTO-ALIGNMENT]: PlayerResource wraps both list and single-player responses in
+        //   ApiResponseDTO. Unwrap its data field before mapping PlayerResponse values; direct DTO
+        //   deserialization leaves successful player catalogue responses empty.
         Optional<PlayerResponse[]> response = apiClient.get(path, PlayerResponse[].class);
         if (response.isEmpty()) {
             LOG.log(Level.WARNING, "Unable to list players.");
@@ -48,6 +55,10 @@ public class PlayerRestClient {
     }
 
     public Optional<PlayerResponse> getPlayer(UUID playerId) {
+        // TODO [W4-FE-FIXES-23]: BLOCKED BY BACKEND — /player/{id} can dispatch to the lock-status stub
+        //   (catch-all @Path); tripwire, fix is backend-side literal @Path values (see W4-CR-BE-05)
+        // TODO [DTO-ALIGNMENT]: GET /player/{id} returns ApiResponseDTO, not a bare PlayerResponse;
+        //   unwrap data before returning the player detail.
         return apiClient.get(PLAYER_PATH + "/" + playerId, PlayerResponse.class);
     }
 

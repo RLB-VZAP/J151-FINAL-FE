@@ -86,6 +86,9 @@ public class PlayerServlet extends HttpServlet {
         request.getRequestDispatcher("/pages/player.jsp").forward(request, response);
     }
 
+    // TODO [W4-FE-FIXES-09]: parseUuid duplicated across 4 servlets (PlayerServlet, LeaderboardServlet,
+    //   ClubServlet, AdminMatchResultServlet) — extract one shared helper in util/ alongside APIConfig
+    //   (see W4-CR-FE-12)
     private Optional<UUID> parseUuid(String value) {
         if (value == null || value.isBlank()) {
             return Optional.empty();
