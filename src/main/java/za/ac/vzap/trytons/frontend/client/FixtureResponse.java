@@ -1,22 +1,29 @@
 package za.ac.vzap.trytons.frontend.client;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.UUID;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class FixtureResponse {
-    // TODO [DTO-ALIGNMENT]: Match FixtureResponseDTO's UUID/Java-time/FixtureStatus types and
-    //   add its createdAt field. The current all-String representation hides contract drift.
-    private String fixtureId;
-    private String leagueId;
-    private String roundId;
-    private String teamAId;
+    private UUID fixtureId;
+    private UUID leagueId;
+    private UUID roundId;
+    private UUID teamAId;
     private String teamAName;
-    private String teamBId;
+    private UUID teamBId;
     private String teamBName;
-    private String fixtureDate;
-    private String fixtureTime;
+    private LocalDate fixtureDate;
+    private LocalTime fixtureTime;
     private String fixtureStatus;
-    private String simulationDate;
+    private LocalDateTime simulationDate;
+    private LocalDateTime createdAt;
 }
