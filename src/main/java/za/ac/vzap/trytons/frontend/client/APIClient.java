@@ -21,14 +21,14 @@ public class APIClient {
     @Inject
     private SessionAuthContext authContext;
 
-    public<T> Optional<T> handle(Response response, Class<T> ResponseType) {
+    public<T> Optional<T> handle(Response response, Class<T> responseType) {
         int status = response.getStatus();
         if(status >= 200 && status < 300) {
-            if(ResponseType == Void.class || status == Response.Status.NO_CONTENT.getStatusCode()) {
+            if(responseType == Void.class || status == Response.Status.NO_CONTENT.getStatusCode()) {
 
                 return Optional.empty();
             }
-            return Optional.ofNullable(response.readEntity(ResponseType));
+            return Optional.ofNullable(response.readEntity(responseType));
         }
         LOG.log(Level.WARNING, "Backend returned status: {0}", status);
         return Optional.empty();
@@ -96,10 +96,10 @@ public class APIClient {
     }
 
     //Added method that accepts a GenericType (overloads the existing handle() method).
-    public <T>Optional<T> handleList(Response response, GenericType<T> ResponseGenericType) {
+    public <T>Optional<T> handleList(Response response, GenericType<T> responseGenericType) {
         int status = response.getStatus();
         if(status >= 200 && status < 300) {
-            return Optional.of(response.readEntity(ResponseGenericType));
+            return Optional.of(response.readEntity(responseGenericType));
         }
         LOG.log(Level.WARNING, "Backend returned status: {0}", status);
         return Optional.empty();

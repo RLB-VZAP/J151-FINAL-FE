@@ -47,7 +47,7 @@ public class AbstractServlet extends HttpServlet {
         try{
             return Optional.of(UUID.fromString(value.trim()));
         }catch(IllegalArgumentException e){
-            LOG.log(Level.WARNING, "Invalid UUID format: {0} " + value);
+            LOG.log(Level.WARNING, "Invalid UUID format: {0} " , value);
             return Optional.empty();
         }
     }
