@@ -1,14 +1,15 @@
 package za.ac.vzap.trytons.frontend.client;
 import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.ProcessingException;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.client.*;
 import jakarta.ws.rs.core.GenericType;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import za.ac.vzap.trytons.frontend.util.APIConfig;
+import za.ac.vzap.trytons.frontend.util.SessionAuthContext;
+
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,13 +18,17 @@ import java.util.logging.Logger;
 public class APIClient {
     private static final Logger LOG = Logger.getLogger(APIClient.class.getName());
 
+    @Inject
+    private SessionAuthContext authContext;
+
     public<T> Optional<T> handle(Response response, Class<T> ResponseType) {
         int status = response.getStatus();
         if(status >= 200 && status < 300) {
-            if(ResponseType == Void.class) {
+            if(ResponseType == Void.class || status == Response.Status.NO_CONTENT.getStatusCode()) {
+
                 return Optional.empty();
             }
-            return Optional.of(response.readEntity(ResponseType));
+            return Optional.ofNullable(response.readEntity(ResponseType));
         }
         LOG.log(Level.WARNING, "Backend returned status: {0}", status);
         return Optional.empty();
@@ -33,10 +38,10 @@ public class APIClient {
         Client client = ClientBuilder.newClient();
         try{
             WebTarget target = client.target(APIConfig.getBaseUrl() + path);
-            Response response = target.request()
-                    .accept(MediaType.APPLICATION_JSON)
-                    .post(Entity.json(body));
-            return handle(response, responseType);
+            try(Response response = request(target).post(Entity.json(body))){
+                return handle(response, responseType);
+            }
+
         }catch(Exception e){
             LOG.log(Level.SEVERE,"POST " + path + " failed", e);
             return Optional.empty();
@@ -49,10 +54,9 @@ public class APIClient {
         Client client = ClientBuilder.newClient();
         try{
             WebTarget target = client.target(APIConfig.getBaseUrl() + path);
-            Response response = target.request()
-                    .accept(MediaType.APPLICATION_JSON)
-                    .get();
-            return handle(response, responseType);
+            try(Response response = request(target).get();) {
+                return handle(response, responseType);
+            }
         }catch(ProcessingException e){
             LOG.log(Level.SEVERE,"GET " + path + " failed", e);
             return Optional.empty();
@@ -65,10 +69,9 @@ public class APIClient {
         Client client = ClientBuilder.newClient();
         try{
             WebTarget target = client.target(APIConfig.getBaseUrl() + path);
-            Response response = target.request()
-                    .accept(MediaType.APPLICATION_JSON)
-                    .post(Entity.json(body));
-            return handle(response, responseType);
+            try(Response response = request(target).put(Entity.json(body))){
+                return handle(response, responseType);
+            }
         }catch(ProcessingException e){
             LOG.log(Level.SEVERE,"PUT " + path + " failed", e);
             return Optional.empty();
@@ -81,10 +84,9 @@ public class APIClient {
         Client client = ClientBuilder.newClient();
         try{
             WebTarget target = client.target(APIConfig.getBaseUrl() + path);
-            Response response = target.request()
-                    .accept(MediaType.APPLICATION_JSON)
-                    .delete();
-            return handle(response, responseType);
+            try(Response response = request(target).delete()){
+                return handle(response, responseType);
+            }
         }catch(ProcessingException e){
             LOG.log(Level.SEVERE,"DELETE " + path + " failed", e);
             return Optional.empty();
@@ -108,15 +110,21 @@ public class APIClient {
         Client client = ClientBuilder.newClient();
         try{
             WebTarget target = client.target(APIConfig.getBaseUrl() + path);
-            Response response = target.request()
-                    .accept(MediaType.APPLICATION_JSON)
-                    .get();
-            return handleList(response, responseGenericType);
+            try(Response response = request(target).get()){
+                return handleList(response, responseGenericType);
+            }
         }catch(ProcessingException e){
             LOG.log(Level.SEVERE,"GET " + path + " failed", e);
             return Optional.empty();
         }finally {
             client.close();
         }
+    }
+    private Invocation.Builder request(WebTarget target) {
+        Invocation.Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE).accept(MediaType.APPLICATION_JSON_TYPE);
+        if(authContext != null && authContext.isAuthenticated()) {
+            builder.header(HttpHeaders.AUTHORIZATION, "Bearer " + authContext.getToken());
+        }
+        return builder;
     }
 }
