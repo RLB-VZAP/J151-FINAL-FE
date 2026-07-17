@@ -54,7 +54,7 @@ public class APIClient {
         Client client = ClientBuilder.newClient();
         try{
             WebTarget target = client.target(APIConfig.getBaseUrl() + path);
-            try(Response response = request(target).get();) {
+            try(Response response = request(target).get()) {
                 return handle(response, responseType);
             }
         }catch(ProcessingException e){
@@ -99,7 +99,7 @@ public class APIClient {
     public <T>Optional<T> handleList(Response response, GenericType<T> responseGenericType) {
         int status = response.getStatus();
         if(status >= 200 && status < 300) {
-            return Optional.of(response.readEntity(responseGenericType));
+            return Optional.ofNullable(response.readEntity(responseGenericType));
         }
         LOG.log(Level.WARNING, "Backend returned status: {0}", status);
         return Optional.empty();

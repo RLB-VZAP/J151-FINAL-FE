@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import za.ac.vzap.trytons.frontend.client.LoginResponse;
 import za.ac.vzap.trytons.frontend.util.SessionAuthContext;
 
 import java.io.IOException;
@@ -53,21 +54,13 @@ public class AbstractServlet extends HttpServlet {
     }
     //I think this was the biggest bug, this refreshes session attributes.
     // for login and token refresh
-    protected void syncSessionAttributes(HttpServletRequest req){
-        HttpSession session = req.getSession(false);
-        if(session == null || !authContext.isAuthenticated()) {
-            return;
+    protected void establishAuthenticatedSession(HttpServletRequest req, LoginResponse loginResponse){
+        HttpSession existingSession = req.getSession(false);
+        if(existingSession != null){
+            existingSession.invalidate();
         }
-        try{
-            session.setAttribute("userId", authContext.getUserId());
-            session.setAttribute("username", authContext.getUsername());
-            session.setAttribute("email", authContext.getEmail());
-            session.setAttribute("role", authContext.getRole());
-            session.setAttribute("authToken", authContext.getToken());
-            session.setAttribute("isAdmin", authContext.isAdmin());
-        }catch(Exception e){
-            LOG.log(Level.WARNING, "Failed to sync session attributes ",e);
-        }
+        req.getSession(true);
+        authContext.signIn(loginResponse);
     }
 
     //used for logout
@@ -75,12 +68,6 @@ public class AbstractServlet extends HttpServlet {
         authContext.clear();
         HttpSession session = req.getSession(false);
         if(session != null){
-            session.removeAttribute("userId");
-            session.removeAttribute("username");
-            session.removeAttribute("email");
-            session.removeAttribute("role");
-            session.removeAttribute("authToken");
-            session.removeAttribute("isAdmin");
             session.invalidate();
         }
     }
