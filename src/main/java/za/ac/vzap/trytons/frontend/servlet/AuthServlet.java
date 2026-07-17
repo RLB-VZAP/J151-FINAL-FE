@@ -7,127 +7,72 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import za.ac.vzap.trytons.frontend.client.AuthRestClient;
-import za.ac.vzap.trytons.frontend.client.LoginRequest;
-import za.ac.vzap.trytons.frontend.client.LoginResponse;
-import za.ac.vzap.trytons.frontend.client.RegisteredUserRequest;
-import za.ac.vzap.trytons.frontend.client.RegisteredUserResponse;
-import za.ac.vzap.trytons.frontend.session.SessionAuthContext;
+import za.ac.vzap.trytons.frontend.client.*;
 
 import java.io.IOException;
 import java.util.Optional;
 
-@WebServlet(name = "AuthServlet", urlPatterns = {"/login", "/register", "/logout"})
+
+@WebServlet (name = "AuthServlet" , urlPatterns = {"/login", "/register", "/logout"})
 public class AuthServlet extends HttpServlet {
 
     @Inject
     private AuthRestClient authRestClient;
 
-    @Inject
-    private SessionAuthContext authContext;
-
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String submit = request.getParameter("submit");
+        if (submit == null) {
+            submit = "";
+        }
+        String destination = switch (submit){
+            case "login" -> {
+                String identifier = request.getParameter("identifier");
+                String password = request.getParameter("password");
+                LoginRequest loginRequest = new LoginRequest(identifier, password);
+                Optional<LoginResponse> loginResponse = authRestClient.login(loginRequest);
+                if (loginResponse.isPresent()) {
+                    HttpSession session = request.getSession(true);
+                    session.setAttribute("userId",  loginResponse.get().getUserId() );
+                    session.setAttribute("username",  loginResponse.get().getUsername());
+                    session.setAttribute("role",  loginResponse.get().getRole());
+                    yield "registeredUser.jsp";
+                }else {
+                    request.setAttribute("error", "Invalid login credentials");
+                    yield "login.jsp";
+                }
 
-        switch (request.getServletPath()) {
-            case "/register" -> request.getRequestDispatcher("/pages/register.jsp").forward(request, response);
-            case "/logout" -> performLogout(request, response);
-            default -> {
-                if (authContext.isAuthenticated()) {
-                    response.sendRedirect(request.getContextPath() + "/players?submit=players");
+            }
+            case "register" ->{
+                String email       = request.getParameter("email");
+                String username    = request.getParameter("username");
+                String rawPassword = request.getParameter("rawPassword");
+                RegisteredUserRequest registerRequest = new RegisteredUserRequest(email, username, rawPassword);
+                Optional<RegisteredUserResponse> registerResponse = authRestClient.register(registerRequest);
+                if (registerResponse.isPresent()) {
+                    yield "login.jsp";
                 } else {
-                    request.getRequestDispatcher("/pages/login.jsp").forward(request, response);
+                    request.setAttribute("error", "Registration failed");
+                    yield "register.jsp";
                 }
             }
-        }
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        String action = request.getParameter("submit");
-        if (action == null || action.isBlank()) {
-            action = request.getServletPath().replace("/", "");
-        }
-
-        switch (action) {
-            case "login" -> login(request, response);
-            case "register" -> register(request, response);
-            case "logout" -> performLogout(request, response);
-            default -> response.sendRedirect(request.getContextPath() + "/login");
-        }
-    }
-
-    private void login(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        LoginRequest loginRequest = new LoginRequest(
-                request.getParameter("identifier"),
-                request.getParameter("password")
-        );
-
-        Optional<LoginResponse> loginResponse = authRestClient.login(loginRequest);
-        if (loginResponse.isEmpty() || loginResponse.get().getToken() == null) {
-            request.setAttribute("error", "Invalid login credentials or the backend is unavailable.");
-            request.getRequestDispatcher("/pages/login.jsp").forward(request, response);
-            return;
-        }
-
-        LoginResponse loggedInUser = loginResponse.get();
-        authContext.signIn(loggedInUser);
-
-        // TODO [W4-FE-FIXES-04]: session ID not rotated on login (session fixation)
-        //   getSession(true) reuses any pre-existing (pre-auth) session; invalidate the old session
-        //   and create a fresh one before storing auth state (performLogout already invalidates)
-        //   (see W4-CR-FE-06)
-        HttpSession session = request.getSession(true);
-        // TODO [W4-FE-FIXES-05]: auth state stored twice — SessionAuthContext.signIn() (line 79) plus
-        //   these five manual session.setAttribute copies (userId/username/email/role/authToken);
-        //   two parallel stores that can drift — make SessionAuthContext the single source
-        //   (see W4-CR-FE-15)
-        session.setAttribute("userId", loggedInUser.getUserId());
-        session.setAttribute("username", loggedInUser.getUsername());
-        session.setAttribute("email", loggedInUser.getEmail());
-        session.setAttribute("role", loggedInUser.getRole());
-        session.setAttribute("authToken", loggedInUser.getToken());
-
-        response.sendRedirect(request.getContextPath() + "/players?submit=players");
-    }
-
-    private void register(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        RegisteredUserRequest registerRequest = new RegisteredUserRequest(
-                request.getParameter("email"),
-                request.getParameter("username"),
-                request.getParameter("rawPassword")
-        );
-
-        Optional<RegisteredUserResponse> registerResponse = authRestClient.register(registerRequest);
-        if (registerResponse.isPresent()) {
-            request.setAttribute("message", "Registration successful. You can now log in.");
-            request.getRequestDispatcher("/pages/login.jsp").forward(request, response);
-            return;
-        }
-
-        request.setAttribute("error", "Registration failed. Check the details or try another email/username.");
-        request.getRequestDispatcher("/pages/register.jsp").forward(request, response);
-    }
-
-    private void performLogout(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        authContext.clear();
-
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.invalidate();
-        }
-        response.sendRedirect(request.getContextPath() + "/login");
+            case "logout" -> {
+                authRestClient.logout();
+                HttpSession session = request.getSession(false);
+                if (session != null) {
+                    session.invalidate();
+                }
+                yield "login.jsp";
+            }
+            default ->"index.jsp";
+        };
+        request.getRequestDispatcher(destination).forward(request, response);
     }
 
     @Override
     public String getServletInfo() {
-        return "Handles frontend registration, login and logout.";
+        return "Auth Servlet, handles login request and register request and logout request";
     }
+
 }
+

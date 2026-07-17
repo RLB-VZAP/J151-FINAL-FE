@@ -1,15 +1,26 @@
-package za.ac.vzap.trytons.frontend.session;
+package za.ac.vzap.trytons.frontend.util;
 
 import jakarta.enterprise.context.SessionScoped;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import za.ac.vzap.trytons.frontend.client.LoginResponse;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.UUID;
 
 @SessionScoped
+@Getter
+@Setter
+@NoArgsConstructor
+
 public class SessionAuthContext implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
+
+    private static final String ADMIN_ROLE = "ADMINISTRATOR";
 
     private UUID userId;
     private String username;
@@ -17,7 +28,11 @@ public class SessionAuthContext implements Serializable {
     private String role;
     private String token;
 
-    public void signIn(LoginResponse response) {
+    public void signIn(LoginResponse response){
+        if(response == null){
+            clear();
+            return;
+        }
         this.userId = response.getUserId();
         this.username = response.getUsername();
         this.email = response.getEmail();
@@ -25,7 +40,7 @@ public class SessionAuthContext implements Serializable {
         this.token = response.getToken();
     }
 
-    public void clear() {
+    public void clear(){
         userId = null;
         username = null;
         email = null;
@@ -33,27 +48,12 @@ public class SessionAuthContext implements Serializable {
         token = null;
     }
 
-    public boolean isAuthenticated() {
+    public boolean isAuthenticated(){
         return userId != null && token != null && !token.isBlank();
     }
 
-    public UUID getUserId() {
-        return userId;
+    public boolean isAdmin(){
+        return isAuthenticated() && ADMIN_ROLE.equalsIgnoreCase(role);
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public String getToken() {
-        return token;
-    }
 }

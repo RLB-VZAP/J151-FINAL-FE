@@ -26,6 +26,7 @@ public class PlayerResponse {
     //   (line 21) has no backend counterpart (always 0) — align with PlayerResponseDTO
     private ClubResponse club;
     private PositionResponse position;
+    private PlayerResponse player;
     private boolean isCaptain;
     private boolean isViceCaptain;
     private boolean isBench;
