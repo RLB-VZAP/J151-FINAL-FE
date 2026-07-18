@@ -49,11 +49,10 @@
             <tbody>
             <c:forEach var="fixture" items="${fixtures}">
                 <tr>
-                    <%-- TODO [W4-FE-FIXES-37]: unescaped user-chosen fantasy team names (${fixture.teamAName}/${fixture.teamBName}) — stored XSS; use c:out/fn:escapeXml --%>
-                    <td>${fixture.teamAName} vs ${fixture.teamBName}</td>
-                    <td>${fixture.fixtureDate}</td>
-                    <td>${fixture.fixtureTime}</td>
-                    <td>${fixture.fixtureStatus}</td>
+                    <td><c:out value="${fixture.teamAName}" /> vs <c:out value="${fixture.teamBName}" /></td>
+                                        <td>${fixture.fixtureDate}</td>
+                                        <td>${fixture.fixtureTime}</td>
+                                        <td>${fixture.fixtureStatus}</td>
                     <td>
                         <a href="${pageContext.request.contextPath}/fixture?submit=fixture&fixtureId=${fixture.fixtureId}"
                             id="fixtureLink-${fixture.fixtureId}">
