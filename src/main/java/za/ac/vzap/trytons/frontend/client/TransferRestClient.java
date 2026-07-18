@@ -21,7 +21,7 @@ public class TransferRestClient {
     private APIClient apiClient;
 
     public Optional<TransferResponse> executeTransfer(TransferRequest request) {
-        if (!TransferRequestValidator.isValid(request)) {
+        if (TransferRequestValidator.isValid(request)) {
             LOG.log(Level.WARNING, "Transfer request is invalid.");
             return Optional.empty();
         }

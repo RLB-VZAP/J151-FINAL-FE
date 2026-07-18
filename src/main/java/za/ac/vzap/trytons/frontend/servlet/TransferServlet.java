@@ -68,7 +68,7 @@ public class TransferServlet extends HttpServlet {
             case "", "transfer", "executeTransfer" -> {
                 TransferRequest transferRequest = buildTransferRequest(request);
 
-                if (!TransferRequestValidator.isValid(transferRequest)) {
+                if (TransferRequestValidator.isValid(transferRequest)) {
                     request.setAttribute("error", "Please select a valid player to remove and a different player to add");
                     loadTransferPage(request);
                     yield "/pages/transfers.jsp";
