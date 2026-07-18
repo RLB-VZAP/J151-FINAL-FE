@@ -1,16 +1,14 @@
 package za.ac.vzap.trytons.frontend.client;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
 @Setter
 public class MatchResultResponse {
-    // TODO [DTO-ALIGNMENT]: Match MatchResultResponseDTO: replace approvedAt with UUID
-    //   approvedByAdminUserId and align winnerSide with the backend MatchTeamSide enum.
     private UUID resultId;
     private UUID fixtureId;
     private UUID teamAId;
@@ -19,9 +17,11 @@ public class MatchResultResponse {
     private int teamAScore;
     private int teamBScore;
     private String winnerSide;
-    private boolean draw;
+    @JsonProperty("isDraw")
+    private boolean isDraw;
     private boolean approved;
-    private boolean current;
+    @JsonProperty("isCurrent")
+    private boolean isCurrent;
     private LocalDateTime resultDate;
     private UUID approvedByAdminUserId;
 }
