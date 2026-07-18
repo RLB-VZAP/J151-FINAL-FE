@@ -7,6 +7,7 @@ import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.glassfish.jersey.jackson.JacksonFeature;
 import za.ac.vzap.trytons.frontend.util.APIConfig;
 import za.ac.vzap.trytons.frontend.util.SessionAuthContext;
 
@@ -35,7 +36,7 @@ public class APIClient {
     }
 
     public <T> Optional<T> post(String path, Object body, Class<T> responseType) {
-        Client client = ClientBuilder.newClient();
+        Client client = ClientBuilder.newClient().register(JacksonFeature.class);
         try{
             WebTarget target = client.target(APIConfig.getBaseUrl() + path);
             try(Response response = request(target).post(Entity.json(body))){
@@ -51,7 +52,7 @@ public class APIClient {
     }
 
     public <T>Optional<T> get(String path, Class<T> responseType) {
-        Client client = ClientBuilder.newClient();
+        Client client = ClientBuilder.newClient().register(JacksonFeature.class);
         try{
             WebTarget target = client.target(APIConfig.getBaseUrl() + path);
             try(Response response = request(target).get()) {
@@ -66,7 +67,7 @@ public class APIClient {
     }
 
     public<T> Optional<T> put(String path, Object body, Class<T> responseType) {
-        Client client = ClientBuilder.newClient();
+        Client client = ClientBuilder.newClient().register(JacksonFeature.class);
         try{
             WebTarget target = client.target(APIConfig.getBaseUrl() + path);
             try(Response response = request(target).put(Entity.json(body))){
@@ -81,7 +82,7 @@ public class APIClient {
     }
 
     public<T> Optional<T> delete(String path, Class<T> responseType) {
-        Client client = ClientBuilder.newClient();
+        Client client = ClientBuilder.newClient().register(JacksonFeature.class);
         try{
             WebTarget target = client.target(APIConfig.getBaseUrl() + path);
             try(Response response = request(target).delete()){
@@ -107,7 +108,7 @@ public class APIClient {
 
     //Added method that accepts a GenericType (overloads the existing get() method).
     public <T>Optional<T> getList(String path, GenericType<T> responseGenericType) {
-        Client client = ClientBuilder.newClient();
+        Client client = ClientBuilder.newClient().register(JacksonFeature.class);
         try{
             WebTarget target = client.target(APIConfig.getBaseUrl() + path);
             try(Response response = request(target).get()){
