@@ -3,20 +3,18 @@ package za.ac.vzap.trytons.frontend.servlet;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import za.ac.vzap.trytons.frontend.client.ClubRequest;
 import za.ac.vzap.trytons.frontend.client.ClubResponse;
 import za.ac.vzap.trytons.frontend.client.ClubRestClient;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @WebServlet(name ="ClubServlet" , urlPatterns = {"/clubs","/club","/club/create","/club/update"})
-public class ClubServlet extends HttpServlet {
+public class ClubServlet extends AbstractServlet {
 
     @Inject
     private ClubRestClient clubRestClient;
@@ -61,6 +59,7 @@ public class ClubServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if(!requireAdmin(request, response)) return;
         String submit = request.getParameter("submit");
         if (submit == null) {
             submit = "";
@@ -108,17 +107,6 @@ public class ClubServlet extends HttpServlet {
         return "/pages/clubs.jsp";
     }
 
-    // TODO [W4-FE-FIXES-09]: duplicated parseUuid — extract shared util/ helper (see W4-CR-FE-12)
-    private Optional<UUID> parseUuid(String value) {
-        if (value == null || value.isBlank()) {
-            return Optional.empty();
-        }
-        try {
-            return Optional.of(UUID.fromString(value.trim()));
-        } catch (IllegalArgumentException e) {
-            return Optional.empty();
-        }
-    }
 
     private boolean parseCheckbox(String value) {
         return "on".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value);
