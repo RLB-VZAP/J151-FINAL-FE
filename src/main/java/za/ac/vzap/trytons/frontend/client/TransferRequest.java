@@ -5,14 +5,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class TransferRequest {
-    private String teamId;
-    private String roundId;
-    private String removedPlayerId;
-    private String addedPlayerId;
+    private UUID teamId;
+    private UUID roundId;
+    private UUID removedPlayerId;
+    private UUID addedPlayerId;
     private boolean penaltyConfirmed;
 }
