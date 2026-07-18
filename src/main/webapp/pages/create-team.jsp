@@ -1,6 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="java.util.List" %>
 <%@ page import="za.ac.vzap.trytons.frontend.client.PlayerResponse" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -18,43 +20,27 @@
             <h1>Create Team</h1>
             <p>Pick your players from the pool, keep an eye on your budget and give your team a name.</p>
 
-            <%
-                String errorMessage = (String) request.getAttribute("error");
-                if (errorMessage != null && !errorMessage.isBlank()) {
-            %>
-            <%-- TODO [W4-FE-FIXES-35]: error/validationErrors/message request attributes written via raw scriptlet <%= %> with no HTML escaping (lines 26, ~40, 52) — reflected XSS if any echoes user-submitted content; escape via c:out/fn:escapeXml --%>
+            <c:if test="${not empty error}">
             <p class="error-message" role="alert">
-                <%= errorMessage %>
+                <c:out value="${error}" />
             </p>
-            <%
-                }
-            %>
+            </c:if>
 
-            <%
-                List<String> validationErrors = (List<String>) request.getAttribute("validationErrors");
-                if (validationErrors != null && !validationErrors.isEmpty()) {
-            %>
+            <c:if test="${not empty validationErrors}">
             <div class="error-message" role="alert">
                 <ul>
-                    <% for (String validationError : validationErrors) { %>
-                    <li><%= validationError %></li>
-                    <% } %>
+                    <c:forEach var="validationError" items="${validationErrors}">
+                    <li><c:out value="${validationError}" /></li>
+                    </c:forEach>
                 </ul>
             </div>
-            <%
-                }
-            %>
+            </c:if>
 
-            <%
-                String successMessage = (String) request.getAttribute("message");
-                if (successMessage != null && !successMessage.isBlank()) {
-            %>
+            <c:if test="${not empty message}">
             <p class="success-message" role="status">
-                <%= successMessage %>
+                <c:out value="${message}" />
             </p>
-            <%
-                }
-            %>
+            </c:if>
 
             <%
                 if (session.getAttribute("userId") == null) {
@@ -76,8 +62,10 @@
                     if (squadSize == null) {
                         squadSize = "15";
                     }
+                    request.setAttribute("budget", budget);
+                    request.setAttribute("squadSize", squadSize);
             %>
-            <form method="post" action="${pageContext.request.contextPath}/create-team" id="createTeamForm" data-budget="<%= budget %>">
+            <form method="post" action="${pageContext.request.contextPath}/create-team" id="createTeamForm" data-budget="${fn:escapeXml(budget)}">
 
                 <section>
                     <h2>Player Pool</h2>
@@ -113,6 +101,9 @@
                                     }
                                     String clubName = p.getClub() == null ? "-" : p.getClub().getClubName();
                                     String positionName = p.getPosition() == null ? "-" : p.getPosition().getPositionName();
+                                    pageContext.setAttribute("player", p);
+                                    pageContext.setAttribute("clubName", clubName);
+                                    pageContext.setAttribute("positionName", positionName);
                             %>
                             <tr>
                                 <td>
@@ -120,13 +111,13 @@
                                         type="checkbox"
                                         name="playerIds"
                                         value="<%= p.getPlayerId() %>"
-                                        data-player-name="<%= p.getPlayerName() %>"
+                                        data-player-name="${fn:escapeXml(player.playerName)}"
                                         data-value="<%= p.getValue() %>"
                                         <%= p.isActive() ? "" : "disabled" %>>
                                 </td>
-                                <td><%= p.getPlayerName() %></td>
-                                <td><%= clubName %></td>
-                                <td><%= positionName %></td>
+                                <td><c:out value="${player.playerName}" /></td>
+                                <td><c:out value="${clubName}" /></td>
+                                <td><c:out value="${positionName}" /></td>
                                 <td>R <%= p.getValue() %></td>
                                 <td><%= p.isActive() ? "Available" : "Unavailable" %></td>
                             </tr>
@@ -140,10 +131,10 @@
 
                 <section>
                     <h2>Your Squad</h2>
-                    <p>Budget: <span id="budgetTotal">R <%= budget %></span></p>
+                    <p>Budget: <span id="budgetTotal">R ${fn:escapeXml(budget)}</span></p>
                     <p>Selected value: <span id="budgetUsed">R 0</span></p>
-                    <p>Remaining: <span id="budgetRemaining">R <%= budget %></span></p>
-                    <p>Players selected: <span><span id="selectedCount">0</span> / <%= squadSize %></span></p>
+                    <p>Remaining: <span id="budgetRemaining">R ${fn:escapeXml(budget)}</span></p>
+                    <p>Players selected: <span><span id="selectedCount">0</span> / ${fn:escapeXml(squadSize)}</span></p>
                     <p class="error-message" role="alert" id="overBudgetWarning" hidden>
                         You are over budget. You can still submit, but the server will reject an over-budget squad.
                     </p>
