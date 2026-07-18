@@ -3,7 +3,6 @@ package za.ac.vzap.trytons.frontend.servlet;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import za.ac.vzap.trytons.frontend.client.UserHistoryRestClient;
@@ -19,13 +18,14 @@ import java.util.Optional;
 // and forward to the history page.
 
 @WebServlet(name = "UserHistoryServlet", urlPatterns = {"/history"})
-public class UserHistoryServlet extends HttpServlet {
+public class UserHistoryServlet extends AbstractServlet {
 
     @Inject
     private UserHistoryRestClient userHistoryRestClient;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if(!requireAuthenticated(request, response)) return;
         String destination = "/pages/history.jsp";
 
         Optional<UserPointsHistoryResponse> pointsHistory = userHistoryRestClient.getUserPointsHistory();
