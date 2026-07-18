@@ -13,7 +13,8 @@ import java.util.UUID;
 @Builder
 
 public class TransferRecommendationResponse {
-    private List<RecommendedPlayer> recommendation;
+    private List<RecommendedPlayer> recommendations;
+    private UUID teamId;
 
     @Getter
     @Setter
@@ -23,7 +24,12 @@ public class TransferRecommendationResponse {
     public static class RecommendedPlayer {
         private UUID playerId;
         private String playerName;
+        private String positionName;
+        private String clubName;
         private BigDecimal value;
+        private int currentForm;
+        private String availabilityStatus;
+        private UUID replacesPlayerId;
         private String reason;
     }
 }
