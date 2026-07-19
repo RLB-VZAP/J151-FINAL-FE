@@ -3,11 +3,9 @@ package za.ac.vzap.trytons.frontend.servlet;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import za.ac.vzap.trytons.frontend.client.*;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,7 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @WebServlet(name ="PlayerServlet", urlPatterns = {"/players", "/player", "/player/create" , "/player/update"} )
-public class PlayerServlet extends HttpServlet {
+public class PlayerServlet extends AbstractServlet {
     @Inject
     private PlayerRestClient playerRestClient;
     @Inject
@@ -75,6 +73,7 @@ public class PlayerServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if(!requireAdmin(request, response)) return;
         String submit = request.getParameter("submit");
         if (submit == null){
             submit = "";
@@ -83,6 +82,10 @@ public class PlayerServlet extends HttpServlet {
             case "player/create" -> {
                 PlayerRequest playerRequest = buildPlayerRequest(request);
                 Optional<PlayerResponse> created = playerRestClient.createPlayer(playerRequest);
+                if(created.isPresent()){
+                    request.setAttribute("player", created.get());
+                    yield "/pages/player.jsp";
+                }
                 request.setAttribute("error", "Unable to create player");
                 yield "/pages/player.jsp";
             }
@@ -94,6 +97,10 @@ public class PlayerServlet extends HttpServlet {
                 }
                 PlayerRequest playerRequest = buildPlayerRequest(request);
                 Optional<PlayerResponse> updated = playerRestClient.updatePlayer(playerId.get(), playerRequest);
+                if(updated.isPresent()){
+                    request.setAttribute("player", updated.get());
+                    yield "/pages/player.jsp";
+                }
 
                 request.setAttribute("error", "Unable to update player");
                 yield "/pages/player.jsp";
@@ -114,36 +121,11 @@ public class PlayerServlet extends HttpServlet {
         playerRequest.setConsistency(parseInt(request.getParameter("consistency")));
         playerRequest.setFitness(parseInt(request.getParameter("fitness")));
         playerRequest.setCurrentForm(parseInt(request.getParameter("currentForm")));
-        playerRequest.setTotalFantasyPoints(parseInt(request.getParameter("totalFantasyPoints")));
         playerRequest.setActive(parseCheckbox(request.getParameter("isActive")));
 
-        parseUuid(request.getParameter("clubId")).ifPresent(clubId -> {
-            ClubResponse club = new ClubResponse();
-            club.setClubId(clubId);
-            playerRequest.setClub(club);
-        });
-        parseUuid(request.getParameter("positionId")).ifPresent(positionId -> {
-            PositionResponse position = new PositionResponse();
-            position.setPositionId(positionId);
-            playerRequest.setPosition(position);
-        });
+        parseUuid(request.getParameter("clubId")).ifPresent(playerRequest::setClubId);
+        parseUuid(request.getParameter("positionId")).ifPresent(playerRequest::setPositionId);
         return playerRequest;
-    }
-
-
-
-    // TODO [W4-FE-FIXES-09]: parseUuid duplicated across 4 servlets (PlayerServlet, LeaderboardServlet,
-    //   ClubServlet, AdminMatchResultServlet) — extract one shared helper in util/ alongside APIConfig
-    //   (see W4-CR-FE-12)
-    private Optional<UUID> parseUuid(String value) {
-        if (value == null || value.isBlank()) {
-            return Optional.empty();
-        }
-        try {
-            return Optional.of(UUID.fromString(value.trim()));
-        } catch (IllegalArgumentException e) {
-            return Optional.empty();
-        }
     }
 
     private int parseInt(String value) {

@@ -1,5 +1,6 @@
 package za.ac.vzap.trytons.frontend.client;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,7 @@ public class PlayerRequest {
     private int consistency;
     private int fitness;
     private int currentForm;
+    @JsonProperty("isActive")
     private boolean isActive;
     private UUID clubId;
     private UUID positionId;
