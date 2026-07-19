@@ -1,5 +1,6 @@
 package za.ac.vzap.trytons.frontend.client;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,5 +12,6 @@ public class ClubResponse {
     private String clubName;
     private String location;
     private String homeVenue;
+    @JsonProperty("isActive")
     private boolean isActive;
 }

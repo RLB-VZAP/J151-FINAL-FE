@@ -3,19 +3,23 @@ package za.ac.vzap.trytons.frontend.client;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 import lombok.Setter;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.UUID;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class FixtureRequest {
-    private String leagueId;
-    private String roundId;
-    private String teamAId;
-    private String teamBId;
-    private String fixtureDate;
-    private String fixtureTime;
+    private UUID leagueId;
+    private UUID roundId;
+    private UUID teamAId;
+    private UUID teamBId;
+    private LocalDate fixtureDate;
+    private LocalTime fixtureTime;
     private String fixtureStatus;
 
 }

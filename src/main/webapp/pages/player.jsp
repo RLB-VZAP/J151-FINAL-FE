@@ -4,6 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <%-- TODO [W4-FE-FIXES-43]: unescaped ${player.playerName} (title line 7 and <h1> line 14) — stored XSS via admin data; use c:out/fn:escapeXml --%>
     <title>${player.playerName} - TryTons</title>
 </head>
 <body>

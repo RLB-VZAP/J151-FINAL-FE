@@ -14,14 +14,6 @@
 <p>Please log in using your username or email address.</p>
 
 <%
-  String successMessage = (String) request.getAttribute("message");
-  if (successMessage != null && !successMessage.isBlank()) {
-%>
-<p class="success-message" role="status"><%= successMessage %></p>
-<%
-  }
-%>
-<%
   String errorMessage = (String) request.getAttribute("error");
   if (errorMessage != null && !errorMessage.isBlank()) {
 %>
@@ -56,7 +48,7 @@ autocomplete="current-password">
 </form>
 <p>
 Don't have an account?
-<a href="${pageContext.request.contextPath}/register">
+<a href="${pageContext.request.contextPath}/pages/register.jsp">
 Register here my brodie, get cooking. You're missing all the action!
 </a>.
 </p>

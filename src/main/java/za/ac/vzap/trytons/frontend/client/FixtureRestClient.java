@@ -2,36 +2,43 @@ package za.ac.vzap.trytons.frontend.client;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Dependent
 public class FixtureRestClient {
-    private String LIST_FIXTURE ="/fixtures";
-    private String GET_FIXTURE = "/fixtures";
+    private static final String FIXTURE_PATH = "/fixtures";
    private static final Logger LOG = Logger.getLogger(FixtureRestClient.class.getName());
 
     @Inject
     private APIClient apiClient;
+
     public Optional<List<FixtureResponse>> listFixtures(String statusFilter) {
-        StringBuilder path = new StringBuilder(LIST_FIXTURE);
-        if(statusFilter != null && !statusFilter.isEmpty()) {
-            path.append("?status=").append(statusFilter);
+        String path = FIXTURE_PATH;
+        if(statusFilter != null && !statusFilter.isBlank()) {
+            path += "?status=" + encode(statusFilter.trim());
         }
-        Optional<FixtureResponse[]> response = apiClient.get(path.toString(), FixtureResponse[].class);
+        Optional<FixtureResponse[]> response = apiClient.get(path, FixtureResponse[].class);
         if(response.isEmpty()){
-            LOG.log(Level.SEVERE, "Unable list fixtures");
+            LOG.log(Level.WARNING, "Unable list fixtures");
         }
         return response.map(fixtures -> new ArrayList<>(Arrays.asList(fixtures)));
     }
 
     public Optional<FixtureResponse> getFixture(String fixtureId) {
-        String path = GET_FIXTURE + "/" + fixtureId;
+        String path =FIXTURE_PATH + "/" + encode(fixtureId);
         Optional<FixtureResponse> response = apiClient.get(path,FixtureResponse.class);
         if(response.isEmpty()){
-            LOG.log(Level.SEVERE, "Unable find fixture");
+            LOG.log(Level.WARNING, "Unable find fixture");
         }
         return response;
+    }
+
+    public String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 }

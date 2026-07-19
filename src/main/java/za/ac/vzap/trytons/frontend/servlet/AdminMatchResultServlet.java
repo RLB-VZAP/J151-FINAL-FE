@@ -36,6 +36,10 @@ public class AdminMatchResultServlet extends HttpServlet {
         request.getRequestDispatcher(VIEW).forward(request, response);
     }
 
+    // TODO [W4-FE-FIXES-01]: admin action runs with no SessionAuthContext.isAuthenticated()/role gate
+    //   gate all /admin/* servlet entry points on an authenticated admin before doing work;
+    //   backend @Authenticated rejects it but the frontend must not reach the call unguarded
+    //   (see W4-CR-FE-05)
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
@@ -57,9 +61,20 @@ public class AdminMatchResultServlet extends HttpServlet {
         String fixtureId = request.getParameter("fixtureId");
         UUID fixtureUuid = parseUuid(fixtureId);
 
+        String actorId = request.getParameter("actorId");
+        UUID actorUuid = parseUuid(actorId);
+
         if (fixtureUuid == null) {
             request.setAttribute("error", "Please select a valid fixture before capturing a result");
             return;
+        }
+
+        // TODO [W4-FE-FIXES-02]: invalid actorId is silently accepted — sets "error" but falls through
+        //   unlike the fixtureUuid guard above (which returns), this branch continues and submits the
+        //   match result with actorUuid=null; a later success attribute overwrites the error message
+        //   so the user never learns the actor was dropped — return/short-circuit here
+        if (actorUuid == null) {
+            request.setAttribute("error", "Actor Id can't be null");
         }
 
         int teamAScore = parseNonNegativeInt(request.getParameter("teamAScore"));
@@ -72,6 +87,7 @@ public class AdminMatchResultServlet extends HttpServlet {
 
         MatchResultRequest matchResultRequest = new MatchResultRequest();
         matchResultRequest.setFixtureId(fixtureUuid);
+        matchResultRequest.setActorId(actorUuid);
         matchResultRequest.setTeamAScore(teamAScore);
         matchResultRequest.setTeamBScore(teamBScore);
         matchResultRequest.setSimulationReason(request.getParameter("simulationReason"));
@@ -161,6 +177,7 @@ public class AdminMatchResultServlet extends HttpServlet {
         }
     }
 
+    // TODO [W4-FE-FIXES-09]: duplicated parseUuid (non-Optional variant) — extract shared util/ helper (see W4-CR-FE-12)
     private UUID parseUuid(String value) {
         if (value == null || value.isBlank()) {
             return null;

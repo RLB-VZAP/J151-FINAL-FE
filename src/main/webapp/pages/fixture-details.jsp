@@ -12,14 +12,14 @@
 <h1>Fixture Details</h1>
 
 <c:if test="${not empty error}">
-    <p class="error-message" role="alert">${error}</p>
+    <p class="error-message" role="alert"><c:out value ="${error}" /></p>
 </c:if>
 
 <c:if test="${not empty fixture}">
     <table id="fixtureDetailsTable">
         <tr>
             <th>Matchup</th>
-            <td>${fixture.teamAName} vs ${fixture.teamBName}</td>
+            <td><c:out value="${fixture.teamAName}" /> vs <c:out value="${fixture.teamBName}" /></td>
         </tr>
         <tr>
             <th>Date</th>

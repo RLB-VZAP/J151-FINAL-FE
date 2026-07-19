@@ -1,8 +1,8 @@
 package za.ac.vzap.trytons.frontend.client;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -17,9 +17,11 @@ public class MatchResultResponse {
     private int teamAScore;
     private int teamBScore;
     private String winnerSide;
-    private boolean draw;
+    @JsonProperty("isDraw")
+    private boolean isDraw;
     private boolean approved;
-    private boolean current;
+    @JsonProperty("isCurrent")
+    private boolean isCurrent;
     private LocalDateTime resultDate;
-    private LocalDateTime approvedAt;
+    private UUID approvedByAdminUserId;
 }

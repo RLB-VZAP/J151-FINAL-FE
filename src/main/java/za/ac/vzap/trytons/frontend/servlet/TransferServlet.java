@@ -68,7 +68,7 @@ public class TransferServlet extends HttpServlet {
             case "", "transfer", "executeTransfer" -> {
                 TransferRequest transferRequest = buildTransferRequest(request);
 
-                if (!isValidTransferRequest(transferRequest)) {
+                if (TransferRequestValidator.isValid(transferRequest)) {
                     request.setAttribute("error", "Please select a valid player to remove and a different player to add");
                     loadTransferPage(request);
                     yield "/pages/transfers.jsp";
@@ -145,18 +145,6 @@ public class TransferServlet extends HttpServlet {
         transferRequest.setPenaltyConfirmed(parseCheckbox(request.getParameter("penaltyConfirmed")));
 
         return transferRequest;
-    }
-
-    private boolean isValidTransferRequest(TransferRequest transferRequest) {
-        return transferRequest.getTeamId() != null
-                && transferRequest.getRoundId() != null
-                && transferRequest.getRemovedPlayerId() != null
-                && transferRequest.getAddedPlayerId() != null
-                && !transferRequest.getTeamId().isBlank()
-                && !transferRequest.getRoundId().isBlank()
-                && !transferRequest.getRemovedPlayerId().isBlank()
-                && !transferRequest.getAddedPlayerId().isBlank()
-                && !transferRequest.getRemovedPlayerId().equals(transferRequest.getAddedPlayerId());
     }
 
     private String getTeamId(HttpServletRequest request) {

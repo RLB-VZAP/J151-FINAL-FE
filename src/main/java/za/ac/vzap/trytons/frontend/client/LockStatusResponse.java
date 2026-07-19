@@ -3,21 +3,22 @@ package za.ac.vzap.trytons.frontend.client;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+import java.util.UUID;
+
 @Getter
 @Setter
 public class LockStatusResponse {
-    private String roundId;
+
+    private UUID roundId;
+
     private String roundStatus;
-    private String transferWindowStatus;
 
-    private Boolean locked;
-    private Boolean deadlinePassed;
-    private Boolean transfersAllowed;
+    private List<UUID> lockedPlayerIds;
+    private List<UUID> lockedTeamIds;
 
-    private String lockDeadline;
-    private String deadlineAt;
-    private String lockedAt;
-    private String unlockAt;
+    private boolean locked;
+    private boolean snapshotsCreated;
 
     private String message;
 }

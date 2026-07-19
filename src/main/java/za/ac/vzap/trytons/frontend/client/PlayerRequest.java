@@ -4,13 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.math.BigDecimal;
+import java.util.UUID;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class PlayerRequest {
+
     private String playerName;
     private BigDecimal value;
     private int attackingAbility;
@@ -20,8 +22,7 @@ public class PlayerRequest {
     private int consistency;
     private int fitness;
     private int currentForm;
-    private int totalFantasyPoints;
     private boolean isActive;
-    private ClubResponse club;
-    private PositionResponse position;
+    private UUID clubId;
+    private UUID positionId;
 }

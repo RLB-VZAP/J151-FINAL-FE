@@ -18,10 +18,11 @@
 
 <form action="${pageContext.request.contextPath}/players" method="get" id="playerSearchForm">
     <input type="hidden" name="submit" value="players" />
+    <%-- TODO [W4-FE-FIXES-44]: raw `search` param echoed unescaped via value="${searchTerm}" (reflected XSS) and ${player.*} fields unescaped in the table (line 67+, stored XSS via admin data); session holds the backend JWT — use c:out/fn:escapeXml (see W4-CR-FE-04) --%>
     <input type="text" name="search" placeholder="Search player name"
            value="${searchTerm}" id="playerSearchInput" />
 
-    <select name="clubId" id="clubFilter" onchange="this.form.submit()">
+    <select name="clubId" id="clubFilter">
         <option value="">All Clubs</option>
         <c:forEach var="club" items="${clubs}">
             <option value="${club.clubId}"
@@ -31,7 +32,7 @@
         </c:forEach>
     </select>
 
-    <select name="positionId" id="positionFilter" onchange="this.form.submit()">
+    <select name="positionId" id="positionFilter">
         <option value="">All Positions</option>
         <c:forEach var="position" items="${positions}">
             <option value="${position.positionId}"
@@ -64,7 +65,7 @@
             <tbody>
             <c:forEach var="player" items="${players}">
                 <tr>
-                    <td><a href="${pageContext.request.contextPath}/player?submit=player&amp;playerId=${player.playerId}">${player.playerName}</a></td>
+                    <td>${player.playerName}</td>
                     <td>${player.club.clubName}</td>
                     <td>${player.position.positionName}</td>
                     <td>${player.value}</td>

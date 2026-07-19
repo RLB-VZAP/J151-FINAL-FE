@@ -15,5 +15,4 @@ public class MatchResultRequest {
     private UUID fixtureId;
     private int teamAScore;
     private int teamBScore;
-    private String simulationReason;
 }
