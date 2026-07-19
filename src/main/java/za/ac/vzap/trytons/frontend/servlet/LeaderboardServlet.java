@@ -3,7 +3,6 @@ package za.ac.vzap.trytons.frontend.servlet;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import za.ac.vzap.trytons.frontend.client.LeaderboardEntryResponse;
@@ -15,83 +14,57 @@ import java.util.Optional;
 import java.util.UUID;
 
 @WebServlet(name = "LeaderboardServlet", urlPatterns = {"/leaderboard"})
-public class LeaderboardServlet extends HttpServlet {
+public class LeaderboardServlet extends AbstractServlet {
     @Inject
     private LeaderboardRestClient leaderboardRestClient;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // TODO [W4-FE-FIXES-07]: leaderboard page never renders — all 8 branches (lines 29,36,41,44,
-        //   53,58,63,66,74) assign destination="/leaderboard.jsp" but the page lives at
-        //   /pages/leaderboard.jsp; also the `destination` variable is redundant (every branch sets
-        //   the same constant) — fold to a single "/pages/leaderboard.jsp" forward (see W4-CR-FE-01)
-        String destination;
+        if(!requireAuthenticated(request,response)) {
+            return;
+        }
 
         //Request contains both 'leagueId' and 'teamId':
         if (request.getParameter("leagueId") != null && request.getParameter("teamId") != null){
             request.setAttribute("error", "Invalid request");
-            destination = "/leaderboard.jsp";
 
             //Request contains 'leagueId':
         } else if (request.getParameter("leagueId") != null) {
             Optional<UUID> leagueId = parseUuid(request.getParameter("leagueId"));
             if (leagueId.isEmpty()){
                 request.setAttribute("error", "Invalid league ID");
-                destination = "/leaderboard.jsp";
             }else {
                 Optional<List<LeaderboardEntryResponse>> result = leaderboardRestClient.getLeaderboardForLeague(leagueId.get());
                 if (result.isPresent()) {
                     request.setAttribute("leaderboard", result.get());
-                    destination = "/leaderboard.jsp";
                 } else {
                     request.setAttribute("error", "No leaderboard found");
-                    destination = "/leaderboard.jsp";
                 }
             }
-
             //Request contains 'teamId':
         } else if (request.getParameter("teamId") != null) {
             Optional<UUID> teamId = parseUuid(request.getParameter("teamId"));
             if (teamId.isEmpty()){
                 request.setAttribute("error", "Invalid team ID");
-                destination = "/leaderboard.jsp";
             }else {
                 Optional<UUID> leaderboardId = parseUuid(request.getParameter("leaderboardId"));
                 if (leaderboardId.isEmpty()) {
                     request.setAttribute("error", "Invalid leaderboard ID");
-                    destination = "/leaderboard.jsp";
                 }else {
                     Optional<LeaderboardEntryResponse> result = leaderboardRestClient.getRankingForTeam(teamId.get(), leaderboardId.get());
                     if (result.isPresent()) {
                         request.setAttribute("ranking", result.get());
-                        destination =  "/leaderboard.jsp";
                     } else {
                         request.setAttribute("error", "No ranking found");
-                        destination = "/leaderboard.jsp";
                     }
                 }
             }
-
             //Request contains neither (leaderboard path with no parameters):
         }else {
             request.setAttribute("error", "Invalid request");
-            destination = "/leaderboard.jsp";
+
         }
-        request.getRequestDispatcher(destination).forward(request, response);
+        request.getRequestDispatcher("/pages/leaderboard.jsp").forward(request, response);
     }
 
-    //Credit goes to Jaunte Garcia for writing this helper method.
-    // TODO [W4-FE-FIXES-09]: parseUuid duplicated across 4 servlets (PlayerServlet, LeaderboardServlet,
-    //   ClubServlet, AdminMatchResultServlet) — extract one shared helper in util/ alongside APIConfig
-    //   (see W4-CR-FE-12)
-    private Optional<UUID> parseUuid(String value) {
-        if (value == null || value.isBlank()) {
-            return Optional.empty();
-        }
-        try {
-            return Optional.of(UUID.fromString(value.trim()));
-        } catch (IllegalArgumentException e) {
-            return Optional.empty();
-        }
-    }
 }

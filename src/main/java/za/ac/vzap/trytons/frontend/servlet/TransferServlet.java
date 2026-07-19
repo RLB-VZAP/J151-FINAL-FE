@@ -3,19 +3,17 @@ package za.ac.vzap.trytons.frontend.servlet;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import za.ac.vzap.trytons.frontend.client.*;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
+
 
 @WebServlet(name = "TransferServlet", urlPatterns = {"/transfers", "/transfers/history"})
-public class TransferServlet extends HttpServlet {
+public class TransferServlet extends AbstractServlet {
 
     @Inject
     private TransferRestClient transferRestClient;
@@ -25,6 +23,7 @@ public class TransferServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if(!requireAuthenticated(request, response)) return;
         String destination = switch (request.getServletPath()) {
             case "/transfers/history" -> {
                 String teamId = getTeamId(request);
@@ -59,6 +58,7 @@ public class TransferServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if(!requireAuthenticated(request, response)) return;
         String submit = request.getParameter("submit");
         if (submit == null) {
             submit = "";
@@ -122,8 +122,8 @@ public class TransferServlet extends HttpServlet {
 
         Optional<TransferRecommendationResponse> recommendations = transferRestClient.getTransferRecommendation(teamId, roundId);
 
-        if (recommendations.isPresent() && recommendations.get().getRecommendation() != null) {
-            request.setAttribute("transferRecommendations", recommendations.get().getRecommendation());
+        if (recommendations.isPresent() && recommendations.get().getRecommendations() != null) {
+            request.setAttribute("transferRecommendations", recommendations.get().getRecommendations());
         } else {
             request.setAttribute("transferRecommendations", List.of());
         }
@@ -138,10 +138,10 @@ public class TransferServlet extends HttpServlet {
     private TransferRequest buildTransferRequest(HttpServletRequest request) {
         TransferRequest transferRequest = new TransferRequest();
 
-        transferRequest.setTeamId(getTeamId(request));
-        transferRequest.setRoundId(getRoundId(request));
-        transferRequest.setRemovedPlayerId(request.getParameter("removedPlayerId"));
-        transferRequest.setAddedPlayerId(request.getParameter("addedPlayerId"));
+        parseUuid(getTeamId(request)).ifPresent(transferRequest::setTeamId);
+        parseUuid(getRoundId(request)).ifPresent(transferRequest::setRoundId);
+        parseUuid(request.getParameter("removedPlayerId")).ifPresent(transferRequest::setRemovedPlayerId);
+        parseUuid(request.getParameter("addedPlayerId")).ifPresent(transferRequest::setAddedPlayerId);
         transferRequest.setPenaltyConfirmed(parseCheckbox(request.getParameter("penaltyConfirmed")));
 
         return transferRequest;

@@ -3,10 +3,8 @@ package za.ac.vzap.trytons.frontend.servlet;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import za.ac.vzap.trytons.frontend.client.*;
 
 import java.io.IOException;
@@ -14,7 +12,7 @@ import java.util.Optional;
 
 
 @WebServlet (name = "AuthServlet" , urlPatterns = {"/login", "/register", "/logout"})
-public class AuthServlet extends HttpServlet {
+public class AuthServlet extends AbstractServlet {
 
     @Inject
     private AuthRestClient authRestClient;
@@ -32,14 +30,11 @@ public class AuthServlet extends HttpServlet {
                 LoginRequest loginRequest = new LoginRequest(identifier, password);
                 Optional<LoginResponse> loginResponse = authRestClient.login(loginRequest);
                 if (loginResponse.isPresent()) {
-                    HttpSession session = request.getSession(true);
-                    session.setAttribute("userId",  loginResponse.get().getUserId() );
-                    session.setAttribute("username",  loginResponse.get().getUsername());
-                    session.setAttribute("role",  loginResponse.get().getRole());
-                    yield "registeredUser.jsp";
+                    establishAuthenticatedSession(request,loginResponse.get());
+                    yield "/pages/register.jsp";
                 }else {
                     request.setAttribute("error", "Invalid login credentials");
-                    yield "login.jsp";
+                    yield "/pages/login.jsp";
                 }
 
             }
@@ -50,20 +45,18 @@ public class AuthServlet extends HttpServlet {
                 RegisteredUserRequest registerRequest = new RegisteredUserRequest(email, username, rawPassword);
                 Optional<RegisteredUserResponse> registerResponse = authRestClient.register(registerRequest);
                 if (registerResponse.isPresent()) {
-                    yield "login.jsp";
+                    yield "/pages/login.jsp";
                 } else {
                     request.setAttribute("error", "Registration failed");
-                    yield "register.jsp";
+                    yield "/pages/register.jsp";
                 }
             }
             case "logout" -> {
                 authRestClient.logout();
-                HttpSession session = request.getSession(false);
-                if (session != null) {
-                    session.invalidate();
+                clearAuthSession(request);
+                yield "/pages/login.jsp";
                 }
-                yield "login.jsp";
-            }
+
             default ->"index.jsp";
         };
         request.getRequestDispatcher(destination).forward(request, response);
