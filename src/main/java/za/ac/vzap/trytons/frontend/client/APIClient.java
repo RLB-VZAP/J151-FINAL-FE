@@ -9,6 +9,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import za.ac.vzap.trytons.frontend.util.APIConfig;
+import za.ac.vzap.trytons.frontend.util.ObjectMapperProvider;
 import za.ac.vzap.trytons.frontend.util.SessionAuthContext;
 
 import java.util.Optional;
@@ -36,63 +37,51 @@ public class APIClient {
     }
 
     public <T> Optional<T> post(String path, Object body, Class<T> responseType) {
-        Client client = ClientBuilder.newClient().register(JacksonFeature.class);
-        try{
+        try (Client client = ClientBuilder.newClient().register(JacksonFeature.class).register(ObjectMapperProvider.class)) {
             WebTarget target = client.target(APIConfig.getBaseUrl() + path);
-            try(Response response = request(target).post(Entity.json(body))){
+            try (Response response = request(target).post(Entity.json(body))) {
                 return handle(response, responseType);
             }
 
-        }catch(Exception e){
-            LOG.log(Level.SEVERE,"POST " + path + " failed", e);
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "POST " + path + " failed", e);
             return Optional.empty();
-        }finally {
-            client.close();
         }
     }
 
     public <T>Optional<T> get(String path, Class<T> responseType) {
-        Client client = ClientBuilder.newClient().register(JacksonFeature.class);
-        try{
+        try (Client client = ClientBuilder.newClient().register(JacksonFeature.class).register(ObjectMapperProvider.class)) {
             WebTarget target = client.target(APIConfig.getBaseUrl() + path);
-            try(Response response = request(target).get()) {
+            try (Response response = request(target).get()) {
                 return handle(response, responseType);
             }
-        }catch(ProcessingException e){
-            LOG.log(Level.SEVERE,"GET " + path + " failed", e);
+        } catch (ProcessingException e) {
+            LOG.log(Level.SEVERE, "GET " + path + " failed", e);
             return Optional.empty();
-        }finally {
-            client.close();
         }
     }
 
     public<T> Optional<T> put(String path, Object body, Class<T> responseType) {
-        Client client = ClientBuilder.newClient().register(JacksonFeature.class);
-        try{
+        try (Client client = ClientBuilder.newClient().register(JacksonFeature.class).register(ObjectMapperProvider.class)) {
             WebTarget target = client.target(APIConfig.getBaseUrl() + path);
-            try(Response response = request(target).put(Entity.json(body))){
+            try (Response response = request(target).put(Entity.json(body))) {
                 return handle(response, responseType);
             }
-        }catch(ProcessingException e){
-            LOG.log(Level.SEVERE,"PUT " + path + " failed", e);
+        } catch (ProcessingException e) {
+            LOG.log(Level.SEVERE, "PUT " + path + " failed", e);
             return Optional.empty();
-        }finally {
-            client.close();
         }
     }
 
     public<T> Optional<T> delete(String path, Class<T> responseType) {
-        Client client = ClientBuilder.newClient().register(JacksonFeature.class);
-        try{
+        try (Client client = ClientBuilder.newClient().register(JacksonFeature.class).register(ObjectMapperProvider.class)) {
             WebTarget target = client.target(APIConfig.getBaseUrl() + path);
-            try(Response response = request(target).delete()){
+            try (Response response = request(target).delete()) {
                 return handle(response, responseType);
             }
-        }catch(ProcessingException e){
-            LOG.log(Level.SEVERE,"DELETE " + path + " failed", e);
+        } catch (ProcessingException e) {
+            LOG.log(Level.SEVERE, "DELETE " + path + " failed", e);
             return Optional.empty();
-        }finally {
-            client.close();
         }
     }
 
@@ -108,17 +97,14 @@ public class APIClient {
 
     //Added method that accepts a GenericType (overloads the existing get() method).
     public <T>Optional<T> getList(String path, GenericType<T> responseGenericType) {
-        Client client = ClientBuilder.newClient().register(JacksonFeature.class);
-        try{
+        try (Client client = ClientBuilder.newClient().register(JacksonFeature.class).register(ObjectMapperProvider.class)) {
             WebTarget target = client.target(APIConfig.getBaseUrl() + path);
-            try(Response response = request(target).get()){
+            try (Response response = request(target).get()) {
                 return handleList(response, responseGenericType);
             }
-        }catch(ProcessingException e){
-            LOG.log(Level.SEVERE,"GET " + path + " failed", e);
+        } catch (ProcessingException e) {
+            LOG.log(Level.SEVERE, "GET " + path + " failed", e);
             return Optional.empty();
-        }finally {
-            client.close();
         }
     }
     private Invocation.Builder request(WebTarget target) {

@@ -25,10 +25,6 @@ public class TransferRestClient {
             LOG.log(Level.WARNING, "Transfer request is invalid.");
             return Optional.empty();
         }
-
-        // TODO [W4-FE-FIXES-26]: executeTransfer deserializes the POST /transfers response straight into
-        //   TransferResponse, but the backend wraps it in an ApiResponseDTO envelope — every field maps
-        //   null and the "Latest Transfer" panel renders blank despite success (see W4-CR-FE-02)
         Optional<TransferResponse> response = apiClient.post(TRANSFERS_PATH, request, TransferResponse.class);
         if (response.isEmpty()) {
             LOG.log(Level.WARNING, "Unable to execute transfer.");
@@ -45,9 +41,6 @@ public class TransferRestClient {
         // TODO [W4-FE-FIXES-17]: teamId concatenated into path unencoded — encode per
         //   PlayerRestClient.listPlayers pattern (see W4-CR-FE-08)
         String path = TRANSFERS_PATH + "/" + teamId + "/history";
-        // TODO [W4-FE-FIXES-27]: getTransferHistory reads a bare JSON array via GenericType<List<...>>,
-        //   but backend TransferResource.listTransferHistory wraps it in an ApiResponseDTO envelope
-        //   {"success","message","data":[...]} — history page always shows "Unable to load" (see W4-CR-FE-02)
         Optional<List<TransferHistoryResponse>> response =
                 apiClient.getList(path, new GenericType<List<TransferHistoryResponse>>() {});
 
@@ -57,9 +50,6 @@ public class TransferRestClient {
         return response;
     }
 
-    // TODO [W4-FE-FIXES-28]: BLOCKED BY BACKEND — getLockStatus calls GET /lock-status/{roundId},
-    //   which resolves to LockStatusResource (marked //stub) and always returns 501; this call can
-    //   never succeed until the backend lock-status endpoint is implemented
     public Optional<LockStatusResponse> getLockStatus(String roundId) {
         if (isBlank(roundId)) {
             LOG.log(Level.WARNING, "Round id is required to get lock status.");

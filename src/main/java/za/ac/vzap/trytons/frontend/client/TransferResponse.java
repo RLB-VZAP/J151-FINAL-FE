@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -25,6 +26,6 @@ public class TransferResponse {
     private int penaltyPoints;
 
     private String status;
-    private String transferDate;
-    private String confirmationDate;
+    private LocalDateTime transferDate;
+    private LocalDateTime confirmationDate;
 }
