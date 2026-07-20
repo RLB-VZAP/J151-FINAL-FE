@@ -4,8 +4,9 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.GenericType;
 
-import java.util.List;
-import java.util.Optional;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import za.ac.vzap.trytons.frontend.client.shared.APIClient;
@@ -15,7 +16,7 @@ import za.ac.vzap.trytons.frontend.client.fixture.LockStatusResponse;
 public class TransferRestClient {
     private static final String TRANSFERS_PATH = "/transfers";
     private static final String LOCK_STATUS_PATH = "/lock-status";
-    private static final String RECOMMENDATIONS_PATH = "/recommendations";
+    private static final String RECOMMENDATIONS_PATH = "/transfer-recommendations";
 
     private static final Logger LOG = Logger.getLogger(TransferRestClient.class.getName());
 
@@ -23,7 +24,7 @@ public class TransferRestClient {
     private APIClient apiClient;
 
     public Optional<TransferResponse> executeTransfer(TransferRequest request) {
-        if (TransferRequestValidator.isValid(request)) {
+        if (!TransferRequestValidator.isValid(request)) {
             LOG.log(Level.WARNING, "Transfer request is invalid.");
             return Optional.empty();
         }
@@ -34,22 +35,19 @@ public class TransferRestClient {
         return response;
     }
 
-    public Optional<List<TransferHistoryResponse>> getTransferHistory(String teamId) {
+    public Optional<List<TransferResponse>> getTransferHistory(String teamId) {
         if (isBlank(teamId)) {
             LOG.log(Level.WARNING, "Team id is required to get transfer history.");
             return Optional.empty();
         }
 
-        // TODO [W4-FE-FIXES-17]: teamId concatenated into path unencoded — encode per
-        //   PlayerRestClient.listPlayers pattern (see W4-CR-FE-08)
-        String path = TRANSFERS_PATH + "/" + teamId + "/history";
-        Optional<List<TransferHistoryResponse>> response =
-                apiClient.getList(path, new GenericType<List<TransferHistoryResponse>>() {});
+        String path = TRANSFERS_PATH + "/" + encode(teamId) + "/history";
+        Optional<TransferResponse[]> response = apiClient.get(path, TransferResponse[].class);
 
         if (response.isEmpty()) {
             LOG.log(Level.WARNING, "Unable to get transfer history.");
         }
-        return response;
+        return response.map(transfers -> new ArrayList<>(Arrays.asList(transfers)));
     }
 
     public Optional<LockStatusResponse> getLockStatus(String roundId) {
@@ -67,32 +65,30 @@ public class TransferRestClient {
         return response;
     }
 
-    public Optional<TransferRecommendationResponse> getTransferRecommendation(String teamId, String roundId) {
-        if(isBlank(teamId)){
-            LOG.log(Level.WARNING, "Team id is required to get recommendation.");
+    public Optional<TransferRecommendationResponse> getTransferRecommendation(String teamId, String currentPlayerId) {
+        if (isBlank(teamId)) {
+            LOG.log(Level.WARNING, "Team id is required to get transfer recommendation.");
             return Optional.empty();
         }
 
-        // TODO [W4-FE-FIXES-29]: no such backend route — GET /transfers/{teamId}/recommendations?roundId=
-        //   does not exist; the real endpoint is POST /transfer-recommendations with a
-        //   TransferRecommendationRequestDTO body; every load 404s and recommendations are silently
-        //   always empty (see W4-CR-FE-03)
-        String path = TRANSFERS_PATH + "/" + teamId + RECOMMENDATIONS_PATH;
-        if(roundId != null && !roundId.isBlank()){
-            // TODO [W4-FE-FIXES-17]: roundId concatenated into query unencoded — encode per
-            //   PlayerRestClient.listPlayers pattern (see W4-CR-FE-08)
-            path += "?roundId=" + roundId;
+        TransferRecommendationRequest request = new TransferRecommendationRequest();
+        request.setTeamId(UUID.fromString(teamId));
+        if(!isBlank(currentPlayerId)){
+            request.setCurrentPlayerId(UUID.fromString(currentPlayerId));
         }
 
-        Optional<TransferRecommendationResponse> response = apiClient.get(path, TransferRecommendationResponse.class);
-
-        if(response.isEmpty()){
-            LOG.log(Level.WARNING, "Unable to get recommendation.");
+        Optional<TransferRecommendationResponse> response = apiClient.post(RECOMMENDATIONS_PATH, request, TransferRecommendationResponse.class);
+        if(response.isEmpty()) {
+            LOG.log(Level.WARNING, "Unable to get transfer recommendation.");
         }
         return response;
     }
 
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
+    }
+
+    public String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 }
