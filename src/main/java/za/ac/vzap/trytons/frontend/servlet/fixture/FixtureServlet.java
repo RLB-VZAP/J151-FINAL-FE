@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
 
-@WebServlet(name ="FixtureServlet", urlPatterns = {"/fixtures", "/fixture"} )
+@WebServlet(name ="FixtureServlet", urlPatterns = {"/fixtures","/fixture","/fixture/create","/fixture/update"} )
 public class FixtureServlet extends AbstractServlet {
     @Inject
     private FixtureRestClient fixtureRestClient;
