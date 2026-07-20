@@ -136,33 +136,27 @@
                                 <td>
                                     <c:choose>
                                         <c:when test="${transfer.penaltyApplied}">
-                                            <c:choose>
-                                                <c:when test="${not empty transfer.penaltyPoints}">
-                                                    ${transfer.penaltyPoints} points
-                                                </c:when>
-                                                <c:otherwise>
-                                                    Penalty applied
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </c:when>
-                                        <c:otherwise>
-                                            No penalty
-                                        </c:otherwise>
-                                    </c:choose>
-                                </td>
-
                                 <td>
-                                    <c:choose>
-                                        <c:when test="${not empty transfer.status}">
-                                            ${transfer.status}
-                                        </c:when>
-                                        <c:when test="${not empty transfer.transferWindowStatus}">
-                                            ${transfer.transferWindowStatus}
-                                        </c:when>
-                                        <c:otherwise>
-                                            Unknown
-                                        </c:otherwise>
-                                    </c:choose>
+                                                                    <c:choose>
+                                                                        <c:when test="${transfer.penaltyPoints > 0}">
+                                                                            ${transfer.penaltyPoints} points
+                                                                        </c:when>
+                                                                        <c:otherwise>
+                                                                            No penalty
+                                                                        </c:otherwise>
+                                                                    </c:choose>
+                                                                </td>
+
+                                                                <td>
+                                                                    <c:choose>
+                                                                        <c:when test="${not empty transfer.status}">
+                                                                            ${transfer.status}
+                                                                        </c:when>
+                                                                        <c:otherwise>
+                                                                            Unknown
+                                                                        </c:otherwise>
+                                                                    </c:choose>
+                                                                </td>
 
                                     <c:if test="${not empty transfer.message}">
                                         <br>
