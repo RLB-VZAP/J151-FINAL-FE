@@ -31,12 +31,17 @@ public class FantasyTeamPlayerSelectionRequest {
     private Integer fitness;
     private Integer currentForm;
     private Integer totalFantasyPoints;
-    private Integer squadRole;
+    private String squadRole;
     @JsonProperty("isCaptain")
     private Boolean isCaptain;
     @JsonProperty("isViceCaptain")
     private Boolean isViceCaptain;
 
 
-
+    public FantasyTeamPlayerSelectionRequest(UUID playerId, String squadRole, boolean isCaptain, boolean isViceCaptain) {
+        this.playerId = playerId;
+        this.squadRole = squadRole;
+        this.isCaptain = isCaptain;
+        this.isViceCaptain = isViceCaptain;
+    }
 }
