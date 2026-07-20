@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpSession;
 import za.ac.vzap.trytons.frontend.client.fixture.LockStatusResponse;
 import za.ac.vzap.trytons.frontend.client.catalog.PlayerResponse;
 import za.ac.vzap.trytons.frontend.client.catalog.PlayerRestClient;
-import za.ac.vzap.trytons.frontend.client.transfer.TransferHistoryResponse;
 import za.ac.vzap.trytons.frontend.client.transfer.TransferRecommendationResponse;
 import za.ac.vzap.trytons.frontend.client.transfer.TransferRequest;
 import za.ac.vzap.trytons.frontend.client.transfer.TransferRequestValidator;
@@ -41,7 +40,7 @@ public class TransferServlet extends AbstractServlet {
                     request.setAttribute("error", "Team id is required to view transfer history");
                     request.setAttribute("history", List.of());
                 } else {
-                    Optional<List<TransferHistoryResponse>> history = transferRestClient.getTransferHistory(teamId);
+                    Optional<List<TransferResponse>> history = transferRestClient.getTransferHistory(teamId);
 
                     if (history.isPresent()) {
                         request.setAttribute("history", history.get());
@@ -77,7 +76,7 @@ public class TransferServlet extends AbstractServlet {
             case "", "transfer", "executeTransfer" -> {
                 TransferRequest transferRequest = buildTransferRequest(request);
 
-                if (TransferRequestValidator.isValid(transferRequest)) {
+                if (!TransferRequestValidator.isValid(transferRequest)) {
                     request.setAttribute("error", "Please select a valid player to remove and a different player to add");
                     loadTransferPage(request);
                     yield "/pages/transfers.jsp";
@@ -129,7 +128,7 @@ public class TransferServlet extends AbstractServlet {
 
         String teamId = getTeamId(request);
 
-        Optional<TransferRecommendationResponse> recommendations = transferRestClient.getTransferRecommendation(teamId, roundId);
+        Optional<TransferRecommendationResponse> recommendations = transferRestClient.getTransferRecommendation(teamId, null);
 
         if (recommendations.isPresent() && recommendations.get().getRecommendations() != null) {
             request.setAttribute("transferRecommendations", recommendations.get().getRecommendations());
