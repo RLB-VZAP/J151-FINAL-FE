@@ -3,6 +3,8 @@ package za.ac.vzap.trytons.frontend.client.catalog;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,7 +36,7 @@ public class PlayerRestClient {
     }
 
     public Optional<PlayerResponse> getPlayer(UUID playerId) {
-        String path = GET_PLAYER + "/" + playerId;
+        String path = GET_PLAYER + "/" + encode(playerId.toString());
         Optional<PlayerResponse> response = apiClient.get(path,PlayerResponse.class);
         if(response.isEmpty()){
             LOG.log(Level.SEVERE, "Unable find player");
@@ -51,11 +53,15 @@ public class PlayerRestClient {
     }
 
     public Optional<PlayerResponse> updatePlayer (UUID playerId , PlayerRequest request) {
-        String path = UPDATE_PLAYER + "/" + playerId;
+        String path = UPDATE_PLAYER + "/" + encode(playerId.toString());
         Optional<PlayerResponse> response = apiClient.put(path,request,PlayerResponse.class);
         if(response.isEmpty()){
             LOG.log(Level.SEVERE, "Unable to update player");
         }
         return response;
+    }
+
+    public String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 }
