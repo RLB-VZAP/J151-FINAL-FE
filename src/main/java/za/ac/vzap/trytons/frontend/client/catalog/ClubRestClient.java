@@ -3,6 +3,8 @@ package za.ac.vzap.trytons.frontend.client.catalog;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +34,7 @@ public class ClubRestClient {
     }
 
     public Optional<ClubResponse> getClubById(UUID clubId) {
-        String path = GET_CLUB_BY_ID + "/" + clubId;
+        String path = GET_CLUB_BY_ID + "/" + encode(clubId.toString());
         Optional<ClubResponse> response = apiClient.get(path,ClubResponse.class);
         if(response.isEmpty()){
             LOG.log(Level.SEVERE, "Unable find Club");
@@ -49,11 +51,14 @@ public class ClubRestClient {
     }
 
     public Optional<ClubResponse> updateClub(UUID clubId,ClubRequest request){
-        String path = UPDATE_CLUB + "/" + clubId;
+        String path = UPDATE_CLUB + "/" + encode(clubId.toString());
         Optional<ClubResponse> response = apiClient.put(path,request,ClubResponse.class);
         if(response.isEmpty()){
             LOG.log(Level.SEVERE, "Unable to update Club");
         }
         return response;
+    }
+    public String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 }
