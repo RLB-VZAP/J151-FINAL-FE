@@ -3,6 +3,8 @@ package za.ac.vzap.trytons.frontend.client.results;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,7 +28,7 @@ public class AdminMatchResultRestClient {
             LOG.log(Level.WARNING, "Fixture id and match result are required to submit a match result.");
             return Optional.empty();
         }
-        String path = SUBMIT_MATCH_RESULT + "/" + fixtureId;
+        String path = SUBMIT_MATCH_RESULT + "/" + encode(fixtureId);
         Optional<MatchResultResponse> response = apiClient.post(path, request, MatchResultResponse.class);
         if(response.isEmpty()){
             LOG.log(Level.SEVERE, "Unable to submit match result");
@@ -39,7 +41,7 @@ public class AdminMatchResultRestClient {
             LOG.log(Level.WARNING, "Fixture id and player statistics are required to submit player statistics.");
             return Optional.empty();
         }
-        String path = SUBMIT_PLAYER_RESULT + "/" + fixtureId;
+        String path = SUBMIT_PLAYER_RESULT + "/" + encode(fixtureId);
         Optional<PlayerStatisticsResponse> response = apiClient.post(path, request, PlayerStatisticsResponse.class);
         if(response.isEmpty()){
             LOG.log(Level.SEVERE, "Unable to submit player statistics");
@@ -52,11 +54,15 @@ public class AdminMatchResultRestClient {
             LOG.log(Level.WARNING, "Fixture id is required to get a match result.");
             return Optional.empty();
         }
-        String path = GET_MATCH_RESULT + "/" + fixtureId;
+        String path = GET_MATCH_RESULT + "/" + encode(fixtureId);
         Optional<MatchResultResponse> response = apiClient.get(path, MatchResultResponse.class);
         if(response.isEmpty()){
             LOG.log(Level.SEVERE, "Unable to get match result");
         }
         return response;
+    }
+
+    public String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 }
