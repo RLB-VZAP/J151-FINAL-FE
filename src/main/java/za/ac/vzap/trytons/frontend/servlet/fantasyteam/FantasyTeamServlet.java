@@ -6,13 +6,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import za.ac.vzap.trytons.frontend.client.catalog.ClubRestClient;
-import za.ac.vzap.trytons.frontend.client.fantasyteam.FantasyTeamRestClient;
+import za.ac.vzap.trytons.frontend.client.catalog.PlayerResponse;
+import za.ac.vzap.trytons.frontend.client.catalog.PositionRestClient;
+import za.ac.vzap.trytons.frontend.client.fantasyteam.*;
 import za.ac.vzap.trytons.frontend.client.catalog.PlayerRestClient;
-import za.ac.vzap.trytons.frontend.client.fantasyteam.ViewOwnTeamResponse;
-
 import java.io.IOException;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+
 import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
 
 @WebServlet(name = "FantasyTeamServlet", urlPatterns = {"/create-team", "/fantasy-team/own", "/fantasy-team/opponent", "/fantasy-team/update"})
@@ -27,18 +27,20 @@ public class FantasyTeamServlet extends AbstractServlet{
     private PlayerRestClient playerRestClient;
     @Inject
     private ClubRestClient clubRestClient;
+    @Inject
+    private PositionRestClient positionRestClient;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if(!requireAuthenticated(request, response)) return;
         String destination = switch (request.getServletPath()){
             case "/fantasy-team/own" ->{
-                Optional<String> teamName = Optional.ofNullable(request.getParameter("teamName"));
-                if(teamName.isEmpty()){
-                    request.setAttribute("error","Team name is required to view your team");
+                Optional<UUID> teamId = parseUuid(request.getParameter("teamId"));
+                if(teamId.isEmpty()){
+                    request.setAttribute("error","Team id is required to view your team");
                     yield VIEW_OWN_TEAM_JSP;
                 }
-                Optional<ViewOwnTeamResponse> team = fantasyTeamRestClient.viewOwnTeam(teamName.get());
+                Optional<ViewOwnTeamResponse> team = fantasyTeamRestClient.viewOwnTeam(teamId.get().toString());
                 if(team.isPresent()){
                     request.setAttribute("team",team.get());
                 }else{
@@ -46,16 +48,155 @@ public class FantasyTeamServlet extends AbstractServlet{
                 }
                 yield VIEW_OWN_TEAM_JSP;
             }
+            case "/fantasy-team/opponent" ->{
+                Optional<UUID> teamId = parseUuid(request.getParameter("teamId"));
+                if(teamId.isEmpty()){
+                    request.setAttribute("error","Team ID is required to view an opponent's team");
+                    yield VIEW_OPPONENT_TEAM_JSP;
+                }
+                Optional<ViewOpponentTeamResponse> team = fantasyTeamRestClient.viewOpponentTeam(UUID.fromString(request.getParameter("teamId")));
+                if(team.isPresent()){
+                    request.setAttribute("team",team.get());
+                }else{
+                    request.setAttribute("error","Unable to load that team");
+                }
+                yield VIEW_OPPONENT_TEAM_JSP;
+            }
             case "/fantasy-team/update" ->{
                 Optional<UUID> teamId = parseUuid(request.getParameter("teamId"));
                 if(teamId.isEmpty()){
-                    request.setAttribute("error","Team ID is required to edit a team");
+                    request.setAttribute("error","Team ID is required to update your team");
+                }else {
+                    fantasyTeamRestClient.viewOwnTeam(teamId.get().toString()).ifPresentOrElse(team -> request.setAttribute("team",team),() -> request.setAttribute("error","Unable to update your team"));
+                    request.setAttribute("team",teamId.get());
                 }
-                yield VIEW_OPPONENT_TEAM_JSP;//this is wrong just need to finish to push.
+                loadPlayerOptions(request);
+                yield CREATE_TEAM_JSP;
             }
-            default -> throw new IllegalStateException("Unexpected value: " + request.getServletPath());
-        };
 
+            default -> {
+                loadPlayerOptions(request);
+                yield CREATE_TEAM_JSP;
+            }
+        };
+        request.getRequestDispatcher(destination).forward(request, response);
+
+    }
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if(!requireAuthenticated(request, response)) return;
+        String submit = request.getParameter("submit");
+        if(submit == null){
+            submit = "";
+        }
+        switch(submit){
+            case"","create-team" -> handleCreateTeam(request);
+            case "update-team" -> handleUpdateTeam(request);
+            default -> request.setAttribute("error","Invalid submit");
+        }
+        request.getRequestDispatcher(CREATE_TEAM_JSP).forward(request, response);
+
+    }
+
+    private void handleCreateTeam(HttpServletRequest request){
+        List<String> validationErrors = new ArrayList<>();
+        String teamName = request.getParameter("teamName");
+        if(teamName == null || teamName.isBlank()){
+            validationErrors.add("Team name is required");
+        }
+        String[] playerIdParams = request.getParameterValues("playerId");
+        List<UUID> selectedPlayerIds = new ArrayList<>();
+        if(playerIdParams != null){
+            for(String value : playerIdParams){
+                parseUuid(value).ifPresent(selectedPlayerIds::add);
+            }
+        }
+        if(selectedPlayerIds.isEmpty()){
+            validationErrors.add("You must select at least one player");
+        }
+        if(!validationErrors.isEmpty()){
+            request.setAttribute("validationErrors",validationErrors);
+            loadPlayerOptions(request);
+            return;
+        }
+
+        FantasyTeamRequest fantasyTeamRequest = buildFantasyTeamRequest(teamName,selectedPlayerIds);
+        Optional<FantasyTeamResponse> fantasyTeamResponse = fantasyTeamRestClient.createTeam(fantasyTeamRequest);
+        if(fantasyTeamResponse.isPresent()){
+            request.setAttribute("message","Team created successfully");
+            request.setAttribute("team",fantasyTeamResponse.get());
+        }else{
+            request.setAttribute("error","Team could not be created. Check your squad rules and budget and try again");
+        }
+        loadPlayerOptions(request);
+    }
+
+    private void handleUpdateTeam(HttpServletRequest request){
+        List<String> validationErrors = new ArrayList<>();
+        Optional<UUID> teamId = parseUuid(request.getParameter("teamId"));
+        if(teamId.isEmpty()){
+            validationErrors.add("Team ID is required to update a team.");
+        }
+        String teamName = request.getParameter("teamName");
+        if(teamName == null || teamName.isBlank()){
+            validationErrors.add("Team name is required");
+        }
+        String[] playerIdParams = request.getParameterValues("playerId");
+        List<UUID> selectedPlayerIds = new ArrayList<>();
+        if(playerIdParams != null){
+            for(String value : playerIdParams){
+                parseUuid(value).ifPresent(selectedPlayerIds::add);
+            }
+        }
+        if(selectedPlayerIds.isEmpty()){
+            validationErrors.add("You must select at least one player");
+        }
+        if(!validationErrors.isEmpty()){
+            request.setAttribute("validationErrors",validationErrors);
+            loadPlayerOptions(request);
+            return;
+        }
+        FantasyTeamRequest fantasyTeamRequest = buildFantasyTeamRequest(teamName, selectedPlayerIds);
+        Optional<FantasyTeamResponse> fantasyTeamResponse = fantasyTeamRestClient.updateTeam(teamId.get(),fantasyTeamRequest);
+        if(fantasyTeamResponse.isPresent()){
+            request.setAttribute("message","Team updated successfully");
+            request.setAttribute("team",fantasyTeamResponse.get());
+        }else{
+            request.setAttribute("error","Team could not be updated. Check your squad rules and budget and try again");
+        }
+        loadPlayerOptions(request);
+    }
+
+    private FantasyTeamRequest buildFantasyTeamRequest(String teamName,List<UUID> selectedPlayerIds){
+        List<FantasyTeamPlayerSelectionRequest> selections = new ArrayList<>();
+        for(UUID playerId : selectedPlayerIds){
+            selections.add(new FantasyTeamPlayerSelectionRequest (playerId, "STARTING", false,false));
+        }
+        return new FantasyTeamRequest(teamName, selections);
+    }
+
+    private void loadPlayerOptions(HttpServletRequest request){
+        Optional<List<PlayerResponse>> players = playerRestClient.listPlayers(null,null,null);
+        if(players.isPresent()){
+            request.setAttribute("players",players.get());
+        }else{
+            request.setAttribute("error","Unable to load available players");
+            request.setAttribute("players",List.of());
+        }
+        request.setAttribute("clubNamesById", buildClubNameLookup());
+        request.setAttribute("positionNamesById",buildPositionNameLookUp());
+    }
+
+    private Map<UUID,String> buildClubNameLookup(){
+        Map<UUID,String> lookup = new HashMap<>();
+        clubRestClient.listClubs().ifPresent(clubs -> clubs.forEach(club -> lookup.put(club.getClubId(), club.getClubName())));
+        return lookup;
+    }
+
+    private Map<UUID,String> buildPositionNameLookUp(){
+        Map<UUID,String> lookup = new HashMap<>();
+        positionRestClient.getAllPositions().ifPresent(positions -> positions.forEach(position -> lookup.put(position.getPositionId(), position.getPositionName())));
+        return lookup;
     }
 
 }
