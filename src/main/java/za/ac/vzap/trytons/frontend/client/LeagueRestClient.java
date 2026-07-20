@@ -13,9 +13,9 @@ import java.util.logging.Logger;
 @Dependent
 public class LeagueRestClient {
 
-    private static final String LEAGUES_PATH = "/leagues";
-    private static final String MY_LEAGUES_PATH = "/leagues/mine";
-    private static final String JOIN_PATH = "/leagues/join";
+    private static final String LEAGUES_PATH = "/league";
+    private static final String MY_LEAGUES_PATH = "/league?mine=true";
+    private static final String JOIN_PATH = "/league/join";
 
     private static final Logger LOG = Logger.getLogger(LeagueRestClient.class.getName());
 
@@ -71,7 +71,7 @@ public class LeagueRestClient {
 
     public Optional<LeagueResponse> joinLeague(JoinLeagueRequest request){
 
-        if (request == null || (isBlank(request.getLeagueId()) && isBlank(request.getLeagueCode()))) {
+        if (request == null || (request.getLeagueId() == null && isBlank(request.getLeagueCode()))) {
             LOG.log(Level.WARNING, "League id or code is required to join a league.");
             return Optional.empty();
         }
