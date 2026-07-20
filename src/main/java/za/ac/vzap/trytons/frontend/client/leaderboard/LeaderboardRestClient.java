@@ -4,6 +4,8 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.GenericType;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,7 +24,7 @@ public class LeaderboardRestClient { // check the backend endpoints again to get
     public APIClient apiClient;
 
     public Optional<List<LeaderboardEntryResponse>> getLeaderboardForLeague(UUID leagueId) {
-        String path = GET_LEADERBOARD_FOR_LEAGUE_PATH + "/" + leagueId + "/rankings";
+        String path = GET_LEADERBOARD_FOR_LEAGUE_PATH + "/" + encode(leagueId.toString()) + "/rankings";
         Optional<List<LeaderboardEntryResponse>> response = apiClient.getList(path, new GenericType<List<LeaderboardEntryResponse>>(){});
         if (response.isEmpty()){
             LOG.log(Level.SEVERE, "Could not get leaderboard for league.");
@@ -31,14 +33,16 @@ public class LeaderboardRestClient { // check the backend endpoints again to get
     }
 
     public Optional<LeaderboardEntryResponse> getRankingForTeam(UUID teamId, UUID leaderboardId) {
-        // TODO [W4-FE-FIXES-17]: teamId/leaderboardId concatenated into URL unencoded — encode per
-        //   PlayerRestClient.listPlayers pattern (see W4-CR-FE-08)
-        String path = GET_RANKING_FOR_TEAM_PATH + "/team" + "/" + teamId + "?leaderboardId=" + leaderboardId;
+        String path = GET_RANKING_FOR_TEAM_PATH + "/team" + "/" + encode(teamId.toString()) + "?leaderboardId=" + leaderboardId;
         Optional<LeaderboardEntryResponse> response = apiClient.get(path, LeaderboardEntryResponse.class);
         if (response.isEmpty()){
             LOG.log(Level.SEVERE, "Could not get ranking for team.");
         }
         return response;
+    }
+
+    public String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
 
