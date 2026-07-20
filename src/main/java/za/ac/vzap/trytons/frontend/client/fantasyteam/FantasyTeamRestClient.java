@@ -3,6 +3,8 @@ package za.ac.vzap.trytons.frontend.client.fantasyteam;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -27,7 +29,7 @@ public class FantasyTeamRestClient {
     }
 
     public Optional<ViewOwnTeamResponse> viewOwnTeam(String teamName){
-        String path = FANTASY_TEAM_PATH + OWN_TEAM_PATH + "/" + teamName;
+        String path = FANTASY_TEAM_PATH + OWN_TEAM_PATH + "/" + encode(teamName);
         Optional<ViewOwnTeamResponse> response = apiClient.get(path, ViewOwnTeamResponse.class);
         if(response.isEmpty()){
             LOG.log(Level.WARNING, "Unable to view own fantasy team.");
@@ -35,7 +37,7 @@ public class FantasyTeamRestClient {
         return response;
     }
     public Optional<ViewOpponentTeamResponse> viewOpponentTeam(UUID teamId){
-        String path = FANTASY_TEAM_PATH + OPPONENT_TEAM_PATH + "/" + teamId;
+        String path = FANTASY_TEAM_PATH + OPPONENT_TEAM_PATH + "/" + encode(teamId.toString());
         Optional<ViewOpponentTeamResponse> response = apiClient.get(path, ViewOpponentTeamResponse.class);
         if(response.isEmpty()){
             LOG.log(Level.WARNING, "Unable to view opponent fantasy team.");
@@ -44,11 +46,15 @@ public class FantasyTeamRestClient {
     }
 
     public Optional<FantasyTeamResponse> updateTeam(UUID teamId, FantasyTeamRequest request){
-        String path = FANTASY_TEAM_PATH + "/" + teamId;
+        String path = FANTASY_TEAM_PATH + "/" + encode(teamId.toString());
         Optional<FantasyTeamResponse> response = apiClient.post(path, request,FantasyTeamResponse.class);
         if(response.isEmpty()){
             LOG.log(Level.WARNING, "Unable to update fantasy team.");
         }
         return response;
+    }
+
+    public String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 }
