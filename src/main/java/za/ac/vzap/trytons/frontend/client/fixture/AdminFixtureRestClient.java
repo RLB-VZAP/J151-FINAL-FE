@@ -2,6 +2,8 @@ package za.ac.vzap.trytons.frontend.client.fixture;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,17 +25,17 @@ public class AdminFixtureRestClient {
         return response;
     }
     public Optional<FixtureResponse> updateFixtureStatus(String fixtureId, String status){
-        // TODO [W4-FE-FIXES-17]: fixtureId/status concatenated into URL unencoded — encode per
-        //   PlayerRestClient.listPlayers pattern (see W4-CR-FE-08)
-        String path = UPDATE_STATUS + "/" + fixtureId + "/status?status=" + status;
-        // TODO [W4-FE-FIXES-10]: null body passed to put() — APIClient.jsonEntity turns null into an
-        //   EmptyRequestBody serialized as {} with Content-Type application/json, so the backend sees
-        //   an all-null DTO instead of an absent body (see W4-CR-FE-11)
+        String path = UPDATE_STATUS + "/" + encode(fixtureId) + "/status?status=" + encode(status);
+        
         Optional<FixtureResponse> response = apiClient.put(path,null,FixtureResponse.class);
         if(response.isEmpty()){
             LOG.log(Level.SEVERE, "Unable to update fixture");
         }
         return response;
+    }
+
+    private String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
     }
