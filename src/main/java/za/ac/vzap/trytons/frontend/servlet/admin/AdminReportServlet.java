@@ -8,6 +8,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import za.ac.vzap.trytons.frontend.client.admin.AdminReportRestClient;
+import za.ac.vzap.trytons.frontend.client.admin.LogRestClient;
+import za.ac.vzap.trytons.frontend.client.admin.LogResponse;
 import za.ac.vzap.trytons.frontend.client.admin.SystemReportRequest;
 import za.ac.vzap.trytons.frontend.client.admin.SystemReportResponse;
 import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
@@ -25,12 +27,18 @@ public class AdminReportServlet extends AbstractServlet {
     @Inject
     private AdminReportRestClient adminReportRestClient;
 
+    @Inject
+    private LogRestClient logRestClient;
+
+    private static final int LOG_LIMIT = 100;
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if(!requireAdmin(request,response)) {
             return;
         }
         loadReports(request);
+        loadLogs(request);
         forward(request, response);
     }
 
@@ -45,6 +53,7 @@ public class AdminReportServlet extends AbstractServlet {
         if(reportType == null || reportType.isBlank() || reportTitle == null || reportTitle.isBlank()) {
             request.setAttribute("error","Report type and title are required");
             loadReports(request);
+            loadLogs(request);
             forward(request, response);
             return;
         }
@@ -58,6 +67,7 @@ public class AdminReportServlet extends AbstractServlet {
             }catch(IOException e){
                 request.setAttribute("error","Invalid JSON format");
                 loadReports(request);
+                loadLogs(request);
                 forward(request, response);
                 return;
             }
@@ -74,6 +84,7 @@ public class AdminReportServlet extends AbstractServlet {
             request.setAttribute("error","Unable to generate System Report");
         }
         loadReports(request);
+        loadLogs(request);
         forward(request, response);
 
     }
@@ -87,6 +98,15 @@ public class AdminReportServlet extends AbstractServlet {
             if(request.getAttribute("error") == null) {
                 request.setAttribute("error","Unable to load reports");
             }
+        }
+    }
+
+    private void loadLogs(HttpServletRequest request) {
+        Optional<List<LogResponse>> logsOptional = logRestClient.getRecentLogs(LOG_LIMIT);
+        if(logsOptional.isPresent()) {
+            request.setAttribute("logs", logsOptional.get());
+        }else{
+            request.setAttribute("logs", List.of());
         }
     }
 

@@ -29,6 +29,48 @@
         <p class="error-message" role="alert"><c:out value="${fixturesError}" /></p>
     </c:if>
 
+    <section id="createFixtureSection">
+        <h2>Create Fixture</h2>
+        <form method="post" action="${pageContext.request.contextPath}/admin/fixtures" id="createFixtureForm">
+            <input type="hidden" name="submit" value="create-fixture">
+            <div class="field">
+                <label for="createFixtureLeagueId">League</label>
+                <select id="createFixtureLeagueId" name="leagueId" required>
+                    <option value="">-- Select league --</option>
+                    <c:forEach var="league" items="${leagues}">
+                        <option value="${league.leagueId}"><c:out value="${league.leagueName}" /></option>
+                    </c:forEach>
+                </select>
+            </div>
+            <div class="field">
+                <label for="createFixtureRoundId">Round</label>
+                <select id="createFixtureRoundId" name="roundId" required>
+                    <option value="">-- Select round --</option>
+                    <c:forEach var="round" items="${rounds}">
+                        <option value="${round.roundId}"><c:out value="${round.season}" /> - Round <c:out value="${round.roundNumber}" /></option>
+                    </c:forEach>
+                </select>
+            </div>
+            <div class="field">
+                <label for="createFixtureTeamAId">Team A ID</label>
+                <input type="text" id="createFixtureTeamAId" name="teamAId" required>
+            </div>
+            <div class="field">
+                <label for="createFixtureTeamBId">Team B ID</label>
+                <input type="text" id="createFixtureTeamBId" name="teamBId" required>
+            </div>
+            <div class="field">
+                <label for="createFixtureDate">Fixture date</label>
+                <input type="date" id="createFixtureDate" name="fixtureDate" required>
+            </div>
+            <div class="field">
+                <label for="createFixtureTime">Fixture time</label>
+                <input type="time" id="createFixtureTime" name="fixtureTime" required>
+            </div>
+            <button type="submit">Create fixture</button>
+        </form>
+    </section>
+
     <section id="fixtureFilterSection">
         <h2>Filter</h2>
         <form action="${pageContext.request.contextPath}/admin/fixtures" method="get" id="fixtureFilterForm">

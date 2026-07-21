@@ -19,11 +19,12 @@ public class LeaderboardServlet extends AbstractServlet {
     @Inject
     private LeaderboardRestClient leaderboardRestClient;
 
-    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if(!requireAuthenticated(request,response)) {
             return;
         }
+
+        String dispatchPath = "/pages/leaderboard.jsp";
 
         //Request contains both 'leagueId' and 'teamId':
         if (request.getParameter("leagueId") != null && request.getParameter("teamId") != null){
@@ -60,12 +61,17 @@ public class LeaderboardServlet extends AbstractServlet {
                     }
                 }
             }
-            //Request contains neither (leaderboard path with no parameters):
+            //Request contains neither (overall/master leaderboard):
         }else {
-            request.setAttribute("error", "Invalid request");
-
+            dispatchPath = "/pages/leaderboards.jsp";
+            Optional<List<LeaderboardEntryResponse>> result = leaderboardRestClient.getOverallLeaderboard();
+            if (result.isPresent()) {
+                request.setAttribute("leaderboard", result.get());
+            } else {
+                request.setAttribute("error", "No leaderboard found");
+            }
         }
-        request.getRequestDispatcher("/pages/leaderboard.jsp").forward(request, response);
+        request.getRequestDispatcher(dispatchPath).forward(request, response);
     }
 
 }

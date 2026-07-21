@@ -7,17 +7,21 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import za.ac.vzap.trytons.frontend.client.catalog.ClubResponse;
 import za.ac.vzap.trytons.frontend.client.catalog.ClubRestClient;
+import za.ac.vzap.trytons.frontend.client.catalog.PlayerAvailabilityRequest;
+import za.ac.vzap.trytons.frontend.client.catalog.PlayerAvailabilityResponse;
 import za.ac.vzap.trytons.frontend.client.catalog.PlayerRequest;
 import za.ac.vzap.trytons.frontend.client.catalog.PlayerResponse;
 import za.ac.vzap.trytons.frontend.client.catalog.PlayerRestClient;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
 
-@WebServlet(name ="PlayerServlet", urlPatterns = {"/players", "/player", "/player/create" , "/player/update"} )
+@WebServlet(name ="PlayerServlet", urlPatterns = {"/players", "/player", "/player/create" , "/player/update", "/player/availability"} )
 public class PlayerServlet extends AbstractServlet {
     @Inject
     private PlayerRestClient playerRestClient;
@@ -110,9 +114,49 @@ public class PlayerServlet extends AbstractServlet {
                 request.setAttribute("error", "Unable to update player");
                 yield "/pages/player.jsp";
             }
+            case "player/availability" -> {
+                Optional<UUID> playerId = parseUuid(request.getParameter("playerId"));
+                if (playerId.isEmpty()) {
+                    request.setAttribute("error", "Invalid or missing player id");
+                    yield "/pages/player.jsp";
+                }
+                PlayerAvailabilityRequest availabilityRequest = buildAvailabilityRequest(request);
+                Optional<PlayerAvailabilityResponse> saved = playerRestClient.setAvailability(playerId.get(), availabilityRequest);
+
+                Optional<PlayerResponse> player = playerRestClient.getPlayer(playerId.get());
+                player.ifPresent(value -> request.setAttribute("player", value));
+
+                if (saved.isPresent()) {
+                    request.setAttribute("availability", saved.get());
+                    request.setAttribute("availabilityMessage", "Availability updated.");
+                } else {
+                    request.setAttribute("error", "Unable to update player availability");
+                }
+                yield "/pages/player.jsp";
+            }
             default -> "/index.jsp";
         };
         request.getRequestDispatcher(destination).forward(request, response);
+    }
+
+    private PlayerAvailabilityRequest buildAvailabilityRequest(HttpServletRequest request) {
+        PlayerAvailabilityRequest availabilityRequest = new PlayerAvailabilityRequest();
+        availabilityRequest.setStatus(request.getParameter("status"));
+        availabilityRequest.setEffectiveDate(parseDate(request.getParameter("effectiveDate")));
+        availabilityRequest.setEndDate(parseDate(request.getParameter("endDate")));
+        availabilityRequest.setNotes(request.getParameter("notes"));
+        return availabilityRequest;
+    }
+
+    private LocalDate parseDate(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(value.trim());
+        } catch (DateTimeParseException e) {
+            return null;
+        }
     }
 
     private PlayerRequest buildPlayerRequest(HttpServletRequest request) {
