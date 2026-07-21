@@ -48,3 +48,6 @@ frontend-local.properties
 *.war
 *.ear
 generated/
+
+# Serena MCP (local code-navigation cache/config)
+.serena/
