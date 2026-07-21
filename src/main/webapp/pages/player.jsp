@@ -22,6 +22,40 @@
         <dt>Fantasy points</dt><dd>${player.totalFantasyPoints}</dd>
         <dt>Status</dt><dd>${player.active ? 'Active' : 'Inactive'}</dd>
     </dl>
+
+    <h2>Set availability</h2>
+    <c:if test="${not empty error}"><p>${error}</p></c:if>
+    <c:if test="${not empty availabilityMessage}"><p>${availabilityMessage}</p></c:if>
+    <c:if test="${not empty availability}">
+        <p>Current: ${availability.status} (from ${availability.effectiveDate}<c:if test="${not empty availability.endDate}"> to ${availability.endDate}</c:if>)</p>
+    </c:if>
+
+    <form method="post" action="${pageContext.request.contextPath}/player/availability">
+        <input type="hidden" name="submit" value="player/availability"/>
+        <input type="hidden" name="playerId" value="${player.playerId}"/>
+        <p>
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                <option value="ACTIVE">ACTIVE</option>
+                <option value="INJURED">INJURED</option>
+                <option value="SUSPENDED">SUSPENDED</option>
+                <option value="UNAVAILABLE">UNAVAILABLE</option>
+            </select>
+        </p>
+        <p>
+            <label for="effectiveDate">Effective date</label>
+            <input type="date" id="effectiveDate" name="effectiveDate" required/>
+        </p>
+        <p>
+            <label for="endDate">End date (optional)</label>
+            <input type="date" id="endDate" name="endDate"/>
+        </p>
+        <p>
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes"></textarea>
+        </p>
+        <p><button type="submit">Save availability</button></p>
+    </form>
 </main>
 </body>
 </html>

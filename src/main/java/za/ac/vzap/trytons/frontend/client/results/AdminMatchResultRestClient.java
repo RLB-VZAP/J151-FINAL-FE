@@ -61,6 +61,33 @@ public class AdminMatchResultRestClient {
         return response;
     }
 
+
+    public Optional<java.util.List<PlayerStatisticsResponse>> listResultStatistics(String resultId){
+        if(resultId == null || resultId.isBlank()){
+            LOG.log(Level.WARNING, "Result id is required to list player statistics.");
+            return Optional.empty();
+        }
+        String path = SUBMIT_PLAYER_RESULT + "/result/" + encode(resultId);
+        Optional<PlayerStatisticsResponse[]> response = apiClient.get(path, PlayerStatisticsResponse[].class);
+        if(response.isEmpty()){
+            LOG.log(Level.WARNING, "Unable to list player statistics for result.");
+        }
+        return response.map(stats -> new java.util.ArrayList<>(java.util.Arrays.asList(stats)));
+    }
+
+    public Optional<java.util.List<PlayerStatisticsResponse>> listResultStatisticsForTeam(String resultId, String teamId){
+        if(resultId == null || resultId.isBlank() || teamId == null || teamId.isBlank()){
+            LOG.log(Level.WARNING, "Result id and team id are required to list player statistics.");
+            return Optional.empty();
+        }
+        String path = SUBMIT_PLAYER_RESULT + "/result/" + encode(resultId) + "/team/" + encode(teamId);
+        Optional<PlayerStatisticsResponse[]> response = apiClient.get(path, PlayerStatisticsResponse[].class);
+        if(response.isEmpty()){
+            LOG.log(Level.WARNING, "Unable to list player statistics for result and team.");
+        }
+        return response.map(stats -> new java.util.ArrayList<>(java.util.Arrays.asList(stats)));
+    }
+
     public String encode(String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }

@@ -47,7 +47,7 @@ public class FantasyTeamRestClient {
 
     public Optional<FantasyTeamResponse> updateTeam(UUID teamId, FantasyTeamRequest request){
         String path = FANTASY_TEAM_PATH + "/" + encode(teamId.toString());
-        Optional<FantasyTeamResponse> response = apiClient.post(path, request,FantasyTeamResponse.class);
+        Optional<FantasyTeamResponse> response = apiClient.put(path, request,FantasyTeamResponse.class);
         if(response.isEmpty()){
             LOG.log(Level.WARNING, "Unable to update fantasy team.");
         }

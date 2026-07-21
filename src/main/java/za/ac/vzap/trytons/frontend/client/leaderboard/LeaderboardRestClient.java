@@ -6,6 +6,8 @@ import jakarta.ws.rs.core.GenericType;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,9 +16,10 @@ import java.util.logging.Logger;
 import za.ac.vzap.trytons.frontend.client.shared.APIClient;
 
 @Dependent
-public class LeaderboardRestClient { // check the backend endpoints again to get master leaderboard
+public class LeaderboardRestClient {
     private static final String GET_LEADERBOARD_FOR_LEAGUE_PATH = "/leaderboard";
     private static final String GET_RANKING_FOR_TEAM_PATH = "/leaderboard";
+    private static final String MASTER_PATH = "/leaderboard/master";
 
     private static final Logger LOG = Logger.getLogger(LeaderboardRestClient.class.getName());
 
@@ -39,6 +42,14 @@ public class LeaderboardRestClient { // check the backend endpoints again to get
             LOG.log(Level.SEVERE, "Could not get ranking for team.");
         }
         return response;
+    }
+
+    public Optional<List<LeaderboardEntryResponse>> getOverallLeaderboard() {
+        Optional<LeaderboardEntryResponse[]> response = apiClient.get(MASTER_PATH, LeaderboardEntryResponse[].class);
+        if (response.isEmpty()){
+            LOG.log(Level.SEVERE, "Could not get overall leaderboard.");
+        }
+        return response.map(a -> new ArrayList<>(Arrays.asList(a)));
     }
 
     public String encode(String value) {
