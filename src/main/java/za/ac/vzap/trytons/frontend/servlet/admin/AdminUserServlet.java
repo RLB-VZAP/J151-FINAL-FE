@@ -6,9 +6,17 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import za.ac.vzap.trytons.frontend.client.admin.AdminUserRestClient;
+import za.ac.vzap.trytons.frontend.client.admin.AdminUserSearchResponse;
+import za.ac.vzap.trytons.frontend.client.admin.AdminUserStatusRequest;
+import za.ac.vzap.trytons.frontend.client.admin.AdminUserStatusResponse;
 import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static java.lang.Boolean.parseBoolean;
 
 @WebServlet(name = "AdminUserServlet", urlPatterns = {"/admin/users"})
 public class AdminUserServlet extends AbstractServlet {
@@ -20,11 +28,85 @@ public class AdminUserServlet extends AbstractServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // TODO [W4-FE-FIXES-03]: Require an admin user, read the optional searchTerm query parameter, call AdminUserRestClient.searchUsers, and forward the results to the admin users view.
+
+        if (!requireAdmin(request, response)) {
+            return;
+        }
+        String searchTerm = request.getParameter("searchTerm");
+        loadUsers(request, searchTerm);
+        request.getRequestDispatcher(VIEW).forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // TODO [W4-FE-FIXES-03]: Require an admin user, read the target user id and new active-status flag from the submitted form, call AdminUserRestClient.updateUserStatus, and forward back to the admin users view with a success or error message.
+
+        if (!requireAdmin(request, response)) {
+            return;
+        }
+
+        String searchTerm = request.getParameter("searchTerm");
+        Optional<UUID> userId = parseUuid(request.getParameter("userId"));
+        Optional <Boolean> isActive = parseBoolean (request.getParameter("isActive"));
+
+        if (userId.isEmpty()){
+            request.setAttribute("error", "invalid or missing user id");
+
+        } else if (isActive.isEmpty()) {
+            request.setAttribute("error", "invalid or missing status value");
+
+        }else{
+            updateStatus(request, userId.get(), isActive.get());
+        }
+
+        loadUsers(request, searchTerm);
+        request.getRequestDispatcher(VIEW).forward(request, response);
     }
+
+    private void updateStatus(HttpServletRequest request, UUID userId, boolean isActive){
+
+        AdminUserStatusRequest statusRequest = new AdminUserStatusRequest();
+        statusRequest.setActive(isActive);
+
+        Optional <AdminUserStatusResponse> result = adminUserRestClient.updateUserStatus(userId, statusRequest);
+
+        if (result.isPresent()) {
+            request.setAttribute("success", "User status updated successfully");
+        } else {
+            request.setAttribute("error", "Unable to update user status");
+        }
+
+    }
+
+    private void loadUsers(HttpServletRequest request, String searchTerm) {
+
+        Optional<List<AdminUserSearchResponse>> users = adminUserRestClient.searchUsers(searchTerm);
+
+        if (users.isPresent()) {
+            request.setAttribute("users", users.get());
+        } else {
+            request.setAttribute("error", "Unable to load users");
+            request.setAttribute("users", List.of());
+        }
+        request.setAttribute("searchTerm", searchTerm);
+    }
+
+    private Optional<Boolean> parseBoolean(String value) {
+        if (value == null || value.isBlank()) {
+            return Optional.empty();
+        }
+        String trimmed = value.trim();
+        if ("true".equalsIgnoreCase(trimmed)) {
+            return Optional.of(Boolean.TRUE);
+        }
+        if ("false".equalsIgnoreCase(trimmed)) {
+            return Optional.of(Boolean.FALSE);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public String getServletInfo() {
+        return "Admin User Servlet, handles admin user search and activation status updates";
+    }
+
 }
