@@ -1,0 +1,95 @@
+/* ============================================================================
+   TryTons — Fantasy Rugby | Dashboard (post-login landing page)
+   Vanilla CSS. Shares the palette/type/radii/spacing tokens used by the other
+   admin/user screens. Targets only the markup in dashboard.jsp; the page uses
+   navigation.jspf (plain nav), not nav.jspf.
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+    --navy: #1f3864;
+    --navy-700: #142544;
+    --teal: #1d9e75;
+    --teal-600: #178a65;
+    --bg: #f0f2f5;
+    --surface: #ffffff;
+
+    --ink: #1f2a44;
+    --ink-muted: #64748b;
+
+    --border: #d8dee9;
+
+    --radius-card: 12px;
+
+    --sp-2: 8px;
+    --sp-3: 12px;
+    --sp-4: 16px;
+    --sp-5: 20px;
+    --sp-6: 24px;
+    --sp-8: 32px;
+}
+
+body.dashboard {
+    margin: 0;
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+}
+
+#dashboard {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-5) var(--sp-8);
+}
+
+#dashboard h1 {
+    color: var(--navy-700);
+    margin-bottom: var(--sp-2);
+}
+
+#dashboard > p {
+    color: var(--ink-muted);
+    margin-bottom: var(--sp-6);
+}
+
+#dashboardShortcuts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--sp-5);
+}
+
+.dashboard-tile {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--sp-5);
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 0.15s ease, transform 0.1s ease, border-color 0.15s ease;
+}
+
+.dashboard-tile:hover {
+    border-color: var(--teal);
+    box-shadow: 0 12px 24px -16px rgba(20, 37, 68, 0.45);
+    transform: translateY(-2px);
+}
+
+.dashboard-tile h2 {
+    margin: 0 0 var(--sp-2);
+    color: var(--navy);
+    font-size: 1.05rem;
+}
+
+.dashboard-tile p {
+    margin: 0;
+    color: var(--ink-muted);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+    #dashboard {
+        padding: var(--sp-6) var(--sp-3) var(--sp-6);
+    }
+}
