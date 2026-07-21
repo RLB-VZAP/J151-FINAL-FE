@@ -36,7 +36,7 @@ public class AuthServlet extends AbstractServlet {
                 Optional<LoginResponse> loginResponse = authRestClient.login(loginRequest);
                 if (loginResponse.isPresent()) {
                     establishAuthenticatedSession(request,loginResponse.get());
-                    yield "/pages/register.jsp";
+                    yield "/pages/dashboard.jsp";
                 }else {
                     request.setAttribute("error", "Invalid login credentials");
                     yield "/pages/login.jsp";
@@ -62,7 +62,7 @@ public class AuthServlet extends AbstractServlet {
                 yield "/pages/login.jsp";
                 }
 
-            default ->"index.jsp";
+            default ->"/pages/login.jsp";
         };
         request.getRequestDispatcher(destination).forward(request, response);
     }
