@@ -26,11 +26,7 @@ public class AdminFixtureRestClient {
     }
     public Optional<FixtureResponse> updateFixtureStatus(String fixtureId, String status){
         String path = UPDATE_STATUS + "/" + encode(fixtureId) + "/status?status=" + encode(status);
-        // TODO [W4-FE-FIXES-10]: null body passed to put() — APIClient.jsonEntity turns null into an
-        //   EmptyRequestBody serialized as {} with Content-Type application/json, so the backend sees
-        //   an all-null DTO instead of an absent body (see W4-CR-FE-11). Harmless here since the backend
-        //   updateFixtureStatus service method reads only the "status" query param, not the request body,
-        //   but there's no null-body-safe put() overload on APIClient today to avoid it cleanly.
+        
         Optional<FixtureResponse> response = apiClient.put(path,null,FixtureResponse.class);
         if(response.isEmpty()){
             LOG.log(Level.SEVERE, "Unable to update fixture");
