@@ -32,6 +32,13 @@ public class APIClient {
             }
             return Optional.ofNullable(response.readEntity(responseType));
         }
+        // A 401 means the caller's JWT is missing/expired/invalid — clear the local session right
+        // away so the servlet layer can detect "session just died" (via authContext.isAuthenticated())
+        // and redirect to login, distinct from a 404/500 which leaves the session intact.
+        if(status == Response.Status.UNAUTHORIZED.getStatusCode() && authContext != null) {
+            LOG.log(Level.WARNING, "Backend returned 401 Unauthorized - clearing local session");
+            authContext.clear();
+        }
         LOG.log(Level.WARNING, "Backend returned status: {0}", status);
         return Optional.empty();
     }

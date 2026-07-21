@@ -84,4 +84,17 @@ public class AbstractServlet extends HttpServlet {
         req.getRequestDispatcher(jspPath).forward(req, resp);
     }
 
+    // 401 handling: APIClient.handle() clears the session (authContext.clear()) as soon as it sees
+    // a 401 from the backend. Callers that made a "should be authenticated" call and got back an
+    // empty Optional can use this helper to check whether that emptiness was actually a session
+    // expiry (authContext no longer authenticated) versus some other failure (404/500/network) -
+    // if it was a session expiry, bounce the user back to login instead of rendering a stale/empty page.
+    protected boolean sessionExpiredRedirect(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        if(!authContext.isAuthenticated()) {
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return true;
+        }
+        return false;
+    }
+
 }
