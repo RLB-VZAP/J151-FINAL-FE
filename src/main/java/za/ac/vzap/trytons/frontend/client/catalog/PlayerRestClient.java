@@ -28,6 +28,18 @@ public class PlayerRestClient {
     public Optional<List<PlayerResponse>> listPlayers(String search , UUID clubId , UUID positionId) {
         StringBuilder path = new StringBuilder(LIST_PLAYERS);
         List<String> params = new ArrayList<>();
+        if (search != null && !search.isBlank()) {
+            params.add("search=" + encode(search));
+        }
+        if (clubId != null) {
+            params.add("clubId=" + encode(clubId.toString()));
+        }
+        if (positionId != null) {
+            params.add("positionId=" + encode(positionId.toString()));
+        }
+        if (!params.isEmpty()) {
+            path.append("?").append(String.join("&", params));
+        }
         Optional<PlayerResponse[]> response = apiClient.get(path.toString(), PlayerResponse[].class);
         if(response.isEmpty()){
             LOG.log(Level.SEVERE, "Unable list player");
