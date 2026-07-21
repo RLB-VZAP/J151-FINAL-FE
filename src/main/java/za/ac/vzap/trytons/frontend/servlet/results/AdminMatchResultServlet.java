@@ -60,7 +60,7 @@ public class AdminMatchResultServlet extends AbstractServlet {
     }
 
     private void submitMatchResult(HttpServletRequest request) {
-        String fixtureId = "";
+        String fixtureId = request.getParameter("fixtureId");
         Optional<UUID> fixtureUuid = parseUuid(fixtureId);
         String actorId = request.getParameter("actorId");
         Optional<UUID> actorUuid = parseUuid(actorId);
@@ -99,7 +99,7 @@ public class AdminMatchResultServlet extends AbstractServlet {
     }
 
     private void submitPlayerStatistics(HttpServletRequest request) {
-        String fixtureId = "";
+        String fixtureId = request.getParameter("fixtureId");
         Optional<UUID> fixtureUuid = parseUuid(fixtureId);
         Optional<UUID> resultId = parseUuid(request.getParameter("resultId"));
         Optional<UUID> teamId = parseUuid(request.getParameter("teamId"));

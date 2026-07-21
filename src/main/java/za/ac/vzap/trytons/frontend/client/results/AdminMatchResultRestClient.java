@@ -12,12 +12,13 @@ import za.ac.vzap.trytons.frontend.client.shared.APIClient;
 
 @Dependent
 public class AdminMatchResultRestClient {
-    // TODO [W4-FE-FIXES-11]: wrong backend routes — client targets /match_result/{fixtureId} and
-    //   /match_player/{fixtureId} (constants lines 12-14); backend exposes /match-results
-    //   (POST /, GET /fixture/{fixtureId}) and /player-statistics — every call 404s (see W4-CR-FE-07)
-    private String SUBMIT_MATCH_RESULT = "/match_result";
-    private String GET_MATCH_RESULT = "/match_result";
-    private String SUBMIT_PLAYER_RESULT = "/match_player";
+    // Backend routes (W4-FE-FIXES-11 fix): MatchResultResource is @Path("/match-results") with
+    // POST / (fixtureId travels inside MatchResultRequestDTO's body, not the URL) and
+    // GET /fixture/{fixtureId}; PlayerStatisticsResource is @Path("/player-statistics") with
+    // POST / (resultId/teamId/playerId travel inside PlayerStatisticsRequestDTO's body).
+    private String SUBMIT_MATCH_RESULT = "/match-results";
+    private String GET_MATCH_RESULT = "/match-results/fixture";
+    private String SUBMIT_PLAYER_RESULT = "/player-statistics";
 
     private static final Logger LOG = Logger.getLogger(AdminMatchResultRestClient.class.getName());
     @Inject
@@ -28,8 +29,7 @@ public class AdminMatchResultRestClient {
             LOG.log(Level.WARNING, "Fixture id and match result are required to submit a match result.");
             return Optional.empty();
         }
-        String path = SUBMIT_MATCH_RESULT + "/" + encode(fixtureId);
-        Optional<MatchResultResponse> response = apiClient.post(path, request, MatchResultResponse.class);
+        Optional<MatchResultResponse> response = apiClient.post(SUBMIT_MATCH_RESULT, request, MatchResultResponse.class);
         if(response.isEmpty()){
             LOG.log(Level.SEVERE, "Unable to submit match result");
         }
@@ -41,8 +41,7 @@ public class AdminMatchResultRestClient {
             LOG.log(Level.WARNING, "Fixture id and player statistics are required to submit player statistics.");
             return Optional.empty();
         }
-        String path = SUBMIT_PLAYER_RESULT + "/" + encode(fixtureId);
-        Optional<PlayerStatisticsResponse> response = apiClient.post(path, request, PlayerStatisticsResponse.class);
+        Optional<PlayerStatisticsResponse> response = apiClient.post(SUBMIT_PLAYER_RESULT, request, PlayerStatisticsResponse.class);
         if(response.isEmpty()){
             LOG.log(Level.SEVERE, "Unable to submit player statistics");
         }
