@@ -4,7 +4,7 @@ import jakarta.enterprise.context.SessionScoped;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import za.ac.vzap.trytons.frontend.client.LoginResponse;
+import za.ac.vzap.trytons.frontend.client.auth.LoginResponse;
 
 import java.io.Serial;
 import java.io.Serializable;

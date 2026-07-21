@@ -1,2 +1,5 @@
-<%-- TODO [W4-FE-FIXES-42]: unimplemented skeleton — implement the overall leaderboard fragment per W3 flow --%>
-<%-- Overall leaderboard fragment stub for W3-STUB28 --%>
+<%-- TODO [W4-FE-FIXES-42]: Fragment for the overall/master leaderboard. Include this fragment where the --%>
+<%-- master leaderboard should render, backed by LeaderboardRestClient's master-leaderboard method. --%>
+
+<%-- TODO [W4-FE-FIXES-42]: Standings table section - rank, team name, owner, rank movement, matches --%>
+<%-- played/won/drawn/lost, points for/against, score difference, league points and total fantasy points. --%>
