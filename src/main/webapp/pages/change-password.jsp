@@ -15,10 +15,70 @@
 
     <h1>Change Password</h1>
 
-    <%-- TODO: Feedback section - show success/error messages set by ProfileServlet. --%>
+    <c:if test="${not empty error}">
+    <p class="error-message" role="alert">
+        <c:out value="${error}" />
+    </p>
+    </c:if>
 
-    <%-- TODO: Change-password form section - current password, new password and confirmation fields. --%>
+    <c:if test="${not empty success}">
+    <p class="success-message" role="status">
+        <c:out value="${success}" />
+    </p>
+    </c:if>
+
+    <form method="post" action="${pageContext.request.contextPath}/profile/change-password" id="changePasswordForm">
+        <div>
+            <label for="currentPassword">Current password</label>
+            <input
+                type="password"
+                id="currentPassword"
+                name="currentPassword"
+                required
+                autocomplete="current-password">
+        </div>
+        <div>
+            <label for="newPassword">New password</label>
+            <input
+                type="password"
+                id="newPassword"
+                name="newPassword"
+                required
+                autocomplete="new-password">
+        </div>
+        <div>
+            <label for="confirmPassword">Confirm new password</label>
+            <%-- Confirmation is client-side only - only currentPassword/newPassword are sent to the server. --%>
+            <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                required
+                autocomplete="new-password">
+        </div>
+        <p class="error-message" role="alert" id="passwordMismatchWarning" hidden>
+            New password and confirmation do not match.
+        </p>
+        <button type="submit">Change password</button>
+    </form>
+
+    <p>
+        <a href="${pageContext.request.contextPath}/profile">Back to profile</a>
+    </p>
 
 </main>
+<script>
+    document.getElementById('changePasswordForm').addEventListener('submit', function (event) {
+        var newPassword = document.getElementById('newPassword').value;
+        var confirmPassword = document.getElementById('confirmPassword').value;
+        var warning = document.getElementById('passwordMismatchWarning');
+        if (newPassword !== confirmPassword) {
+            event.preventDefault();
+            warning.hidden = false;
+        } else {
+            warning.hidden = true;
+        }
+    });
+</script>
 </body>
 </html>
