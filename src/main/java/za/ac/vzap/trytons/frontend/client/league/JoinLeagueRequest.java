@@ -15,4 +15,9 @@ public class JoinLeagueRequest {
     private UUID leagueId;
     private String leagueCode;
     private UUID teamId;
+
+    public JoinLeagueRequest(String leagueId, String leagueCode) {
+        this.leagueId = UUID.fromString(leagueId);
+        this.leagueCode = leagueCode;
+    }
 }
