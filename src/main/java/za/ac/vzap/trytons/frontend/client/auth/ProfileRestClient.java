@@ -40,11 +40,6 @@ public class ProfileRestClient {
         return response;
     }
 
-    // Endpoint returns a 200 with an empty/small body. APIClient.handle() collapses both a Void-typed
-    // success and a non-2xx failure into an empty Optional (see AuthRestClient.logout for the same
-    // established idiom), so the call result can't disambiguate success from failure here without
-    // changes to APIClient itself (out of scope for this lane) — the call is fired and treated as
-    // successful unless the request itself was invalid.
     public boolean changePassword(ChangePasswordRequest request) {
         if (request == null || isBlank(request.getCurrentPassword()) || isBlank(request.getNewPassword())) {
             LOG.log(Level.WARNING, "Current and new password are required to change password.");
