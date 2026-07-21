@@ -65,6 +65,22 @@ public class TransferRestClient {
         return response;
     }
 
+
+    public Optional<za.ac.vzap.trytons.frontend.client.fixture.DeadlineStatusResponse> getDeadlineStatus(String roundId) {
+        if (isBlank(roundId)) {
+            LOG.log(Level.WARNING, "Round id is required to get deadline status.");
+            return Optional.empty();
+        }
+
+        String path = LOCK_STATUS_PATH + "/deadline/" + encode(roundId);
+        Optional<za.ac.vzap.trytons.frontend.client.fixture.DeadlineStatusResponse> response = apiClient.get(path, za.ac.vzap.trytons.frontend.client.fixture.DeadlineStatusResponse.class);
+
+        if (response.isEmpty()) {
+            LOG.log(Level.WARNING, "Unable to get deadline status.");
+        }
+        return response;
+    }
+
     public Optional<TransferRecommendationResponse> getTransferRecommendation(String teamId, String currentPlayerId) {
         if (isBlank(teamId)) {
             LOG.log(Level.WARNING, "Team id is required to get transfer recommendation.");

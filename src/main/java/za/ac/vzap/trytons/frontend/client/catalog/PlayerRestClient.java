@@ -20,6 +20,7 @@ public class PlayerRestClient {
     private String GET_PLAYER = "/player";
     private String CREATE_PLAYER = "/player";
     private String UPDATE_PLAYER ="/player";
+    private String PLAYER_AVAILABILITY ="/player";
 
     private static final Logger LOG = Logger.getLogger(PlayerRestClient.class.getName());
     @Inject
@@ -69,6 +70,15 @@ public class PlayerRestClient {
         Optional<PlayerResponse> response = apiClient.put(path,request,PlayerResponse.class);
         if(response.isEmpty()){
             LOG.log(Level.SEVERE, "Unable to update player");
+        }
+        return response;
+    }
+
+    public Optional<PlayerAvailabilityResponse> setAvailability(UUID playerId, PlayerAvailabilityRequest request) {
+        String path = PLAYER_AVAILABILITY + "/" + encode(playerId.toString()) + "/availability";
+        Optional<PlayerAvailabilityResponse> response = apiClient.put(path, request, PlayerAvailabilityResponse.class);
+        if(response.isEmpty()){
+            LOG.log(Level.SEVERE, "Unable to set player availability");
         }
         return response;
     }

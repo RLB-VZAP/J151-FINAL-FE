@@ -24,8 +24,6 @@ public class ResimulationRestClient {
     @Inject
     private APIClient apiClient;
 
-    // Backend service (ControlledResimulationServiceImpl) is still a stub (W3-BE-DATABASE-LOGIC-FIX-05A) —
-    // this client is wired correctly and will return Optional.empty() until that lands.
     public Optional<ResimulationResponse> resimulateFixture(ResimulationRequest request) {
         if (request == null || request.getFixtureId() == null) {
             LOG.log(Level.WARNING, "Fixture id is required to trigger a resimulation.");

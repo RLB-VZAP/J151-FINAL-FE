@@ -174,6 +174,50 @@
             </c:choose>
         </section>
 
+        <section id="systemLogs">
+            <h2>Recent System Activity Logs</h2>
+
+            <c:choose>
+                <c:when test="${empty logs}">
+                    <p>No logs are available.</p>
+                </c:when>
+                <c:otherwise>
+                    <table id="logsTable">
+                        <thead>
+                            <tr>
+                                <th>Created At</th>
+                                <th>Action Type</th>
+                                <th>Entity Type</th>
+                                <th>Entity Id</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach var="log" items="${logs}">
+                                <tr>
+                                    <td>
+                                        <c:out value="${log.createdAt}"/>
+                                    </td>
+                                    <td>
+                                        <c:out value="${log.actionType}"/>
+                                    </td>
+                                    <td>
+                                        <c:out value="${log.entityType}"/>
+                                    </td>
+                                    <td>
+                                        <c:out value="${log.entityId}"/>
+                                    </td>
+                                    <td>
+                                        <c:out value="${log.description}"/>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                </c:otherwise>
+            </c:choose>
+        </section>
+
 </main>
 </body>
 </html>
