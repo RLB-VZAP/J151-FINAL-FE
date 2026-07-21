@@ -5,10 +5,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import za.ac.vzap.trytons.frontend.client.AdminUserSearchResponse;
-import za.ac.vzap.trytons.frontend.client.AdminUserStatusRequest;
-import za.ac.vzap.trytons.frontend.client.AdminUserStatusResponse;
 import za.ac.vzap.trytons.frontend.client.admin.AdminUserRestClient;
+import za.ac.vzap.trytons.frontend.client.admin.AdminUserSearchResponse;
+import za.ac.vzap.trytons.frontend.client.admin.AdminUserStatusRequest;
+import za.ac.vzap.trytons.frontend.client.admin.AdminUserStatusResponse;
 import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
 
 import java.io.IOException;
