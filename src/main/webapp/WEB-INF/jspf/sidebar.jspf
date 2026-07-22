@@ -49,6 +49,12 @@
         <a class="sidebar-link ${activeNav == 'notifications' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/notifications">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
             <span>Notifications</span>
+            <%-- Shown when the page supplies a "sidebarUnreadCount" request attribute.
+                 Only the notifications servlet sets it today; any other servlet can opt
+                 in with the same attribute rather than every page paying for the call. --%>
+            <c:if test="${sidebarUnreadCount > 0}">
+                <span class="sidebar-badge">${sidebarUnreadCount}</span>
+            </c:if>
         </a>
         <a class="sidebar-link ${activeNav == 'profile' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/profile">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
