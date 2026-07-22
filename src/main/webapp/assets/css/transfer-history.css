@@ -1,12 +1,12 @@
 /* Transfer history page - Fantasy TryTons */
 
 .transfer-history-page {
-    --trytons-navy: #081b2d;
-    --trytons-panel: #102b43;
-    --trytons-gold: #f4b41a;
-    --trytons-cream: #f7f4eb;
-    --trytons-muted: #b9c6d1;
-    --trytons-line: rgba(185, 198, 209, 0.22);
+    --trytons-navy: #0c1712;
+    --trytons-panel: #132a1f;
+    --trytons-gold: #c9a227;
+    --trytons-cream: #eef3ef;
+    --trytons-muted: #7f9187;
+    --trytons-line: rgba(44, 68, 55, 0.5);
 
     max-width: 1180px;
     margin: 0 auto;
@@ -19,10 +19,10 @@
     overflow: hidden;
     margin-bottom: 2rem;
     padding: 2.25rem;
-    border: 1px solid rgba(244, 180, 26, 0.34);
+    border: 1px solid rgba(201, 162, 39, 0.34);
     border-radius: 18px;
     background: linear-gradient(135deg, var(--trytons-navy), var(--trytons-panel));
-    box-shadow: 0 16px 32px rgba(8, 27, 45, 0.2);
+    box-shadow: 0 16px 32px rgba(12, 23, 18, 0.2);
 }
 
 .transfer-history-hero::after {
@@ -31,7 +31,7 @@
     bottom: -4.5rem;
     width: 13rem;
     height: 13rem;
-    border: 2rem solid rgba(244, 180, 26, 0.12);
+    border: 2rem solid rgba(201, 162, 39, 0.12);
     border-radius: 50%;
     content: "";
 }
@@ -95,7 +95,7 @@
 .transfer-history-empty,
 .transfer-history-error {
     border-radius: 14px;
-    box-shadow: 0 12px 28px rgba(8, 27, 45, 0.12);
+    box-shadow: 0 12px 28px rgba(12, 23, 18, 0.12);
 }
 
 .transfer-history-card,

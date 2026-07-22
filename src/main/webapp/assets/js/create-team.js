@@ -27,8 +27,10 @@
   var selectedList = document.getElementById("selectedList");
   var overWarning = document.getElementById("overBudgetWarning");
 
+  // Matches the money tag's plain form (no space after R, en-ZA separators) so
+  // the live totals look identical to the server-rendered budget above them.
   function formatValue(n) {
-    return "R " + n.toLocaleString("en-ZA", { maximumFractionDigits: 2 });
+    return "R" + n.toLocaleString("en-ZA", { maximumFractionDigits: 2 });
   }
 
   /* Budget & selection preview (UX only — backend calculates finals) */

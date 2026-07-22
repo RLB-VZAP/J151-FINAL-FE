@@ -6,6 +6,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Leagues - Fantasy TryTons</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css">
 </head>
 <body>
 <%@ include file="/WEB-INF/jspf/navigation.jspf" %>

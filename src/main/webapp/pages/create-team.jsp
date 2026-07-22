@@ -4,6 +4,7 @@
 <%@ page import="java.util.UUID" %>
 <%@ page import="za.ac.vzap.trytons.frontend.client.catalog.PlayerResponse" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
 <!DOCTYPE html>
@@ -112,7 +113,7 @@
                                 <td><c:out value="${player.playerName}" /></td>
                                 <td><c:out value="${clubName}" /></td>
                                 <td><c:out value="${positionName}" /></td>
-                                <td>R <%= p.getValue() %></td>
+                                <td><t:money value="${player.value}" /></td>
                                 <td><%= p.isActive() ? "Available" : "Unavailable" %></td>
                             </tr>
                             <%
@@ -125,9 +126,12 @@
 
                 <section>
                     <h2>Your Squad</h2>
-                    <p>Budget: <span id="budgetTotal">R ${fn:escapeXml(budget)}</span></p>
-                    <p>Selected value: <span id="budgetUsed">R 0</span></p>
-                    <p>Remaining: <span id="budgetRemaining">R ${fn:escapeXml(budget)}</span></p>
+                    <%-- Budget is whole rands, so plain formatting rather than the "m"
+                         form used for per-player values. create-team.js overwrites the
+                         used/remaining spans on load using the same style. --%>
+                    <p>Budget: <span id="budgetTotal"><t:money value="${budget}" plain="true" /></span></p>
+                    <p>Selected value: <span id="budgetUsed"><t:money value="0" plain="true" /></span></p>
+                    <p>Remaining: <span id="budgetRemaining"><t:money value="${budget}" plain="true" /></span></p>
                     <p>Players selected: <span><span id="selectedCount">0</span> / ${fn:escapeXml(squadSize)}</span></p>
                     <p class="error-message" role="alert" id="overBudgetWarning" hidden>
                         You are over budget. You can still submit, but the server will reject an over-budget squad.

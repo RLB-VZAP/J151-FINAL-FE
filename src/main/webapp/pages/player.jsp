@@ -1,11 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <%-- TODO [W4-FE-FIXES-43]: unescaped ${player.playerName} (title line 7 and <h1> line 14) — stored XSS via admin data; use c:out/fn:escapeXml --%>
     <title>${player.playerName} - TryTons</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css">
 </head>
 <body>
 <%@ include file="/WEB-INF/jspf/navigation.jspf" %>
@@ -17,8 +20,8 @@
     <dl>
         <dt>Club</dt><dd>${clubNamesById[player.clubId]}</dd>
         <dt>Position</dt><dd>${positionNamesById[player.positionId]}</dd>
-        <dt>Value</dt><dd>${player.value}</dd>
-        <dt>Current form</dt><dd>${player.currentForm}</dd>
+        <dt>Value</dt><dd><t:money value="${player.value}" /></dd>
+        <dt>Current form</dt><dd><t:rating value="${player.currentForm}" /></dd>
         <dt>Status</dt><dd>${player.active ? 'Active' : 'Inactive'}</dd>
     </dl>
 
