@@ -1,0 +1,35 @@
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<nav id="mainNav">
+    <a href="${pageContext.request.contextPath}/dashboard" id="navHomeLink">Home</a>
+    <a href="${pageContext.request.contextPath}/players?submit=players" id="navPlayersLink">Players</a>
+    <a href="${pageContext.request.contextPath}/clubs?submit=clubs" id="navClubsLink">Clubs</a>
+    <a href="${pageContext.request.contextPath}/leagues" id="navLeaguesLink">Leagues</a>
+    <a href="${pageContext.request.contextPath}/create-team" id="navCreateTeamLink">Create Team</a>
+    <a href="${pageContext.request.contextPath}/transfers" id="navTransfersLink">Transfers</a>
+    <a href="${pageContext.request.contextPath}/fixtures?submit=fixtures" id="navFixturesLink">Fixtures</a>
+    <c:if test="${sessionScope.role == 'ADMINISTRATOR'}">
+    <a href="${pageContext.request.contextPath}/admin/match-results" id="navMatchResultsLink">Match Results</a>
+    </c:if>
+    <a href="${pageContext.request.contextPath}/history" id="navHistoryLink">History</a>
+    <a href="${pageContext.request.contextPath}/notifications" id="navNotificationsLink">Notifications</a>
+    <a href="${pageContext.request.contextPath}/profile" id="navProfileLink">Profile</a>
+    <c:if test="${sessionScope.role == 'ADMINISTRATOR'}">
+    <a href="${pageContext.request.contextPath}/admin/scoring-rules" id="navAdminScoringRulesLink">Admin: Scoring Rules</a>
+    <a href="${pageContext.request.contextPath}/admin/simulation" id="navAdminSimulationLink">Admin: Simulation</a>
+    <a href="${pageContext.request.contextPath}/admin/fixtures" id="navAdminFixturesLink">Admin: Fixtures</a>
+    </c:if>
+
+    <c:choose>
+        <c:when test="${not empty sessionScope.username}">
+            <span id="navWelcome">Welcome, ${fn:escapeXml(sessionScope.username)}</span>
+            <form action="${pageContext.request.contextPath}/logout" method="post" id="navLogoutForm">
+                <button type="submit" name="submit" value="logout">Log out</button>
+            </form>
+        </c:when>
+        <c:otherwise>
+            <a href="${pageContext.request.contextPath}/login" id="navLoginLink">Login</a>
+            <a href="${pageContext.request.contextPath}/register" id="navRegisterLink">Register</a>
+        </c:otherwise>
+    </c:choose>
+</nav>
