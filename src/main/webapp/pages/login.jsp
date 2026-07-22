@@ -1,4 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -12,6 +14,17 @@
 <main>
 <h1>Login</h1>
 <p>Please log in using your username or email address.</p>
+
+<c:if test="${param.registered == '1'}">
+<p class="success-message" role="status">
+Registration successful. Please log in with your new account.
+</p>
+</c:if>
+<c:if test="${param.expired == '1'}">
+<p class="notice-message" role="alert">
+Your session has expired. Please log in again.
+</p>
+</c:if>
 
 <%
   String errorMessage = (String) request.getAttribute("error");
@@ -30,6 +43,7 @@
       type="text"
       id="identifier"
       name="identifier"
+      value="${fn:escapeXml(identifier)}"
       required
       autocomplete="username">
 </div>
@@ -48,8 +62,8 @@ autocomplete="current-password">
 </form>
 <p>
 Don't have an account?
-<a href="${pageContext.request.contextPath}/pages/register.jsp">
-Register here my brodie, get cooking. You're missing all the action!
+<a href="${pageContext.request.contextPath}/register">
+Register for a Fantasy TryTons account.
 </a>.
 </p>
 </main>

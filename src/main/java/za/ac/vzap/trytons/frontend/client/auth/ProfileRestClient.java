@@ -3,6 +3,7 @@ package za.ac.vzap.trytons.frontend.client.auth;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import za.ac.vzap.trytons.frontend.client.shared.APIClient;
+import za.ac.vzap.trytons.frontend.client.shared.ApiCallStatus;
 
 import java.util.Optional;
 import java.util.logging.Level;
@@ -18,6 +19,9 @@ public class ProfileRestClient {
 
     @Inject
     private APIClient apiClient;
+
+    @Inject
+    private ApiCallStatus apiCallStatus;
 
     public Optional<ProfileResponse> getProfile() {
         Optional<ProfileResponse> response = apiClient.get(PROFILE_PATH, ProfileResponse.class);
@@ -47,7 +51,7 @@ public class ProfileRestClient {
         }
 
         apiClient.post(CHANGE_PASSWORD_PATH, request, Void.class);
-        return true;
+        return apiCallStatus.isSuccess();
     }
 
     private boolean isBlank(String value) {

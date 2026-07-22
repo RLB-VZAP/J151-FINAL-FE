@@ -15,6 +15,8 @@ import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,20 +52,33 @@ public class AdminSimulationServlet extends AbstractServlet {
         }
 
         String fixtureIdForReload = request.getParameter("fixtureId");
+        boolean success;
         switch (action) {
-            case "saveSettings" -> saveSettings(request);
+            case "saveSettings" -> success = saveSettings(request);
             case "resimulate" -> {
-                resimulate(request);
+                success = resimulate(request);
                 fixtureIdForReload = request.getParameter("fixtureId");
             }
-            default -> request.setAttribute("error", "Unknown simulation action requested");
+            default -> {
+                request.setAttribute("error", "Unknown simulation action requested");
+                success = false;
+            }
+        }
+
+        if (success) {
+            String redirect = request.getContextPath() + "/admin/simulation";
+            if (fixtureIdForReload != null && !fixtureIdForReload.isBlank()) {
+                redirect += "?fixtureId=" + URLEncoder.encode(fixtureIdForReload, StandardCharsets.UTF_8);
+            }
+            response.sendRedirect(redirect);
+            return;
         }
 
         loadPage(request, fixtureIdForReload);
         request.getRequestDispatcher(VIEW).forward(request, response);
     }
 
-    private void saveSettings(HttpServletRequest request) {
+    private boolean saveSettings(HttpServletRequest request) {
         String season = request.getParameter("season");
         BigDecimal playerAbilityWeight = parseDecimal(request.getParameter("playerAbilityWeight"));
         BigDecimal playerFormWeight = parseDecimal(request.getParameter("playerFormWeight"));
@@ -73,13 +88,13 @@ public class AdminSimulationServlet extends AbstractServlet {
         if (season == null || season.isBlank() || playerAbilityWeight == null || playerFormWeight == null
                 || teamBalanceWeight == null || randomVariationWeight == null) {
             request.setAttribute("error", "Season and all four weights are required to save simulation settings");
-            return;
+            return false;
         }
 
         Integer maxResimulations = parseInt(request.getParameter("maxResimulations"));
         if (maxResimulations == null) {
             request.setAttribute("error", "Max resimulations must be a valid whole number");
-            return;
+            return false;
         }
 
         SimulationSettingRequest settingRequest = new SimulationSettingRequest();
@@ -99,19 +114,19 @@ public class AdminSimulationServlet extends AbstractServlet {
                 : simulationSettingRestClient.createSimulationSetting(settingRequest);
 
         if (saved.isPresent()) {
-            request.setAttribute("success", "Simulation settings saved successfully");
-        } else {
-            request.setAttribute("error", "Simulation settings could not be saved");
+            return true;
         }
+        request.setAttribute("error", "Simulation settings could not be saved");
+        return false;
     }
 
-    private void resimulate(HttpServletRequest request) {
+    private boolean resimulate(HttpServletRequest request) {
         Optional<UUID> fixtureId = parseUuid(request.getParameter("fixtureId"));
         String reason = request.getParameter("resimulationReason");
 
         if (fixtureId.isEmpty()) {
             request.setAttribute("error", "A valid fixture is required to trigger a resimulation");
-            return;
+            return false;
         }
 
         ResimulationRequest resimulationRequest = new ResimulationRequest();
@@ -120,10 +135,10 @@ public class AdminSimulationServlet extends AbstractServlet {
 
         Optional<ResimulationResponse> result = resimulationRestClient.resimulateFixture(resimulationRequest);
         if (result.isPresent()) {
-            request.setAttribute("success", "Resimulation triggered successfully");
-        } else {
-            request.setAttribute("error", "Resimulation could not be triggered");
+            return true;
         }
+        request.setAttribute("error", "Resimulation could not be triggered");
+        return false;
     }
 
     private void loadPage(HttpServletRequest request, String fixtureIdParam) {

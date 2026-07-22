@@ -15,11 +15,10 @@
     <h1>${player.playerName}</h1>
 
     <dl>
-        <dt>Club</dt><dd>${player.club.clubName}</dd>
-        <dt>Position</dt><dd>${player.position.positionName}</dd>
+        <dt>Club</dt><dd>${clubNamesById[player.clubId]}</dd>
+        <dt>Position</dt><dd>${positionNamesById[player.positionId]}</dd>
         <dt>Value</dt><dd>${player.value}</dd>
         <dt>Current form</dt><dd>${player.currentForm}</dd>
-        <dt>Fantasy points</dt><dd>${player.totalFantasyPoints}</dd>
         <dt>Status</dt><dd>${player.active ? 'Active' : 'Inactive'}</dd>
     </dl>
 

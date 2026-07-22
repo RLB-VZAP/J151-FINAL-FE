@@ -34,13 +34,6 @@
                     <label for="reportType">Report Type</label>
                     <select id="reportType" name="reportType" required>
                         <option value="">-- Select Report Type --</option>
-                            <label for="reportType">Report Type</label>
-
-                                        <select id="reportType"
-                                                name="reportType"
-                                                required>
-
-                                            <option value="">-- Select Report Type --</option>
 
                                             <option value="ACTIVE_USERS"
                                                 <c:if test="${param.reportType == 'ACTIVE_USERS'}">selected</c:if>>

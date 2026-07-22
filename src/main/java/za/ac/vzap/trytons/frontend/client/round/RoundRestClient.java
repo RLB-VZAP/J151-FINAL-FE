@@ -4,6 +4,8 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import za.ac.vzap.trytons.frontend.client.shared.APIClient;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,7 +37,7 @@ public class RoundRestClient {
             LOG.log(Level.WARNING, "Status is required to list rounds by status.");
             return Optional.empty();
         }
-        String path = ROUNDS_PATH + "?status=" + status;
+        String path = ROUNDS_PATH + "?status=" + encode(status);
         Optional<RoundResponse[]> response = apiClient.get(path, RoundResponse[].class);
         if (response.isEmpty()) {
             LOG.log(Level.WARNING, "Unable to list rounds by status.");
@@ -53,5 +55,9 @@ public class RoundRestClient {
 
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
+    }
+
+    private String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 }

@@ -15,7 +15,11 @@ import za.ac.vzap.trytons.frontend.client.shared.APIClient;
 public class LeagueRestClient {
 
     private static final String LEAGUES_PATH = "/league";
-    private static final String MY_LEAGUES_PATH = "/league?mine=true";
+    // Backend LeagueResource.getAllLeagues() declares no @QueryParam - "mine" was always ignored and
+    // this returned the exact same public+member list as listPublicLeagues(). Kept as its own method
+    // (rather than collapsed into listPublicLeagues) so callers can filter client-side by managerUserId;
+    // see LeagueServlet, which is the only place that can actually narrow this to "my leagues".
+    private static final String MY_LEAGUES_PATH = "/league";
     private static final String JOIN_PATH = "/league/join";
 
     private static final Logger LOG = Logger.getLogger(LeagueRestClient.class.getName());
@@ -70,14 +74,17 @@ public class LeagueRestClient {
         return response;
     }
 
-    public Optional<LeagueResponse> joinLeague(JoinLeagueRequest request){
+    public Optional<JoinLeagueResponse> joinLeague(JoinLeagueRequest request){
 
         if (request == null || (request.getLeagueId() == null && isBlank(request.getLeagueCode()))) {
             LOG.log(Level.WARNING, "League id or code is required to join a league.");
             return Optional.empty();
         }
 
-        Optional<LeagueResponse> response = apiClient.post(JOIN_PATH, request, LeagueResponse.class);
+        // Backend POST /league/join returns a JoinLeagueResponseDTO (leagueId, leagueName, message,
+        // membershipId), not a full LeagueResponseDTO - deserializing into LeagueResponse here used to
+        // silently null out every field the backend never sends (description, leagueType, etc.).
+        Optional<JoinLeagueResponse> response = apiClient.post(JOIN_PATH, request, JoinLeagueResponse.class);
         if (response.isEmpty()) {
             LOG.log(Level.WARNING, "Unable to join league.");
         }
@@ -99,21 +106,18 @@ public class LeagueRestClient {
         return response.map(members -> new ArrayList<>(Arrays.asList(members)));
     }
 
-    public boolean removeMember(String leagueId, String membershipId){
+    // Backend returns 204 No Content on a successful removal, which APIClient.handle() always maps to
+    // Optional.empty() - so Optional emptiness can never distinguish success from failure here. Return
+    // Optional<Void> and let the caller check the request-scoped ApiCallStatus.isSuccess() instead.
+    public Optional<Void> removeMember(String leagueId, String membershipId){
 
         if (isBlank(leagueId) || isBlank(membershipId)) {
             LOG.log(Level.WARNING, "League id and membership id are required to remove a member.");
-            return false;
+            return Optional.empty();
         }
 
         String path = LEAGUES_PATH + "/" + leagueId + "/members/" + membershipId;
-
-        Optional<LeagueMemberResponse> response = apiClient.delete(path, LeagueMemberResponse.class);
-        if (response.isEmpty()) {
-            LOG.log(Level.WARNING, "Unable to remove member.");
-            return false;
-        }
-        return true;
+        return apiClient.delete(path, Void.class);
     }
 
     private boolean isValidLeagueRequest(LeagueRequest request) {

@@ -3,12 +3,11 @@ package za.ac.vzap.trytons.frontend.client.auth;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import za.ac.vzap.trytons.frontend.client.shared.APIClient;
+import za.ac.vzap.trytons.frontend.client.shared.ApiCallStatus;
 
 @Dependent
 public class AuthRestClient {
@@ -20,6 +19,8 @@ public class AuthRestClient {
     private static final Logger LOG = Logger.getLogger(AuthRestClient.class.getName());
     @Inject
     private APIClient apiClient ;
+    @Inject
+    private ApiCallStatus apiCallStatus;
 
     public Optional<RegisteredUserResponse> register(RegisteredUserRequest request){
         Optional<RegisteredUserResponse> response = apiClient.post(REGISTER_PATH,request,RegisteredUserResponse.class);
@@ -37,15 +38,10 @@ public class AuthRestClient {
     }
     public boolean logout(){
         apiClient.post(LOGOUT_PATH, null, Void.class);
-        return true;
+        return apiCallStatus.isSuccess();
     }
-    public Optional<AuthStatusResponse> getAuthStatus(String requestingUserId){
-        String path = STATUS_PATH + "?requestingUserId=" + encode(requestingUserId);
-        return apiClient.get(path, AuthStatusResponse.class);
-    }
-
-    public String encode(String value) {
-        return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    public Optional<AuthStatusResponse> getAuthStatus(){
+        return apiClient.get(STATUS_PATH, AuthStatusResponse.class);
     }
 
 }
