@@ -10,7 +10,7 @@ import java.util.UUID;
 @Getter
 @Setter
 public class FantasyTeamResponse {
-    private UUID teamID;
+    private UUID teamId;
     private String teamName;
     private UUID managerId;
     private String managerUsername;

@@ -55,6 +55,14 @@ public class AdminMatchResultServlet extends AbstractServlet {
             default -> request.setAttribute("error", "Unknown capture action requested");
         }
 
+        if (request.getAttribute("success") != null) {
+            String fixtureId = request.getParameter("fixtureId");
+            String redirectUrl = request.getContextPath() + "/admin/match-results"
+                    + (fixtureId != null && !fixtureId.isBlank() ? "?fixtureId=" + fixtureId : "");
+            response.sendRedirect(redirectUrl);
+            return;
+        }
+
         loadPage(request);
         request.getRequestDispatcher(VIEW).forward(request, response);
     }
@@ -62,15 +70,13 @@ public class AdminMatchResultServlet extends AbstractServlet {
     private void submitMatchResult(HttpServletRequest request) {
         String fixtureId = request.getParameter("fixtureId");
         Optional<UUID> fixtureUuid = parseUuid(fixtureId);
-        String actorId = request.getParameter("actorId");
-        Optional<UUID> actorUuid = parseUuid(actorId);
 
         if (fixtureUuid.isEmpty()) {
             request.setAttribute("error", "Please select a valid fixture before capturing a result");
             return;
         }
-        if (actorUuid.isEmpty()) {
-            request.setAttribute("error", "Actor Id can't be null");
+        if (authContext.getUserId() == null) {
+            request.setAttribute("error", "Your session has expired, please log in again");
             return;
         }
 

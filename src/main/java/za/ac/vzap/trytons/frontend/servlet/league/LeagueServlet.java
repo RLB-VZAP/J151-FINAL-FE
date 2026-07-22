@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import za.ac.vzap.trytons.frontend.client.league.JoinLeagueRequest;
+import za.ac.vzap.trytons.frontend.client.league.JoinLeagueResponse;
 import za.ac.vzap.trytons.frontend.client.league.LeagueMemberResponse;
 import za.ac.vzap.trytons.frontend.client.league.LeagueRequest;
 import za.ac.vzap.trytons.frontend.client.league.LeagueResponse;
@@ -13,6 +14,8 @@ import za.ac.vzap.trytons.frontend.client.league.LeagueRestClient;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
 
 @WebServlet(name = "LeagueServlet", urlPatterns = {"/leagues", "/league", "/league/create", "/league/join", "/league/members"})
@@ -35,10 +38,7 @@ public class LeagueServlet extends AbstractServlet {
                     request.setAttribute("error", "Unable to load leagues right now");
                 }
 
-                request.setAttribute("myLeagues",
-                        authContext.isAuthenticated()
-                                ? leagueRestClient.listMyLeagues().orElse(List.of())
-                                : List.of());
+                request.setAttribute("myLeagues", loadMyLeagues());
                 yield "/pages/leagues.jsp";
             }
 
@@ -63,6 +63,7 @@ public class LeagueServlet extends AbstractServlet {
                 String leagueId = request.getParameter("leagueId");
                 request.setAttribute("leagueId", leagueId);
                 request.setAttribute("members", reloadMembers(leagueId));
+                request.setAttribute("isLeagueManager", isCurrentUserManager(leagueId));
                 yield "/pages/league-members.jsp";
             }
 
@@ -79,49 +80,51 @@ public class LeagueServlet extends AbstractServlet {
         String submit = request.getParameter("submit");
         if (submit == null) submit = "";
 
-        String destination = switch (submit) {
+        switch (submit) {
             case "league/create" -> {
                 Optional<LeagueResponse> created = leagueRestClient.createLeague(buildLeagueRequest(request));
                 if (created.isPresent()) {
-                    request.setAttribute("success", "League created successfully");
-                    request.setAttribute("league", created.get());
-                } else {
-                    request.setAttribute("error", "Unable to create league. Check your details and try again.");
+                    response.sendRedirect(request.getContextPath() + "/league?leagueId=" + created.get().getLeagueId());
+                    return;
                 }
-                yield "/pages/create-league.jsp";
+                if (handleApiFailure(request, response, "Unable to create league. Check your details and try again.")) return;
+                request.getRequestDispatcher("/pages/create-league.jsp").forward(request, response);
             }
 
             case "league/join" -> {
                 JoinLeagueRequest joinRequest = new JoinLeagueRequest(
                         request.getParameter("leagueId"),
                         request.getParameter("leagueCode"));
-                Optional<LeagueResponse> joined = leagueRestClient.joinLeague(joinRequest);
+                Optional<JoinLeagueResponse> joined = leagueRestClient.joinLeague(joinRequest);
                 if (joined.isPresent()) {
-                    request.setAttribute("success", "You've joined the league");
-                    request.setAttribute("league", joined.get());
-                    yield "/pages/leagues.jsp";
+                    response.sendRedirect(request.getContextPath() + "/league?leagueId=" + joined.get().getLeagueId());
+                    return;
                 }
-
-                request.setAttribute("error", "Unable to join that league. Check the code or ID and try again.");
-                yield "/pages/join-league.jsp";
+                if (handleApiFailure(request, response, "Unable to join that league. Check the code or ID and try again.")) return;
+                request.getRequestDispatcher("/pages/join-league.jsp").forward(request, response);
             }
 
             case "league/members/remove" -> {
                 String leagueId = request.getParameter("leagueId");
                 String membershipId = request.getParameter("membershipId");
-                boolean removed = leagueId != null && membershipId != null
-                        && leagueRestClient.removeMember(leagueId, membershipId);
-                request.setAttribute(removed ? "success" : "error",
-                        removed ? "Member removed" : "Unable to remove member");
+                boolean removed = false;
+                if (leagueId != null && membershipId != null) {
+                    leagueRestClient.removeMember(leagueId, membershipId);
+                    removed = apiCallStatus.isSuccess();
+                }
+                if (removed) {
+                    response.sendRedirect(request.getContextPath() + "/league/members?leagueId=" + leagueId);
+                    return;
+                }
+                if (handleApiFailure(request, response, "Unable to remove member")) return;
                 request.setAttribute("leagueId", leagueId);
                 request.setAttribute("members", reloadMembers(leagueId));
-                yield "/pages/league-members.jsp";
+                request.setAttribute("isLeagueManager", isCurrentUserManager(leagueId));
+                request.getRequestDispatcher("/pages/league-members.jsp").forward(request, response);
             }
 
-            default -> "/index.jsp";
-        };
-
-        request.getRequestDispatcher(destination).forward(request, response);
+            default -> request.getRequestDispatcher("/index.jsp").forward(request, response);
+        }
     }
 
     private LeagueRequest buildLeagueRequest(HttpServletRequest request) {
@@ -135,6 +138,30 @@ public class LeagueServlet extends AbstractServlet {
     private List<LeagueMemberResponse> reloadMembers(String leagueId) {
         if (leagueId == null || leagueId.isBlank()) return List.of();
         return leagueRestClient.listMembers(leagueId).orElse(List.of());
+    }
+
+    // Backend GET /league takes no filter param - it always returns every public league plus every
+    // league the caller is a member of, so "my leagues" cannot be requested server-side. This narrows
+    // the result to leagues the current user manages (created). It cannot also include leagues the
+    // user has merely joined, since LeagueResponseDTO carries no per-league membership flag and there
+    // is no endpoint to check membership without listing members league-by-league.
+    private List<LeagueResponse> loadMyLeagues() {
+        if (!authContext.isAuthenticated()) return List.of();
+        UUID currentUserId = authContext.getUserId();
+        if (currentUserId == null) return List.of();
+        return leagueRestClient.listMyLeagues().orElse(List.of()).stream()
+                .filter(league -> currentUserId.equals(league.getManagerUserId()))
+                .collect(Collectors.toList());
+    }
+
+    private boolean isCurrentUserManager(String leagueId) {
+        if (leagueId == null || leagueId.isBlank() || !authContext.isAuthenticated()) return false;
+        UUID currentUserId = authContext.getUserId();
+        if (currentUserId == null) return false;
+        return leagueRestClient.getLeague(leagueId)
+                .map(LeagueResponse::getManagerUserId)
+                .map(currentUserId::equals)
+                .orElse(false);
     }
 
     private int parseIntOrZero(String value) {

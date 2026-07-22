@@ -6,9 +6,14 @@
     <title>Leaderboard</title>
 </head>
 <body>
+<%@ include file="/WEB-INF/jspf/navigation.jspf" %>
 
     <c:if test="${not empty error}">
         <p><c:out value="${error}" /></p>
+    </c:if>
+
+    <c:if test="${empty error and empty leaderboard and empty ranking}">
+        <p id="leaderboardEmptyState">No leaderboard entries found.</p>
     </c:if>
 
     <c:if test="${not empty leaderboard}">

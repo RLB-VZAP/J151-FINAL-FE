@@ -17,7 +17,16 @@ public class JoinLeagueRequest {
     private UUID teamId;
 
     public JoinLeagueRequest(String leagueId, String leagueCode) {
-        this.leagueId = UUID.fromString(leagueId);
+        UUID parsedLeagueId = null;
+        if (leagueId != null && !leagueId.isBlank()) {
+            try {
+                parsedLeagueId = UUID.fromString(leagueId.trim());
+            } catch (IllegalArgumentException ignored) {
+                // Invalid league id format - leave null so downstream validation treats this as
+                // an invalid join request instead of the constructor throwing a 500.
+            }
+        }
+        this.leagueId = parsedLeagueId;
         this.leagueCode = leagueCode;
     }
 }

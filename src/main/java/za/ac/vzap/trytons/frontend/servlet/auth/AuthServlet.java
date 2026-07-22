@@ -10,6 +10,7 @@ import za.ac.vzap.trytons.frontend.client.auth.LoginRequest;
 import za.ac.vzap.trytons.frontend.client.auth.LoginResponse;
 import za.ac.vzap.trytons.frontend.client.auth.RegisteredUserRequest;
 import za.ac.vzap.trytons.frontend.client.auth.RegisteredUserResponse;
+import za.ac.vzap.trytons.frontend.client.shared.ApiCallStatus;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -23,48 +24,74 @@ public class AuthServlet extends AbstractServlet {
     private AuthRestClient authRestClient;
 
     @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        switch (request.getServletPath()) {
+            case "/login" -> request.getRequestDispatcher("/pages/login.jsp").forward(request, response);
+            case "/register" -> request.getRequestDispatcher("/pages/register.jsp").forward(request, response);
+            case "/logout" -> {
+                authRestClient.logout();
+                clearAuthSession(request);
+                response.sendRedirect(request.getContextPath() + "/login");
+            }
+            default -> response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String submit = request.getParameter("submit");
         if (submit == null) {
             submit = "";
         }
-        String destination = switch (submit){
-            case "login" -> {
-                String identifier = request.getParameter("identifier");
-                String password = request.getParameter("password");
-                LoginRequest loginRequest = new LoginRequest(identifier, password);
-                Optional<LoginResponse> loginResponse = authRestClient.login(loginRequest);
-                if (loginResponse.isPresent()) {
-                    establishAuthenticatedSession(request,loginResponse.get());
-                    yield "/pages/dashboard.jsp";
-                }else {
-                    request.setAttribute("error", "Invalid login credentials");
-                    yield "/pages/login.jsp";
-                }
+        switch (submit) {
+            case "login" -> handleLogin(request, response);
+            case "register" -> handleRegister(request, response);
+            case "logout" -> handleLogout(request, response);
+            default -> request.getRequestDispatcher("/pages/login.jsp").forward(request, response);
+        }
+    }
 
-            }
-            case "register" ->{
-                String email       = request.getParameter("email");
-                String username    = request.getParameter("username");
-                String rawPassword = request.getParameter("rawPassword");
-                RegisteredUserRequest registerRequest = new RegisteredUserRequest(email, username, rawPassword);
-                Optional<RegisteredUserResponse> registerResponse = authRestClient.register(registerRequest);
-                if (registerResponse.isPresent()) {
-                    yield "/pages/login.jsp";
-                } else {
-                    request.setAttribute("error", "Registration failed");
-                    yield "/pages/register.jsp";
-                }
-            }
-            case "logout" -> {
-                authRestClient.logout();
-                clearAuthSession(request);
-                yield "/pages/login.jsp";
-                }
+    private void handleLogin(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String identifier = request.getParameter("identifier");
+        String password = request.getParameter("password");
+        Optional<LoginResponse> loginResponse = authRestClient.login(new LoginRequest(identifier, password));
+        if (loginResponse.isPresent()) {
+            establishAuthenticatedSession(request, loginResponse.get());
+            response.sendRedirect(request.getContextPath() + "/dashboard");
+            return;
+        }
+        String error;
+        if (apiCallStatus.isUnauthorized()) {
+            error = "Invalid username/email or password.";
+        } else if (apiCallStatus.getStatus() == ApiCallStatus.NETWORK_FAILURE || apiCallStatus.getStatus() >= 500) {
+            error = "The login service is currently unavailable. Please try again later.";
+        } else {
+            error = apiCallStatus.getMessage("Login failed. Please try again.");
+        }
+        request.setAttribute("error", error);
+        request.setAttribute("identifier", identifier);
+        request.getRequestDispatcher("/pages/login.jsp").forward(request, response);
+    }
 
-            default ->"/pages/login.jsp";
-        };
-        request.getRequestDispatcher(destination).forward(request, response);
+    private void handleRegister(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String email = request.getParameter("email");
+        String username = request.getParameter("username");
+        String rawPassword = request.getParameter("rawPassword");
+        Optional<RegisteredUserResponse> registerResponse = authRestClient.register(new RegisteredUserRequest(email, username, rawPassword));
+        if (registerResponse.isPresent()) {
+            response.sendRedirect(request.getContextPath() + "/login?registered=1");
+            return;
+        }
+        request.setAttribute("error", apiCallStatus.getMessage("Registration failed."));
+        request.setAttribute("email", email);
+        request.setAttribute("username", username);
+        request.getRequestDispatcher("/pages/register.jsp").forward(request, response);
+    }
+
+    private void handleLogout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        authRestClient.logout();
+        clearAuthSession(request);
+        response.sendRedirect(request.getContextPath() + "/login");
     }
 
     @Override

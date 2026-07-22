@@ -77,12 +77,11 @@ public class ProfileServlet extends AbstractServlet {
             // failed update (the backend treats a null field as "leave unchanged", so the form must
             // always show current data, not empty inputs).
             profileRestClient.getProfile().ifPresent(p -> request.setAttribute("profile", p));
-        } else {
-            request.setAttribute("success", "Profile updated successfully");
-            request.setAttribute("profile", updated.get());
+            request.getRequestDispatcher(PROFILE_VIEW).forward(request, response);
+            return;
         }
 
-        request.getRequestDispatcher(PROFILE_VIEW).forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/profile");
     }
 
     private void handleChangePassword(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -95,11 +94,13 @@ public class ProfileServlet extends AbstractServlet {
 
         boolean success = profileRestClient.changePassword(changeRequest);
         if (success) {
-            request.setAttribute("success", "Password changed successfully");
-        } else {
-            request.setAttribute("error", "Unable to change your password. Please check your current password and try again.");
+            response.sendRedirect(request.getContextPath() + "/profile/change-password");
+            return;
         }
 
+        if (handleApiFailure(request, response, "Unable to change your password. Please check your current password and try again.")) {
+            return;
+        }
         request.getRequestDispatcher(CHANGE_PASSWORD_VIEW).forward(request, response);
     }
 
