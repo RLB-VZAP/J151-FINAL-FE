@@ -15,7 +15,7 @@
 
     <body>
         <% request.setAttribute("activeNav", "create-team"); %>
-        <%@ include file="/WEB-INF/jspf/nav.jspf" %>
+        <%@ include file="/WEB-INF/jspf/navigation.jspf" %>
         <main>
             <h1>Create Team</h1>
             <p>Pick your players from the pool, keep an eye on your budget and give your team a name.</p>
@@ -51,7 +51,7 @@
 
                             <body>
                             <% request.setAttribute("activeNav", "create-team"); %>
-                            <%@ include file="/WEB-INF/jspf/nav.jspf" %>
+                            <%@ include file="/WEB-INF/jspf/navigation.jspf" %>
                             <main>
                                 <h1>Create Team</h1>
                                 <p>Pick your players from the pool, keep an eye on your budget and give your team a name.</p>

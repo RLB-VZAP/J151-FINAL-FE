@@ -23,22 +23,29 @@ public class APIClient {
     @Inject
     private SessionAuthContext authContext;
 
+    @Inject
+    private ApiCallStatus apiCallStatus;
+
     public<T> Optional<T> handle(Response response, Class<T> responseType) {
         int status = response.getStatus();
         if(status >= 200 && status < 300) {
+            apiCallStatus.record(status, null);
             if(responseType == Void.class || status == Response.Status.NO_CONTENT.getStatusCode()) {
 
                 return Optional.empty();
             }
             return Optional.ofNullable(response.readEntity(responseType));
         }
-        // A 401 means the caller's JWT is missing/expired/invalid — clear the local session right
-        // away so the servlet layer can detect "session just died" (via authContext.isAuthenticated())
-        // and redirect to login, distinct from a 404/500 which leaves the session intact.
-        if(status == Response.Status.UNAUTHORIZED.getStatusCode() && authContext != null) {
-            LOG.log(Level.WARNING, "Backend returned 401 Unauthorized - clearing local session");
-            authContext.clear();
+        // A non-2xx status (including 401) is recorded here for the servlet layer to inspect via
+        // ApiCallStatus. Session clearing on 401 happens in AbstractServlet, not here, so the
+        // CDI-scoped SessionAuthContext and the mirrored HttpSession attributes can never diverge.
+        ErrorResponse error = null;
+        try {
+            error = response.readEntity(ErrorResponse.class);
+        } catch (Exception e) {
+            LOG.log(Level.FINE, "Could not parse error body as ErrorResponse for status {0}", status);
         }
+        apiCallStatus.record(status, error);
         LOG.log(Level.WARNING, "Backend returned status: {0}", status);
         return Optional.empty();
     }
@@ -52,6 +59,7 @@ public class APIClient {
 
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "POST " + path + " failed", e);
+            apiCallStatus.recordNetworkFailure();
             return Optional.empty();
         }
     }
@@ -64,6 +72,7 @@ public class APIClient {
             }
         } catch (ProcessingException e) {
             LOG.log(Level.SEVERE, "GET " + path + " failed", e);
+            apiCallStatus.recordNetworkFailure();
             return Optional.empty();
         }
     }
@@ -76,6 +85,7 @@ public class APIClient {
             }
         } catch (ProcessingException e) {
             LOG.log(Level.SEVERE, "PUT " + path + " failed", e);
+            apiCallStatus.recordNetworkFailure();
             return Optional.empty();
         }
     }
@@ -88,6 +98,7 @@ public class APIClient {
             }
         } catch (ProcessingException e) {
             LOG.log(Level.SEVERE, "DELETE " + path + " failed", e);
+            apiCallStatus.recordNetworkFailure();
             return Optional.empty();
         }
     }
@@ -96,8 +107,16 @@ public class APIClient {
     public <T>Optional<T> handleList(Response response, GenericType<T> responseGenericType) {
         int status = response.getStatus();
         if(status >= 200 && status < 300) {
+            apiCallStatus.record(status, null);
             return Optional.ofNullable(response.readEntity(responseGenericType));
         }
+        ErrorResponse error = null;
+        try {
+            error = response.readEntity(ErrorResponse.class);
+        } catch (Exception e) {
+            LOG.log(Level.FINE, "Could not parse error body as ErrorResponse for status {0}", status);
+        }
+        apiCallStatus.record(status, error);
         LOG.log(Level.WARNING, "Backend returned status: {0}", status);
         return Optional.empty();
     }
@@ -111,6 +130,7 @@ public class APIClient {
             }
         } catch (ProcessingException e) {
             LOG.log(Level.SEVERE, "GET " + path + " failed", e);
+            apiCallStatus.recordNetworkFailure();
             return Optional.empty();
         }
     }
