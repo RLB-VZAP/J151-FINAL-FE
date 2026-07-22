@@ -23,7 +23,7 @@
 </p>
 
 <%-- Both public and private joins go through the same submission; the join code
-     is only required when the league you're joining is private. --%>
+    is only required when the league you're joining is private. --%>
 <form method="post" action="${pageContext.request.contextPath}/league/join" id="joinLeagueForm">
     <input type="hidden" name="submit" value="league/join" />
 
@@ -33,7 +33,7 @@
         <div>
             <label for="leagueId">League ID</label>
             <input type="text" id="leagueId" name="leagueId"
-                   value="${param.leagueId}" required>
+                    value="${param.leagueId}" required>
         </div>
     </section>
 

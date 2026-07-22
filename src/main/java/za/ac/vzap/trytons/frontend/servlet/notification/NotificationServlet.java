@@ -73,8 +73,6 @@ public class NotificationServlet extends AbstractServlet {
         request.getRequestDispatcher(VIEW).forward(request, response);
     }
 
-    // Loads the notification list into the "notifications" attribute. Returns false if a session
-    // expiry redirect was already sent (caller must return immediately in that case).
     private boolean loadNotifications(HttpServletRequest request, HttpServletResponse response, boolean unreadOnly) throws IOException {
         Optional<List<NotificationResponse>> notifications = notificationRestClient.getNotifications(unreadOnly);
         if (notifications.isEmpty()) {

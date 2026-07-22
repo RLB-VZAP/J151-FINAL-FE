@@ -73,9 +73,6 @@ public class ProfileServlet extends AbstractServlet {
                 return;
             }
             request.setAttribute("error", "Unable to update your profile");
-            // Reload the current profile so the form is still pre-filled with real values after a
-            // failed update (the backend treats a null field as "leave unchanged", so the form must
-            // always show current data, not empty inputs).
             profileRestClient.getProfile().ifPresent(p -> request.setAttribute("profile", p));
             request.getRequestDispatcher(PROFILE_VIEW).forward(request, response);
             return;

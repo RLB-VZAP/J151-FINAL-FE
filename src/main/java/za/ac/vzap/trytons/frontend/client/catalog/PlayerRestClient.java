@@ -16,11 +16,11 @@ import za.ac.vzap.trytons.frontend.client.shared.APIClient;
 
 @Dependent
 public class PlayerRestClient {
-    private String LIST_PLAYERS ="/player";
-    private String GET_PLAYER = "/player";
-    private String CREATE_PLAYER = "/player";
-    private String UPDATE_PLAYER ="/player";
-    private String PLAYER_AVAILABILITY ="/player";
+    private final String LIST_PLAYERS ="/player";
+    private final String GET_PLAYER = "/player";
+    private final String CREATE_PLAYER = "/player";
+    private final String UPDATE_PLAYER ="/player";
+    private final String PLAYER_AVAILABILITY ="/player";
 
     private static final Logger LOG = Logger.getLogger(PlayerRestClient.class.getName());
     @Inject

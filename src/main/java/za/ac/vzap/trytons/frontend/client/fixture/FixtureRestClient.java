@@ -13,7 +13,7 @@ import za.ac.vzap.trytons.frontend.client.shared.APIClient;
 @Dependent
 public class FixtureRestClient {
     private static final String FIXTURE_PATH = "/fixtures";
-   private static final Logger LOG = Logger.getLogger(FixtureRestClient.class.getName());
+    private static final Logger LOG = Logger.getLogger(FixtureRestClient.class.getName());
 
     @Inject
     private APIClient apiClient;

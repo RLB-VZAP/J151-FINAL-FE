@@ -11,14 +11,10 @@ import java.util.UUID;
 public class LockStatusResponse {
 
     private UUID roundId;
-
     private String roundStatus;
-
     private List<UUID> lockedPlayerIds;
     private List<UUID> lockedTeamIds;
-
     private boolean locked;
     private boolean snapshotsCreated;
-
     private String message;
 }
