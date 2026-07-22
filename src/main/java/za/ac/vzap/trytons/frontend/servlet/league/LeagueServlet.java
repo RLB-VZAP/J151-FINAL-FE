@@ -11,8 +11,13 @@ import za.ac.vzap.trytons.frontend.client.league.LeagueMemberResponse;
 import za.ac.vzap.trytons.frontend.client.league.LeagueRequest;
 import za.ac.vzap.trytons.frontend.client.league.LeagueResponse;
 import za.ac.vzap.trytons.frontend.client.league.LeagueRestClient;
+import za.ac.vzap.trytons.frontend.client.leaderboard.LeaderboardEntryResponse;
+import za.ac.vzap.trytons.frontend.client.leaderboard.LeaderboardRestClient;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -23,6 +28,9 @@ public class LeagueServlet extends AbstractServlet {
 
     @Inject
     private LeagueRestClient leagueRestClient;
+
+    @Inject
+    private LeaderboardRestClient leaderboardRestClient;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -39,6 +47,7 @@ public class LeagueServlet extends AbstractServlet {
                 }
 
                 request.setAttribute("myLeagues", loadMyLeagues());
+                populateLeaguesView(request, publicLeagues.orElseGet(List::of));
                 yield "/pages/leagues.jsp";
             }
 
@@ -152,6 +161,64 @@ public class LeagueServlet extends AbstractServlet {
         return leagueRestClient.listMyLeagues().orElse(List.of()).stream()
                 .filter(league -> currentUserId.equals(league.getManagerUserId()))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Supplies the extra data the leagues page needs beyond the raw league lists:
+     * the master leaderboard behind the spotlight, per-league member counts, the
+     * standings behind each mini leaderboard, and the split between leagues the
+     * user belongs to and ones they could still join.
+     *
+     * Membership is derived from the member lists rather than {@link #loadMyLeagues()},
+     * which can only detect leagues the user *manages* — LeagueResponseDTO carries no
+     * membership flag. The member list is fetched anyway for the counts, so reusing it
+     * costs nothing and makes "Your leagues" reflect joined leagues too.
+     *
+     * One listMembers call per league. Fine at this scale; worth revisiting if the
+     * league count grows.
+     */
+    private void populateLeaguesView(HttpServletRequest request, List<LeagueResponse> publicLeagues) {
+        List<LeagueResponse> candidates = authContext.isAuthenticated()
+                ? leagueRestClient.listMyLeagues().orElse(publicLeagues)
+                : publicLeagues;
+
+        UUID currentUserId = authContext.isAuthenticated() ? authContext.getUserId() : null;
+        String currentUsername = authContext.getUsername();
+
+        Map<String, Integer> memberCounts = new HashMap<>();
+        Map<String, List<LeaderboardEntryResponse>> leagueStandings = new HashMap<>();
+        List<LeagueResponse> memberLeagues = new ArrayList<>();
+        List<LeagueResponse> discoverLeagues = new ArrayList<>();
+
+        for (LeagueResponse league : candidates) {
+            String leagueId = league.getLeagueId();
+            if (leagueId == null || leagueId.isBlank()) continue;
+
+            List<LeagueMemberResponse> members = leagueRestClient.listMembers(leagueId).orElse(List.of());
+            List<LeagueMemberResponse> active = members.stream()
+                    .filter(LeagueMemberResponse::isActive)
+                    .collect(Collectors.toList());
+            memberCounts.put(leagueId, active.size());
+
+            boolean isMember = currentUserId != null && active.stream()
+                    .anyMatch(member -> currentUserId.toString().equals(member.getUserId()));
+            boolean isManager = currentUserId != null && currentUserId.equals(league.getManagerUserId());
+
+            if (isMember || isManager) {
+                memberLeagues.add(league);
+                parseUuid(leagueId).ifPresent(id -> leaderboardRestClient.getLeaderboardForLeague(id)
+                        .ifPresent(standings -> leagueStandings.put(leagueId, standings)));
+            } else if ("PUBLIC".equalsIgnoreCase(league.getLeagueType())) {
+                discoverLeagues.add(league);
+            }
+        }
+
+        request.setAttribute("memberLeagues", memberLeagues);
+        request.setAttribute("discoverLeagues", discoverLeagues);
+        request.setAttribute("memberCounts", memberCounts);
+        request.setAttribute("leagueStandings", leagueStandings);
+        request.setAttribute("currentUsername", currentUsername);
+        request.setAttribute("masterStandings", leaderboardRestClient.getOverallLeaderboard().orElse(List.of()));
     }
 
     private boolean isCurrentUserManager(String leagueId) {
