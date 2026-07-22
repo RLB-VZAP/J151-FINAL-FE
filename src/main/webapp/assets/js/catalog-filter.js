@@ -34,7 +34,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var noun = root.getAttribute("data-catalog-noun") || "result";
     var suffix = root.getAttribute("data-catalog-count-suffix") || "";
-    var rows = Array.prototype.slice.call(body.querySelectorAll(".crow"));
+    // Any direct child of the body is a row, so this drives both the table pages
+    // (.crow divs) and the card grids (.lg-card articles) without either having
+    // to adopt the other's class.
+    var rows = Array.prototype.slice.call(body.children);
 
     function matches(row) {
         if (search) {

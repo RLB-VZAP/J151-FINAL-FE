@@ -513,6 +513,36 @@
     margin: 0;
 }
 
+/* ---------- Join page: private-code card ------------------------------------------ */
+.lg-code-card {
+    margin-top: 26px;
+    max-width: 620px;
+}
+
+.lg-code-form {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 18px 0 0;
+    flex-wrap: wrap;
+}
+
+.lg-code-form .search-wrap {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* Match the 44px field beside it; the card-footer Join is deliberately smaller. */
+.lg-code-form .lg-join {
+    height: 44px;
+    padding: 0 1.2rem;
+}
+
+/* The join page pairs the count with the search box rather than the page header. */
+.catalog-toolbar .catalog-count {
+    margin-left: auto;
+}
+
 /* ---------- Narrow screens -------------------------------------------------------- */
 @media (max-width: 900px) {
     .lg-spotlight-inner {
