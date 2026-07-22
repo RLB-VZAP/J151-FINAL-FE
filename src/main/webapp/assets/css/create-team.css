@@ -27,6 +27,19 @@
     }
 }
 
+/* ---------- Budget note beside the search box -------------------------------------- */
+/* Pushed to the far end of the toolbar, opposite the search field. */
+.ct-budget-note {
+    margin: 0 0 0 auto;
+    color: var(--silver-dim);
+    font-size: .85rem;
+}
+
+.ct-budget-note strong {
+    color: var(--gold-bright);
+    font-weight: 600;
+}
+
 /* ---------- Player pool ----------------------------------------------------------- */
 /* Select · Name · Club · Position · Value · Status */
 .ct-page .crow {
