@@ -69,9 +69,22 @@ public class LeagueServlet extends AbstractServlet {
             case "/league/join" -> {
                 // The page browses public leagues by name rather than asking for an id,
                 // so it needs the same list and member counts the leagues hub uses.
-                Optional<List<LeagueResponse>> joinable = leagueRestClient.listPublicLeagues();
-                request.setAttribute("publicLeagues", joinable.orElseGet(List::of));
-                request.setAttribute("memberCounts", countMembers(joinable.orElseGet(List::of)));
+                Optional<List<LeagueResponse>> allVisible = leagueRestClient.listPublicLeagues();
+                if (allVisible.isEmpty()) {
+                    // GET /league is @Authenticated, so an expired session returns nothing.
+                    // Without this the page just showed "0 leagues" and looked broken.
+                    request.setAttribute("error", authContext.isAuthenticated()
+                            ? "Unable to load leagues right now. Please try again."
+                            : "Please sign in to browse and join leagues.");
+                }
+                // The endpoint returns every public league PLUS any private league the
+                // caller belongs to, so filter: a private league must not be listed here
+                // as joinable, and must never be labelled Public.
+                List<LeagueResponse> joinable = allVisible.orElseGet(List::of).stream()
+                        .filter(league -> "PUBLIC".equalsIgnoreCase(league.getLeagueType()))
+                        .collect(Collectors.toList());
+                request.setAttribute("publicLeagues", joinable);
+                request.setAttribute("memberCounts", countMembers(joinable));
                 yield "/pages/join-league.jsp";
             }
 
