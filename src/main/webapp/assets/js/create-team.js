@@ -18,7 +18,8 @@
   var budget = parseFloat(form.getAttribute("data-budget")) || 0;
 
   var picks = Array.prototype.slice.call(form.querySelectorAll('input[name="playerIds"]'));
-  var rows = Array.prototype.slice.call(form.querySelectorAll("tbody tr"));
+  // The pool is a CSS grid rather than a <table>, so rows are marked explicitly.
+  var rows = Array.prototype.slice.call(form.querySelectorAll("[data-team-row]"));
 
   var searchInput = document.getElementById("playerSearch");
   var budgetUsed = document.getElementById("budgetUsed");
@@ -27,10 +28,12 @@
   var selectedList = document.getElementById("selectedList");
   var overWarning = document.getElementById("overBudgetWarning");
 
-  // Matches the money tag's plain form (no space after R, en-ZA separators) so
-  // the live totals look identical to the server-rendered budget above them.
+  // Mirrors the money tag exactly — "R12,5m": no space after R, en-ZA comma
+  // decimal, always one decimal place, and the millions suffix. Values and the
+  // budget are both on the millions scale, so the live totals have to read the
+  // same way as the server-rendered ones beside them.
   function formatValue(n) {
-    return "R" + n.toLocaleString("en-ZA", { maximumFractionDigits: 2 });
+    return "R" + n.toLocaleString("en-ZA", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "m";
   }
 
   /* Budget & selection preview (UX only — backend calculates finals) */
@@ -41,6 +44,11 @@
     if (selectedList) selectedList.innerHTML = "";
 
     picks.forEach(function (pick) {
+      // Tint the whole row of a picked player, so the choice stays visible
+      // while scrolling a long pool.
+      var row = pick.closest("[data-team-row]");
+      if (row) row.classList.toggle("is-picked", pick.checked);
+
       if (!pick.checked) return;
 
       count++;

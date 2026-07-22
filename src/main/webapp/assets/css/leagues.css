@@ -513,6 +513,64 @@
     margin: 0;
 }
 
+/* ---------- "You need a team first" notice ----------------------------------------- */
+/* Shown above the league lists when the signed-in user has no fantasy team.
+   Joining is impossible until then (leagueMembership.teamId is NOT NULL), so
+   the page explains it rather than letting the join fail. */
+.lg-noteam {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 26px 0 0;
+    padding: 18px 22px;
+    border: 1px solid var(--gold-deep);
+    border-radius: 14px;
+    background: rgba(201, 162, 39, .07);
+}
+
+.lg-noteam-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 11px;
+    background: rgba(201, 162, 39, .16);
+    color: var(--gold);
+}
+
+.lg-noteam-text {
+    flex: 1;
+    min-width: 200px;
+}
+
+.lg-noteam-title {
+    margin: 0;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: 1.02rem;
+    font-weight: 600;
+    color: var(--silver-bright);
+}
+
+.lg-noteam-sub {
+    margin: .25rem 0 0;
+    color: var(--silver);
+    font-size: .84rem;
+}
+
+.lg-noteam .btn-gold {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 40px;
+    padding: 0 1rem;
+    flex-shrink: 0;
+    text-decoration: none;
+    border-bottom: none;
+}
+
 /* ---------- Join page: private-code card ------------------------------------------ */
 .lg-code-card {
     margin-top: 26px;

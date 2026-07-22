@@ -167,6 +167,10 @@
                     </section>
                 </c:if>
 
+                <%-- The master leaderboard above still renders for everyone; only the
+                     join actions below are gated on having a team. --%>
+                <%@ include file="/WEB-INF/jspf/no-team-notice.jspf" %>
+
                 <%-- ---------- Tabs ---------- --%>
                 <div class="lg-tabs" role="tablist">
                     <button type="button" class="lg-tab is-active" data-lg-tab="mine" role="tab" aria-selected="true">
@@ -295,7 +299,10 @@
                                             <form class="lg-join-form" action="${pageContext.request.contextPath}/league/join" method="post">
                                                 <input type="hidden" name="submit" value="league/join">
                                                 <input type="hidden" name="leagueId" value="${fn:escapeXml(openLeague.leagueId)}">
-                                                <button type="submit" class="btn-gold lg-join" ${spotsLeft <= 0 ? 'disabled' : ''}>Join</button>
+                                                <%-- Disabled without a team: the join would be rejected anyway. --%>
+                                                <button type="submit" class="btn-gold lg-join"
+                                                        ${spotsLeft <= 0 or not hasTeam ? 'disabled' : ''}
+                                                        title="${not hasTeam ? 'Create a team before joining a league' : ''}">Join</button>
                                             </form>
                                         </div>
                                     </article>
