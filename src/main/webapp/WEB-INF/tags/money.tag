@@ -1,17 +1,20 @@
 <%--
     Renders a rand amount consistently across the app.
 
-    Default is the "millions" form used for player and transfer values, which
-    are stored as e.g. 12.5 meaning R12,5m. Pass plain="true" for amounts
-    already denominated in whole rands (budgets, team totals) to get
-    R50 000 000 instead.
+    Default is the "millions" form: amounts are stored as e.g. 12.5 meaning
+    R12,5m. Player values, team totals and budgets are all on this scale, so
+    they all use the default.
+
+    plain="true" renders a whole-rand amount as R50 000 000 instead. Nothing
+    uses it today — it is here for any future amount genuinely denominated in
+    rands rather than millions.
 
     The locale is pinned to en_ZA so the decimal separator does not follow each
     visitor's browser: money reads with a comma everywhere. Ratings use the
     rating tag, which deliberately keeps a period.
 
     Usage:  <t:money value="${player.value}" />
-            <t:money value="${budget}" plain="true" />
+            <t:money value="${someWholeRandAmount}" plain="true" />
 --%>
 <%@ tag body-content="empty" trimDirectiveWhitespaces="true" %>
 <%@ attribute name="value" required="true" type="java.lang.Object" %>
