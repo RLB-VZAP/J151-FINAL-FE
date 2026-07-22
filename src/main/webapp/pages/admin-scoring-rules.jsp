@@ -97,31 +97,31 @@
             <div class="field">
                 <label for="eventType">Event type</label>
                 <input type="text" id="eventType" name="eventType"
-                       value="${not empty editingRule ? fn:escapeXml(editingRule.eventType) : ''}" required>
+                        value="${not empty editingRule ? fn:escapeXml(editingRule.eventType) : ''}" required>
             </div>
 
             <div class="field">
                 <label for="pointsAwarded">Points awarded</label>
                 <input type="number" id="pointsAwarded" name="pointsAwarded" step="1"
-                       value="${not empty editingRule ? editingRule.pointsAwarded : ''}" required>
+                        value="${not empty editingRule ? editingRule.pointsAwarded : ''}" required>
             </div>
 
             <div class="field">
                 <label for="season">Season</label>
                 <input type="text" id="season" name="season"
-                       value="${not empty editingRule ? fn:escapeXml(editingRule.season) : fn:escapeXml(selectedSeason)}" required>
+                        value="${not empty editingRule ? fn:escapeXml(editingRule.season) : fn:escapeXml(selectedSeason)}" required>
             </div>
 
             <div class="field">
                 <label for="description">Description</label>
                 <input type="text" id="description" name="description"
-                       value="${not empty editingRule ? fn:escapeXml(editingRule.description) : ''}">
+                        value="${not empty editingRule ? fn:escapeXml(editingRule.description) : ''}">
             </div>
 
             <div class="field field-checkbox">
                 <label for="active">
                     <input type="checkbox" id="active" name="active"
-                           ${(empty editingRule) or editingRule.active ? 'checked' : ''}>
+                            ${(empty editingRule) or editingRule.active ? 'checked' : ''}>
                     Active
                 </label>
             </div>
@@ -129,7 +129,7 @@
             <div class="field field-checkbox">
                 <label for="isDeduction">
                     <input type="checkbox" id="isDeduction" name="isDeduction"
-                           ${(not empty editingRule) and editingRule.isDeduction ? 'checked' : ''}>
+                            ${(not empty editingRule) and editingRule.isDeduction ? 'checked' : ''}>
                     Deduction
                 </label>
             </div>
