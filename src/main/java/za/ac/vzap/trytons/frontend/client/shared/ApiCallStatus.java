@@ -6,9 +6,6 @@ import lombok.Getter;
 import java.io.Serial;
 import java.io.Serializable;
 
-// Records the outcome of the most recent backend call made during this request so servlets can tell
-// 401 from 403/404/409/422/500 - the REST clients still return Optional<T>, which on its own cannot
-// distinguish "not found" from "session expired" from "a 204 success with no body".
 @RequestScoped
 @Getter
 public class ApiCallStatus implements Serializable {

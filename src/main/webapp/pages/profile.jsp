@@ -59,7 +59,7 @@
     <section id="profileUpdateSection">
         <h2>Update profile</h2>
         <%-- The backend treats a null field as "leave unchanged", so every input is pre-filled with
-             the current profile value - submitting without editing a field must not blank it out. --%>
+                the current profile value - submitting without editing a field must not blank it out. --%>
         <form method="post" action="${pageContext.request.contextPath}/profile" id="profileUpdateForm">
             <div>
                 <label for="username">Username</label>

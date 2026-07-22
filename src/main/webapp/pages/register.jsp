@@ -25,21 +25,21 @@
 <div>
 <label for="email">Email Address</label>
 <input
-      type="email"
-      id="email"
-      name="email"
-      value="${fn:escapeXml(email)}"
-      required>
+        type="email"
+        id="email"
+        name="email"
+        value="${fn:escapeXml(email)}"
+        required>
 </div>
 <br>
 <div>
 <label for = "username">Username</label>
 <input
-      type="text"
-      id="username"
-      name="username"
-      value="${fn:escapeXml(username)}"
-      required>
+        type="text"
+        id="username"
+        name="username"
+        value="${fn:escapeXml(username)}"
+        required>
 </div>
 
 <br>

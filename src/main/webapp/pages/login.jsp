@@ -27,25 +27,25 @@ Your session has expired. Please log in again.
 </c:if>
 
 <%
-  String errorMessage = (String) request.getAttribute("error");
-  if (errorMessage != null && !errorMessage.isBlank()) {
+    String errorMessage = (String) request.getAttribute("error");
+    if (errorMessage != null && !errorMessage.isBlank()) {
 %>
 <p class="error-message" role="alert">
 <%= errorMessage %>
 </p>
 <%
-  }
+    }
 %>
 <form method="post" action="${pageContext.request.contextPath}/login">
 <div>
 <label for="identifier">Username or email address</label>
 <input
-      type="text"
-      id="identifier"
-      name="identifier"
-      value="${fn:escapeXml(identifier)}"
-      required
-      autocomplete="username">
+    type="text"
+    id="identifier"
+    name="identifier"
+    value="${fn:escapeXml(identifier)}"
+    required
+    autocomplete="username">
 </div>
 <br>
 <div>

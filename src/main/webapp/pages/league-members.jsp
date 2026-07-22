@@ -50,12 +50,12 @@
                                 <td><c:out value="${member.teamDisplayName}" /></td>
                                 <td>
                                     <%-- Remove control is only shown to the league manager as a UI convenience;
-                                         the backend remains the sole judge of whether the current user is
-                                         actually allowed to remove this member, and will reject the request
-                                         with a safe error message if not. --%>
+                                        the backend remains the sole judge of whether the current user is
+                                        actually allowed to remove this member, and will reject the request
+                                        with a safe error message if not. --%>
                                     <c:if test="${isLeagueManager}">
                                         <form method="post" action="${pageContext.request.contextPath}/league/members"
-                                              class="member-remove-form">
+                                            class="member-remove-form">
                                             <input type="hidden" name="submit" value="league/members/remove" />
                                             <input type="hidden" name="leagueId" value="${leagueId}" />
                                             <input type="hidden" name="membershipId" value="${member.membershipId}" />

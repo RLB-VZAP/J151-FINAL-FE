@@ -12,13 +12,9 @@ import za.ac.vzap.trytons.frontend.client.shared.APIClient;
 
 @Dependent
 public class AdminMatchResultRestClient {
-    // Backend routes (W4-FE-FIXES-11 fix): MatchResultResource is @Path("/match-results") with
-    // POST / (fixtureId travels inside MatchResultRequestDTO's body, not the URL) and
-    // GET /fixture/{fixtureId}; PlayerStatisticsResource is @Path("/player-statistics") with
-    // POST / (resultId/teamId/playerId travel inside PlayerStatisticsRequestDTO's body).
-    private String SUBMIT_MATCH_RESULT = "/match-results";
-    private String GET_MATCH_RESULT = "/match-results/fixture";
-    private String SUBMIT_PLAYER_RESULT = "/player-statistics";
+    private final String SUBMIT_MATCH_RESULT = "/match-results";
+    private final String GET_MATCH_RESULT = "/match-results/fixture";
+    private final String SUBMIT_PLAYER_RESULT = "/player-statistics";
 
     private static final Logger LOG = Logger.getLogger(AdminMatchResultRestClient.class.getName());
     @Inject

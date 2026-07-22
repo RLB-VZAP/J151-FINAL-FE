@@ -35,8 +35,7 @@ public class NotificationRestClient {
         return response.map(notifications -> new ArrayList<>(Arrays.asList(notifications)));
     }
 
-    // Backend wraps the count in a single-key JSON object ({"unreadCount": N}), not a bare integer —
-    // deserialize into UnreadCountResponse and unwrap so the method can still return Optional<Integer>.
+
     public Optional<Integer> getUnreadCount() {
         Optional<UnreadCountResponse> response = apiClient.get(UNREAD_COUNT_PATH, UnreadCountResponse.class);
         if (response.isEmpty()) {
@@ -59,8 +58,6 @@ public class NotificationRestClient {
         return response;
     }
 
-    // Backend wraps the count in a single-key JSON object ({"updatedCount": N}), not a bare integer —
-    // deserialize into UpdatedCountResponse and unwrap so the method can still return Optional<Integer>.
     public Optional<Integer> markAllAsRead() {
         Optional<UpdatedCountResponse> response = apiClient.put(READ_ALL_PATH, null, UpdatedCountResponse.class);
         if (response.isEmpty()) {
