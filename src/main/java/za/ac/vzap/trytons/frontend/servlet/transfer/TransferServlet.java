@@ -294,9 +294,20 @@ public class TransferServlet extends AbstractServlet {
             return Optional.of(round);
         }
         Optional<RoundResponse> round = roundRestClient.getCurrentOpenRound();
-        round.ifPresent(value -> request.setAttribute("round", value));
+        round.ifPresent(value -> {
+            request.setAttribute("round", value);
+            // lockDeadline is a LocalDateTime and fmt:formatDate takes java.util.Date,
+            // so the display string is built here rather than in the JSP.
+            if (value.getLockDeadline() != null) {
+                request.setAttribute("lockDeadlineLabel",
+                        value.getLockDeadline().format(DEADLINE_FORMAT));
+            }
+        });
         return round;
     }
+
+    private static final java.time.format.DateTimeFormatter DEADLINE_FORMAT =
+            java.time.format.DateTimeFormatter.ofPattern("d MMM, HH:mm", java.util.Locale.UK);
 
     /**
      * Free transfers left this round.

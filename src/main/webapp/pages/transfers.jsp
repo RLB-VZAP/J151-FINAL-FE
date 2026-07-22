@@ -1,7 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
-<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
 <!DOCTYPE html>
@@ -42,8 +41,8 @@
                 <c:if test="${not empty round}">
                     <p class="tf-status-line">
                         Round ${round.roundNumber}
-                        <c:if test="${not empty round.lockDeadline}">
-                            &middot; Deadline <fmt:formatDate value="${round.lockDeadline}" pattern="d MMM, HH:mm" />
+                        <c:if test="${not empty lockDeadlineLabel}">
+                            &middot; Deadline ${lockDeadlineLabel}
                         </c:if>
                     </p>
                 </c:if>
