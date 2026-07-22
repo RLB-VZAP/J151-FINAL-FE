@@ -202,3 +202,17 @@
         margin-top: 10px;
     }
 }
+
+/* ---------- Unread badge on the Notifications item ---------------------------- */
+/* Rendered by sidebar.jspf when a page supplies a sidebarUnreadCount attribute.
+   Lives here rather than in notifications.css so it is styled on every page that
+   opts in, not just the notifications page itself. */
+.sidebar-badge {
+    margin-left: auto;
+    padding: .05rem .4rem;
+    border-radius: 999px;
+    background: var(--gold);
+    color: #141f0e;
+    font-size: .68rem;
+    font-weight: 700;
+}
