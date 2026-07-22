@@ -78,7 +78,7 @@
                             <td>${setting.isActive ? 'Yes' : 'No'}</td>
                             <td>
                                 <a href="#simulationSettingForm"
-                                   onclick="return trytonsFillSettingsForm('${setting.settingsId}','${fn:escapeXml(setting.season)}','${setting.playerAbilityWeight}','${setting.playerFormWeight}','${setting.teamBalanceWeight}','${setting.randomVariationWeight}',${setting.requireAdminApproval},${setting.allowResimulation},'${setting.maxResimulations}',${setting.isActive});">Edit</a>
+                                    onclick="return trytonsFillSettingsForm('${setting.settingsId}','${fn:escapeXml(setting.season)}','${setting.playerAbilityWeight}','${setting.playerFormWeight}','${setting.teamBalanceWeight}','${setting.randomVariationWeight}',${setting.requireAdminApproval},${setting.allowResimulation},'${setting.maxResimulations}',${setting.isActive});">Edit</a>
                             </td>
                         </tr>
                     </c:forEach>
