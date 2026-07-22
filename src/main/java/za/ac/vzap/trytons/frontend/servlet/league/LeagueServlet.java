@@ -13,6 +13,7 @@ import za.ac.vzap.trytons.frontend.client.league.LeagueResponse;
 import za.ac.vzap.trytons.frontend.client.league.LeagueRestClient;
 import za.ac.vzap.trytons.frontend.client.leaderboard.LeaderboardEntryResponse;
 import za.ac.vzap.trytons.frontend.client.leaderboard.LeaderboardRestClient;
+import za.ac.vzap.trytons.frontend.client.fantasyteam.FantasyTeamRestClient;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +33,18 @@ public class LeagueServlet extends AbstractServlet {
     @Inject
     private LeaderboardRestClient leaderboardRestClient;
 
+    @Inject
+    private FantasyTeamRestClient fantasyTeamRestClient;
+
+    /**
+     * A league membership requires a team (leagueMembership.teamId is NOT NULL),
+     * so joining is impossible until the user has created one. Both league pages
+     * use this to explain that up front rather than letting a join fail.
+     */
+    private boolean currentUserHasTeam() {
+        return authContext.isAuthenticated() && fantasyTeamRestClient.getMyTeam().isPresent();
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String path = request.getServletPath();
@@ -47,6 +60,7 @@ public class LeagueServlet extends AbstractServlet {
                 }
 
                 request.setAttribute("myLeagues", loadMyLeagues());
+                request.setAttribute("hasTeam", currentUserHasTeam());
                 populateLeaguesView(request, publicLeagues.orElseGet(List::of));
                 yield "/pages/leagues.jsp";
             }
@@ -83,6 +97,7 @@ public class LeagueServlet extends AbstractServlet {
                 List<LeagueResponse> joinable = allVisible.orElseGet(List::of).stream()
                         .filter(league -> "PUBLIC".equalsIgnoreCase(league.getLeagueType()))
                         .collect(Collectors.toList());
+                request.setAttribute("hasTeam", currentUserHasTeam());
                 request.setAttribute("publicLeagues", joinable);
                 request.setAttribute("memberCounts", countMembers(joinable));
                 yield "/pages/join-league.jsp";
@@ -129,7 +144,8 @@ public class LeagueServlet extends AbstractServlet {
                     response.sendRedirect(request.getContextPath() + "/league?leagueId=" + joined.get().getLeagueId());
                     return;
                 }
-                if (handleApiFailure(request, response, "Unable to join that league. Check the code or ID and try again.")) return;
+                if (handleApiFailure(request, response, "Unable to join that league. Check the join code and try again.")) return;
+                request.setAttribute("hasTeam", currentUserHasTeam());
                 request.getRequestDispatcher("/pages/join-league.jsp").forward(request, response);
             }
 

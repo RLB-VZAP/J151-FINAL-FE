@@ -35,6 +35,8 @@
             <p class="catalog-error" role="alert"><c:out value="${error}" /></p>
         </c:if>
 
+        <%@ include file="/WEB-INF/jspf/no-team-notice.jspf" %>
+
         <%-- ---------- Private league: code only ---------- --%>
         <%-- The code is enough to identify the league, so there is no id to enter.
              Never pre-filled from a URL, and this form always posts. --%>
@@ -54,9 +56,9 @@
                 <label class="search-wrap" for="leagueCode">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
                     <input type="text" id="leagueCode" name="leagueCode" placeholder="Enter join code"
-                           autocomplete="off" aria-label="League join code" required>
+                           autocomplete="off" aria-label="League join code" required ${not hasTeam ? "disabled" : ""}>
                 </label>
-                <button type="submit" class="btn-gold lg-join">Join</button>
+                <button type="submit" class="btn-gold lg-join" ${not hasTeam ? "disabled" : ""}>Join</button>
             </form>
         </section>
 
@@ -105,7 +107,7 @@
                                     <form class="lg-join-form" action="${pageContext.request.contextPath}/league/join" method="post">
                                         <input type="hidden" name="submit" value="league/join">
                                         <input type="hidden" name="leagueId" value="${fn:escapeXml(openLeague.leagueId)}">
-                                        <button type="submit" class="btn-gold lg-join" ${spotsLeft <= 0 ? 'disabled' : ''}>Join</button>
+                                        <button type="submit" class="btn-gold lg-join" ${spotsLeft <= 0 or not hasTeam ? "disabled" : ""}>Join</button>
                                     </form>
                                 </div>
                             </article>
