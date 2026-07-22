@@ -14,7 +14,8 @@
         </span>
         <span class="lg-noteam-text">
             <p class="lg-noteam-title">Create a team to join a league</p>
-            <p class="lg-noteam-sub">You need a fantasy team before you can join. Browse the leagues below in the meantime.</p>
+            <%-- Creating a league needs one too: it enrols you as its first member. --%>
+            <p class="lg-noteam-sub">You need a fantasy team before you can join or create a league. Browse the leagues below in the meantime.</p>
         </span>
         <a class="btn-gold" href="${pageContext.request.contextPath}/create-team">Create team</a>
     </section>
