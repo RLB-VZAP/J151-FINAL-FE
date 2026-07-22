@@ -36,7 +36,7 @@
             // rule in SquadValidationServiceImpl is 20 players, not 15.
             Object budget = request.getAttribute("budget");
             if (budget == null) {
-                budget = "200";
+                budget = "196";
             }
             Object squadSize = request.getAttribute("squadSize");
             if (squadSize == null) {
@@ -76,18 +76,20 @@
         <form method="post" action="${pageContext.request.contextPath}/create-team" id="createTeamForm"
               data-budget="${fn:escapeXml(budget)}">
 
+            <%-- Sits above the two columns, not inside the pool, so the table and the
+                 squad summary start on the same line. --%>
+            <div class="catalog-toolbar">
+                <label class="search-wrap" for="playerSearch">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+                    <input type="search" id="playerSearch" placeholder="Search players"
+                           autocomplete="off" aria-label="Search players">
+                </label>
+            </div>
+
             <div class="ct-layout">
 
                 <%-- ---------- Player pool ---------- --%>
                 <section>
-                    <div class="catalog-toolbar">
-                        <label class="search-wrap" for="playerSearch">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-                            <input type="search" id="playerSearch" placeholder="Search players"
-                                   autocomplete="off" aria-label="Search players">
-                        </label>
-                    </div>
-
                     <% if (players == null) { %>
                         <p class="catalog-empty">The players could not be loaded right now. Please try again later.</p>
                     <% } else if (players.isEmpty()) { %>
