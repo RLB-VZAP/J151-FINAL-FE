@@ -28,8 +28,8 @@ public class FantasyTeamRestClient {
         return response;
     }
 
-    public Optional<ViewOwnTeamResponse> viewOwnTeam(String teamName){
-        String path = FANTASY_TEAM_PATH + OWN_TEAM_PATH + "/" + encode(teamName);
+    public Optional<ViewOwnTeamResponse> viewOwnTeam(UUID teamId){
+        String path = FANTASY_TEAM_PATH + OWN_TEAM_PATH + "/" + encode(teamId.toString());
         Optional<ViewOwnTeamResponse> response = apiClient.get(path, ViewOwnTeamResponse.class);
         if(response.isEmpty()){
             LOG.log(Level.WARNING, "Unable to view own fantasy team.");

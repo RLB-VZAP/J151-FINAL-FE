@@ -14,6 +14,10 @@
 
 <p>Choose one player from your current squad to remove, then choose one available player to bring in.</p>
 
+<c:if test="${param.transferred == '1'}">
+    <p class="success-message" role="status">Transfer completed successfully.</p>
+</c:if>
+
 <c:if test="${not empty success}">
     <p class="success-message" role="status">${success}</p>
 </c:if>
@@ -30,6 +34,10 @@
     <p class="error-message" role="alert">${lockError}</p>
 </c:if>
 
+<c:if test="${not empty squadError}">
+    <p class="error-message" role="alert">${squadError}</p>
+</c:if>
+
 <c:if test="${not empty transfer}">
     <section id="latestTransferResult">
         <h2>Latest Transfer</h2>
@@ -42,21 +50,17 @@
             <p>Value difference: ${transfer.valueDifference}</p>
         </c:if>
 
-        <c:if test="${transfer.penaltyApplied}">
+        <c:if test="${transfer.penaltyPoints > 0}">
             <p>Penalty applied: ${transfer.penaltyPoints} points</p>
         </c:if>
 
-        <c:if test="${not empty transfer.newRemainingBudget}">
-            <p>New remaining budget: ${transfer.newRemainingBudget}</p>
-        </c:if>
-
-        <c:if test="${not empty transfer.message}">
-            <p>${transfer.message}</p>
+        <c:if test="${not empty transfer.status}">
+            <p>Status: ${transfer.status}</p>
         </c:if>
     </section>
 </c:if>
 
-<c:if test="${not empty lockStatus}">
+<c:if test="${not empty lockStatus or not empty deadlineStatus}">
     <section id="lockStatusBanner">
         <h2>Round Status</h2>
 
@@ -64,7 +68,7 @@
             Status:
             <strong>
                 <c:choose>
-                    <c:when test="${lockStatus.locked or lockStatus.deadlinePassed or lockStatus.transfersAllowed == false}">
+                    <c:when test="${(not empty lockStatus and lockStatus.locked) or (not empty deadlineStatus and (deadlineStatus.locked or not deadlineStatus.openForTransfers))}">
                         Transfers locked
                     </c:when>
                     <c:otherwise>
@@ -78,20 +82,16 @@
             <p>Round status: ${lockStatus.roundStatus}</p>
         </c:if>
 
-        <c:if test="${not empty lockStatus.transferWindowStatus}">
-            <p>Transfer window: ${lockStatus.transferWindowStatus}</p>
-        </c:if>
-
-        <c:if test="${not empty lockStatus.lockDeadline}">
-            <p>Lock deadline: ${lockStatus.lockDeadline}</p>
-        </c:if>
-
-        <c:if test="${not empty lockStatus.deadlineAt}">
-            <p>Deadline: ${lockStatus.deadlineAt}</p>
+        <c:if test="${not empty deadlineStatus.lockDeadline}">
+            <p>Lock deadline: ${deadlineStatus.lockDeadline}</p>
         </c:if>
 
         <c:if test="${not empty lockStatus.message}">
             <p>${lockStatus.message}</p>
+        </c:if>
+
+        <c:if test="${empty lockStatus.message and not empty deadlineStatus.message}">
+            <p>${deadlineStatus.message}</p>
         </c:if>
     </section>
 </c:if>
@@ -144,7 +144,17 @@
 
         <c:choose>
             <c:when test="${empty squad}">
-                <p>Your current squad could not be loaded yet.</p>
+                <c:choose>
+                    <c:when test="${empty teamId}">
+                        <p>You don't have a fantasy team yet.
+                            <a href="${pageContext.request.contextPath}/create-team">Create your team</a>
+                            to start making transfers.
+                        </p>
+                    </c:when>
+                    <c:otherwise>
+                        <p>Your current squad could not be loaded yet.</p>
+                    </c:otherwise>
+                </c:choose>
             </c:when>
             <c:otherwise>
                 <table id="squadTable">
@@ -166,11 +176,12 @@
                                         type="radio"
                                         name="removedPlayerId"
                                         value="${player.playerId}"
+                                        ${param.removedPlayerId == player.playerId ? 'checked' : ''}
                                         required>
                             </td>
                             <td>${player.playerName}</td>
-                            <td>${player.club.clubName}</td>
-                            <td>${player.position.positionName}</td>
+                            <td>${player.clubName}</td>
+                            <td>${player.positionName}</td>
                             <td>${player.value}</td>
                             <td>${player.totalFantasyPoints}</td>
                         </tr>
@@ -198,7 +209,6 @@
                         <th>Position</th>
                         <th>Value</th>
                         <th>Form</th>
-                        <th>Fantasy Points</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -209,14 +219,14 @@
                                         type="radio"
                                         name="addedPlayerId"
                                         value="${player.playerId}"
+                                        ${param.addedPlayerId == player.playerId ? 'checked' : ''}
                                         required>
                             </td>
                             <td>${player.playerName}</td>
-                            <td>${player.club.clubName}</td>
-                            <td>${player.position.positionName}</td>
+                            <td>${clubNamesById[player.clubId]}</td>
+                            <td>${positionNamesById[player.positionId]}</td>
                             <td>${player.value}</td>
                             <td>${player.currentForm}</td>
-                            <td>${player.totalFantasyPoints}</td>
                         </tr>
                     </c:forEach>
                     </tbody>

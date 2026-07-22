@@ -6,17 +6,26 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import za.ac.vzap.trytons.frontend.client.fixture.DeadlineStatusResponse;
 import za.ac.vzap.trytons.frontend.client.fixture.LockStatusResponse;
+import za.ac.vzap.trytons.frontend.client.catalog.ClubRestClient;
 import za.ac.vzap.trytons.frontend.client.catalog.PlayerResponse;
 import za.ac.vzap.trytons.frontend.client.catalog.PlayerRestClient;
+import za.ac.vzap.trytons.frontend.client.catalog.PositionRestClient;
+import za.ac.vzap.trytons.frontend.client.fantasyteam.FantasyTeamPlayerSelectionResponse;
+import za.ac.vzap.trytons.frontend.client.fantasyteam.FantasyTeamRestClient;
+import za.ac.vzap.trytons.frontend.client.fantasyteam.ViewOwnTeamResponse;
 import za.ac.vzap.trytons.frontend.client.transfer.TransferRecommendationResponse;
 import za.ac.vzap.trytons.frontend.client.transfer.TransferRequest;
 import za.ac.vzap.trytons.frontend.client.transfer.TransferRequestValidator;
 import za.ac.vzap.trytons.frontend.client.transfer.TransferResponse;
 import za.ac.vzap.trytons.frontend.client.transfer.TransferRestClient;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
 
 
@@ -28,6 +37,15 @@ public class TransferServlet extends AbstractServlet {
 
     @Inject
     private PlayerRestClient playerRestClient;
+
+    @Inject
+    private ClubRestClient clubRestClient;
+
+    @Inject
+    private PositionRestClient positionRestClient;
+
+    @Inject
+    private FantasyTeamRestClient fantasyTeamRestClient;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -72,34 +90,37 @@ public class TransferServlet extends AbstractServlet {
             submit = "";
         }
 
-        String destination = switch (submit) {
+        switch (submit) {
             case "", "transfer", "executeTransfer" -> {
                 TransferRequest transferRequest = buildTransferRequest(request);
 
                 if (!TransferRequestValidator.isValid(transferRequest)) {
                     request.setAttribute("error", "Please select a valid player to remove and a different player to add");
                     loadTransferPage(request);
-                    yield "/pages/transfers.jsp";
+                    request.getRequestDispatcher("/pages/transfers.jsp").forward(request, response);
+                    return;
                 }
 
                 Optional<TransferResponse> transferResponse = transferRestClient.executeTransfer(transferRequest);
 
                 if (transferResponse.isPresent()) {
-                    request.setAttribute("success", "Transfer completed successfully");
-                    request.setAttribute("transfer", transferResponse.get());
-                } else {
-                    request.setAttribute("error", "Transfer could not be completed");
-                    request.setAttribute("transferError", "The transfer may be blocked by lock status, affordability, or squad rules");
+                    String teamId = getTeamId(request);
+                    String roundId = getRoundId(request);
+                    String redirectUrl = request.getContextPath() + "/transfers?transferred=1"
+                            + (teamId != null ? "&teamId=" + teamId : "")
+                            + (roundId != null ? "&roundId=" + roundId : "");
+                    response.sendRedirect(redirectUrl);
+                    return;
                 }
 
+                if (handleApiFailure(request, response, "Transfer could not be completed")) return;
+                request.setAttribute("transferError", "The transfer may be blocked by lock status, affordability, or squad rules");
                 loadTransferPage(request);
-                yield "/pages/transfers.jsp";
+                request.getRequestDispatcher("/pages/transfers.jsp").forward(request, response);
             }
 
-            default -> "/index.jsp";
-        };
-
-        request.getRequestDispatcher(destination).forward(request, response);
+            default -> request.getRequestDispatcher("/index.jsp").forward(request, response);
+        }
     }
 
     private void loadTransferPage(HttpServletRequest request) {
@@ -116,6 +137,9 @@ public class TransferServlet extends AbstractServlet {
             request.setAttribute("candidatePlayers", List.of());
         }
 
+        request.setAttribute("clubNamesById", buildClubNameLookup());
+        request.setAttribute("positionNamesById", buildPositionNameLookup());
+
         if (roundId != null && !roundId.isBlank()) {
             Optional<LockStatusResponse> lockStatus = transferRestClient.getLockStatus(roundId);
 
@@ -124,6 +148,9 @@ public class TransferServlet extends AbstractServlet {
             } else {
                 request.setAttribute("lockError", "Unable to load round lock status");
             }
+
+            Optional<DeadlineStatusResponse> deadlineStatus = transferRestClient.getDeadlineStatus(roundId);
+            deadlineStatus.ifPresent(status -> request.setAttribute("deadlineStatus", status));
         }
 
         String teamId = getTeamId(request);
@@ -139,8 +166,44 @@ public class TransferServlet extends AbstractServlet {
         request.setAttribute("teamId", teamId);
         request.setAttribute("roundId", roundId);
 
-        request.setAttribute("squad", List.of());
-        request.setAttribute("currentSquad", List.of());
+        loadSquad(request, teamId);
+    }
+
+    // Loads the user's real locked-in squad for the transfer "remove" side. There is no unconditional
+    // "my team" endpoint - viewOwnTeam needs the team id, which we already resolve from the request/
+    // session via getTeamId(). If there's no team id yet, the JSP shows an empty state pointing the
+    // user at team creation instead of a permanently-empty squad table.
+    private void loadSquad(HttpServletRequest request, String teamId) {
+        Optional<UUID> parsedTeamId = parseUuid(teamId);
+        if (parsedTeamId.isEmpty()) {
+            request.setAttribute("squad", List.of());
+            return;
+        }
+
+        Optional<ViewOwnTeamResponse> team = fantasyTeamRestClient.viewOwnTeam(parsedTeamId.get());
+        if (team.isPresent()) {
+            ViewOwnTeamResponse ownTeam = team.get();
+            List<FantasyTeamPlayerSelectionResponse> squad = ownTeam.getPlayers();
+            request.setAttribute("squad", squad != null ? squad : List.of());
+            request.setAttribute("remainingBudget", ownTeam.getRemainingBudget());
+        } else {
+            request.setAttribute("squad", List.of());
+            if (!apiCallStatus.isSuccess()) {
+                request.setAttribute("squadError", "Unable to load your current squad");
+            }
+        }
+    }
+
+    private Map<UUID, String> buildClubNameLookup() {
+        Map<UUID, String> lookup = new HashMap<>();
+        clubRestClient.listClubs().ifPresent(clubs -> clubs.forEach(club -> lookup.put(club.getClubId(), club.getClubName())));
+        return lookup;
+    }
+
+    private Map<UUID, String> buildPositionNameLookup() {
+        Map<UUID, String> lookup = new HashMap<>();
+        positionRestClient.getAllPositions().ifPresent(positions -> positions.forEach(position -> lookup.put(position.getPositionId(), position.getPositionName())));
+        return lookup;
     }
 
     private TransferRequest buildTransferRequest(HttpServletRequest request) {

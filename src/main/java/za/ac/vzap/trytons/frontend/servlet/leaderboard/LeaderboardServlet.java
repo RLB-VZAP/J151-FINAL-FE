@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.UUID;
 import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
 
-@WebServlet(name = "LeaderboardServlet", urlPatterns = {"/leaderboard"})
+@WebServlet(name = "LeaderboardServlet", urlPatterns = {"/leaderboard", "/leaderboards"})
 public class LeaderboardServlet extends AbstractServlet {
     @Inject
     private LeaderboardRestClient leaderboardRestClient;

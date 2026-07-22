@@ -1,4 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -13,17 +15,12 @@
 <h1>Register</h1>
 <p>Please register a new account with your details.</p>
 
-<%
-  String errorMessage = (String) request.getAttribute("error");
-  if (errorMessage != null && !errorMessage.isBlank()) {
-%>
+<c:if test="${not empty error}">
 <p class="error-message" role="alert">
-<%-- TODO [W4-FE-FIXES-45]: errorMessage written via unescaped scriptlet <%= %> on the unauthenticated registration page — reflected XSS if a validation error echoes submitted email/username; escape output --%>
-<%= errorMessage %>
+<c:out value="${error}"/>
 </p>
-<%
-  }
-%>
+</c:if>
+
 <form method="post" action="${pageContext.request.contextPath}/register">
 <div>
 <label for="email">Email Address</label>
@@ -31,6 +28,7 @@
       type="email"
       id="email"
       name="email"
+      value="${fn:escapeXml(email)}"
       required>
 </div>
 <br>
@@ -40,6 +38,7 @@
       type="text"
       id="username"
       name="username"
+      value="${fn:escapeXml(username)}"
       required>
 </div>
 
@@ -58,8 +57,8 @@ autocomplete="new-password">
 </form>
 <p>
 Already have an account?
-<a href="${pageContext.request.contextPath}/pages/login.jsp">
-Login here my brodie, get cooking. You're missing all the action!
+<a href="${pageContext.request.contextPath}/login">
+Log in to your Fantasy TryTons account.
 </a>.
 </p>
 </main>
