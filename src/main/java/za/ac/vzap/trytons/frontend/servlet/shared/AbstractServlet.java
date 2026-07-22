@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import za.ac.vzap.trytons.frontend.client.auth.LoginResponse;
+import za.ac.vzap.trytons.frontend.client.shared.ApiCallStatus;
 import za.ac.vzap.trytons.frontend.util.SessionAuthContext;
 
 import java.io.IOException;
@@ -20,21 +21,31 @@ public class AbstractServlet extends HttpServlet {
     @Inject
     protected SessionAuthContext authContext;
 
+    @Inject
+    protected ApiCallStatus apiCallStatus;
+
     //protected route guard
     protected boolean requireAuthenticated(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if(!authContext.isAuthenticated()) {
             LOG.warning("Unauthenticated access attempt to " + req.getRequestURI());
+            clearAuthSession(req);
             resp.sendRedirect(req.getContextPath() + "/login");
             return false;
         }
         return true;
     }
 
-    //Admin guard
+    //Admin guard: not authenticated at all -> login; authenticated but not admin -> 403 (not a login bounce)
     protected boolean requireAdmin(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        if(!authContext.isAuthenticated()) {
+            LOG.warning("Unauthenticated admin access attempt to " + req.getRequestURI());
+            clearAuthSession(req);
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return false;
+        }
         if(!authContext.isAdmin()) {
             LOG.warning("Non-admin access attempt to " + req.getRequestURI());
-            resp.sendRedirect(req.getContextPath() + "/login");
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "You are not authorised to view this page.");
             return false;
         }
         return true;
@@ -55,12 +66,14 @@ public class AbstractServlet extends HttpServlet {
     //I think this was the biggest bug, this refreshes session attributes.
     // for login and token refresh
     protected void establishAuthenticatedSession(HttpServletRequest req, LoginResponse loginResponse){
-        HttpSession existingSession = req.getSession(false);
-        if(existingSession != null){
-            existingSession.invalidate();
-        }
-        req.getSession(true);
+        HttpSession session = req.getSession(true);
+        req.changeSessionId(); // session-fixation protection: rotates the id without destroying the Weld session context
         authContext.signIn(loginResponse);
+        session.setAttribute(SessionAuthContext.SESSION_USER_ID, String.valueOf(loginResponse.getUserId()));
+        session.setAttribute(SessionAuthContext.SESSION_USERNAME, loginResponse.getUsername());
+        session.setAttribute(SessionAuthContext.SESSION_EMAIL, loginResponse.getEmail());
+        session.setAttribute(SessionAuthContext.SESSION_ROLE, loginResponse.getRole());
+        session.setAttribute(SessionAuthContext.SESSION_AUTHENTICATED, Boolean.TRUE);
     }
 
     //used for logout
@@ -68,6 +81,11 @@ public class AbstractServlet extends HttpServlet {
         authContext.clear();
         HttpSession session = req.getSession(false);
         if(session != null){
+            session.removeAttribute(SessionAuthContext.SESSION_USER_ID);
+            session.removeAttribute(SessionAuthContext.SESSION_USERNAME);
+            session.removeAttribute(SessionAuthContext.SESSION_EMAIL);
+            session.removeAttribute(SessionAuthContext.SESSION_ROLE);
+            session.removeAttribute(SessionAuthContext.SESSION_AUTHENTICATED);
             session.invalidate();
         }
     }
@@ -84,16 +102,31 @@ public class AbstractServlet extends HttpServlet {
         req.getRequestDispatcher(jspPath).forward(req, resp);
     }
 
-    // 401 handling: APIClient.handle() clears the session (authContext.clear()) as soon as it sees
-    // a 401 from the backend. Callers that made a "should be authenticated" call and got back an
-    // empty Optional can use this helper to check whether that emptiness was actually a session
-    // expiry (authContext no longer authenticated) versus some other failure (404/500/network) -
+    // 401 handling: APIClient no longer clears authContext itself - it records the status on the
+    // request-scoped ApiCallStatus instead. Callers that made a "should be authenticated" call and
+    // got back an empty Optional can use this helper to check whether that emptiness was actually a
+    // session expiry (last recorded status was 401) versus some other failure (404/500/network) -
     // if it was a session expiry, bounce the user back to login instead of rendering a stale/empty page.
     protected boolean sessionExpiredRedirect(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        if(!authContext.isAuthenticated()) {
+        if(apiCallStatus.isUnauthorized()) {
+            clearAuthSession(req);
             resp.sendRedirect(req.getContextPath() + "/login");
             return true;
         }
+        return false;
+    }
+
+    // Inspects the last recorded ApiCallStatus after a failed client call. On 401, clears the
+    // session and redirects to login, returning true to signal the caller must return immediately
+    // (the response is already committed). On any other failure, stashes a message on the request
+    // and returns false so the caller can carry on and forward to its own view.
+    protected boolean handleApiFailure(HttpServletRequest req, HttpServletResponse resp, String fallbackMessage) throws IOException {
+        if(apiCallStatus.isUnauthorized()) {
+            clearAuthSession(req);
+            resp.sendRedirect(req.getContextPath() + "/login?expired=1");
+            return true;
+        }
+        req.setAttribute("error", apiCallStatus.getMessage(fallbackMessage));
         return false;
     }
 

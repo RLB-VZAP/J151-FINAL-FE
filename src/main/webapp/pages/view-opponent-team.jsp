@@ -12,7 +12,7 @@
 
     <body>
         <% request.setAttribute("activeNav", "create-team"); %>
-        <%@ include file="/WEB-INF/jspf/nav.jspf" %>
+        <%@ include file="/WEB-INF/jspf/navigation.jspf" %>
         <main>
             <h1>Opponent Team</h1>
 
