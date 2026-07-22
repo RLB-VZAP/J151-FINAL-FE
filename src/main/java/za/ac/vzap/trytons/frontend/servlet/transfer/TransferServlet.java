@@ -169,10 +169,6 @@ public class TransferServlet extends AbstractServlet {
         loadSquad(request, teamId);
     }
 
-    // Loads the user's real locked-in squad for the transfer "remove" side. There is no unconditional
-    // "my team" endpoint - viewOwnTeam needs the team id, which we already resolve from the request/
-    // session via getTeamId(). If there's no team id yet, the JSP shows an empty state pointing the
-    // user at team creation instead of a permanently-empty squad table.
     private void loadSquad(HttpServletRequest request, String teamId) {
         Optional<UUID> parsedTeamId = parseUuid(teamId);
         if (parsedTeamId.isEmpty()) {

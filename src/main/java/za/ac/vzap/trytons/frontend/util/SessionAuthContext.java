@@ -22,9 +22,6 @@ public class SessionAuthContext implements Serializable {
 
     private static final String ADMIN_ROLE = "ADMINISTRATOR";
 
-    // HttpSession attribute names mirrored onto the session by AbstractServlet so that JSPs
-    // (navigation.jspf, nav.jspf, dashboard.jsp, create-team.jsp) can read login state via
-    // sessionScope without depending on the CDI-scoped bean.
     public static final String SESSION_USER_ID = "userId";
     public static final String SESSION_USERNAME = "username";
     public static final String SESSION_EMAIL = "email";

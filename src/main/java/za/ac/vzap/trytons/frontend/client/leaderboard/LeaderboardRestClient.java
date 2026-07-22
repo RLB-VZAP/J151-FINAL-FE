@@ -28,7 +28,8 @@ public class LeaderboardRestClient {
 
     public Optional<List<LeaderboardEntryResponse>> getLeaderboardForLeague(UUID leagueId) {
         String path = GET_LEADERBOARD_FOR_LEAGUE_PATH + "/" + encode(leagueId.toString()) + "/rankings";
-        Optional<List<LeaderboardEntryResponse>> response = apiClient.getList(path, new GenericType<List<LeaderboardEntryResponse>>(){});
+        Optional<List<LeaderboardEntryResponse>> response = apiClient.getList(path, new GenericType<>() {
+        });
         if (response.isEmpty()){
             LOG.log(Level.SEVERE, "Could not get leaderboard for league.");
         }

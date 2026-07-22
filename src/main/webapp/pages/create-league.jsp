@@ -17,14 +17,14 @@
 </c:if>
 
 <%-- A successful create now redirects straight to /league?leagueId=... (PRG) rather than forwarding
-     back here, so this page only ever needs to render the form (with an error on failure). --%>
+    back here, so this page only ever needs to render the form (with an error on failure). --%>
 <form method="post" action="${pageContext.request.contextPath}/league/create" id="createLeagueForm">
     <input type="hidden" name="submit" value="league/create" />
 
     <div>
         <label for="leagueName">League name</label>
         <input type="text" id="leagueName" name="leagueName"
-               value="${param.leagueName}" required>
+                value="${param.leagueName}" required>
     </div>
     <br>
 
@@ -46,7 +46,7 @@
     <div>
         <label for="maxMembers">Max members</label>
         <input type="number" id="maxMembers" name="maxMembers" min="1"
-               value="${empty param.maxMembers ? 20 : param.maxMembers}" required>
+                value="${empty param.maxMembers ? 20 : param.maxMembers}" required>
     </div>
     <br>
 

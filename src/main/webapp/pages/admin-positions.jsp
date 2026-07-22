@@ -82,25 +82,25 @@
             <div>
                 <label for="positionName">Name</label>
                 <input type="text" id="positionName" name="positionName"
-                       value="${not empty position ? fn:escapeXml(position.positionName) : ''}" required>
+                        value="${not empty position ? fn:escapeXml(position.positionName) : ''}" required>
             </div>
 
             <div>
                 <label for="positionCategory">Category</label>
                 <input type="text" id="positionCategory" name="positionCategory"
-                       value="${not empty position ? fn:escapeXml(position.positionCategory) : ''}" required>
+                        value="${not empty position ? fn:escapeXml(position.positionCategory) : ''}" required>
             </div>
 
             <div>
                 <label for="minRequired">Min Required</label>
                 <input type="number" id="minRequired" name="minRequired" min="0"
-                       value="${not empty position ? position.minRequired : ''}" required>
+                        value="${not empty position ? position.minRequired : ''}" required>
             </div>
 
             <div>
                 <label for="maxAllowed">Max Allowed</label>
                 <input type="number" id="maxAllowed" name="maxAllowed" min="0"
-                       value="${not empty position ? position.maxAllowed : ''}" required>
+                        value="${not empty position ? position.maxAllowed : ''}" required>
             </div>
 
             <button type="submit">

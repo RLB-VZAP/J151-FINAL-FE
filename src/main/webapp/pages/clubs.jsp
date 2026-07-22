@@ -20,7 +20,7 @@
     <input type="hidden" name="submit" value="clubs" />
     <%-- TODO [W4-FE-FIXES-34]: raw `search` param echoed unescaped via value="${searchTerm}" — reflected XSS; use c:out/fn:escapeXml (same class as FIXES-44) --%>
     <input type="text" name="search" placeholder="Search club name"
-           value="${searchTerm}" id="clubSearchInput" />
+            value="${searchTerm}" id="clubSearchInput" />
     <button type="submit">Search</button>
 </form>
 

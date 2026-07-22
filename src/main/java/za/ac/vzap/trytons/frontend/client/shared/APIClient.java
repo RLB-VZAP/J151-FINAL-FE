@@ -36,9 +36,7 @@ public class APIClient {
             }
             return Optional.ofNullable(response.readEntity(responseType));
         }
-        // A non-2xx status (including 401) is recorded here for the servlet layer to inspect via
-        // ApiCallStatus. Session clearing on 401 happens in AbstractServlet, not here, so the
-        // CDI-scoped SessionAuthContext and the mirrored HttpSession attributes can never diverge.
+        
         ErrorResponse error = null;
         try {
             error = response.readEntity(ErrorResponse.class);

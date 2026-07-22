@@ -1,5 +1,6 @@
 package za.ac.vzap.trytons.frontend.client.simulation;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,6 +20,7 @@ public class SimulationSettingResponse {
     private Boolean requireAdminApproval;
     private Boolean allowResimulation;
     private int maxResimulations;
+    @JsonProperty("isActive")
     private Boolean isActive;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

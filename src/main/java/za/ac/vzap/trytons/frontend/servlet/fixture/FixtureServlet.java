@@ -71,10 +71,6 @@ public class FixtureServlet extends AbstractServlet {
         }
     }
 
-    // Loads the match result read-back for a completed fixture: the result itself, both teams'
-    // match-team-scores, and the player-statistics captured for that result. Silently leaves the
-    // request attributes unset if no result exists yet (fixture not simulated) - the JSP treats an
-    // absent "matchResult" attribute as "no result available".
     private void loadMatchResultReadBack(HttpServletRequest request, String fixtureId) {
         Optional<MatchResultResponse> matchResult = matchResultRestClient.getMatchResult(fixtureId);
         if (matchResult.isEmpty()) {
@@ -92,11 +88,6 @@ public class FixtureServlet extends AbstractServlet {
         playerStats.ifPresent(stats -> request.setAttribute("playerStats", stats));
     }
 
-    // Optional drill-down: when the page is reloaded with ?statId=<uuid> (a link next to a row in
-    // the player-statistics table), resolves that stat's final fantasy points and the points'
-    // breakdown lines, so the JSP can render a breakdown table for the selected player only.
-    // Iterating every player's breakdown on every fixture-details load would be an N+1 fan-out over
-    // fantasy-points and fantasy-point-breakdowns per player, so it is surfaced on-demand instead.
     private void loadBreakdownDrillDown(HttpServletRequest request) {
         String statId = request.getParameter("statId");
         if (statId == null || statId.isBlank()) {

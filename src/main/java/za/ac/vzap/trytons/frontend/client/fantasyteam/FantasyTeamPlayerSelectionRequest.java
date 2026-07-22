@@ -37,7 +37,6 @@ public class FantasyTeamPlayerSelectionRequest {
     @JsonProperty("isViceCaptain")
     private Boolean isViceCaptain;
 
-
     public FantasyTeamPlayerSelectionRequest(UUID playerId, String squadRole, boolean isCaptain, boolean isViceCaptain) {
         this.playerId = playerId;
         this.squadRole = squadRole;
