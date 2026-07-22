@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -89,7 +90,7 @@
                                 <td>
                                     <c:choose>
                                         <c:when test="${not empty transfer.removedPlayerValue}">
-                                            ${transfer.removedPlayerValue}
+                                            <t:money value="${transfer.removedPlayerValue}" />
                                         </c:when>
                                         <c:otherwise>
                                             -
@@ -111,7 +112,7 @@
                                 <td>
                                     <c:choose>
                                         <c:when test="${not empty transfer.addedPlayerValue}">
-                                            ${transfer.addedPlayerValue}
+                                            <t:money value="${transfer.addedPlayerValue}" />
                                         </c:when>
                                         <c:otherwise>
                                             -
@@ -122,7 +123,7 @@
                                 <td>
                                     <c:choose>
                                         <c:when test="${not empty transfer.valueDifference}">
-                                            ${transfer.valueDifference}
+                                            <t:money value="${transfer.valueDifference}" />
                                         </c:when>
                                         <c:otherwise>
                                             -

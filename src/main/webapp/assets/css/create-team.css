@@ -11,30 +11,30 @@
 /* ---------- Design tokens (mirrors style.css) ------------------------------ */
 :root {
   /* Palette */
-  --navy: #1f3864;
+  --navy: #eef3ef;
   --navy-600: #1a2f54;
-  --navy-700: #142544;
-  --teal: #1d9e75;
-  --teal-600: #178a65;
-  --bg: #f0f2f5;
-  --surface: #ffffff;
+  --navy-700: #eef3ef;
+  --teal: #c9a227;
+  --teal-600: #8a6a15;
+  --bg: #0c1712;
+  --surface: #132a1f;
 
   /* Text */
-  --ink: #1f2a44;
-  --ink-muted: #64748b;
+  --ink: #c7d1c9;
+  --ink-muted: #7f9187;
   --ink-faint: #94a3b8;
 
   /* Feedback */
-  --danger: #dc2626;
-  --danger-bg: #fef2f2;
-  --danger-border: #fca5a5;
-  --success: #15803d;
-  --success-bg: #f0fdf4;
-  --success-border: #86efac;
+  --danger: #e0847a;
+  --danger-bg: rgba(192, 82, 74, 0.12);
+  --danger-border: #c0524a;
+  --success: #6fcf8e;
+  --success-bg: rgba(21, 128, 61, 0.14);
+  --success-border: #2f6b45;
 
   /* Lines & fields */
-  --border: #d8dee9;
-  --field-bg: #f8fafc;
+  --border: #2c4437;
+  --field-bg: #0f2118;
 
   /* Radii */
   --radius-card: 12px;
@@ -51,7 +51,7 @@
   --sp-10: 40px;
 
   /* Elevation */
-  --shadow-card: 0 20px 45px -25px rgba(20, 37, 68, 0.35);
+  --shadow-card: 0 20px 45px -25px rgba(0, 0, 0, 0.35);
   --shadow-btn: 0 12px 24px -12px rgba(31, 56, 100, 0.55);
 
   /* Motion */
@@ -90,7 +90,7 @@ body {
   top: 0;
   z-index: 20;
   background: var(--navy);
-  box-shadow: 0 10px 24px -18px rgba(20, 37, 68, 0.9);
+  box-shadow: 0 10px 24px -18px rgba(0, 0, 0, 0.9);
 }
 
 .site-nav {
@@ -162,7 +162,7 @@ body {
 
 .site-nav__link.is-active {
   color: #fff;
-  background: rgba(29, 158, 117, 0.28);
+  background: rgba(201, 162, 39, 0.28);
   box-shadow: inset 0 -2px 0 var(--teal);
 }
 
@@ -334,7 +334,7 @@ main form input[type="search"]:focus {
   outline: none;
   background-color: var(--surface);
   border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.15);
+  box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.15);
 }
 
 /* Table (bare markup; the section scrolls sideways on small screens) */
@@ -373,12 +373,12 @@ main form tbody tr {
 }
 
 main form tbody tr:hover {
-  background: rgba(29, 158, 117, 0.05);
+  background: rgba(201, 162, 39, 0.05);
 }
 
 /* Selected & unavailable rows, driven purely by the checkbox state */
 main form tbody tr:has(input:checked) {
-  background: rgba(29, 158, 117, 0.1);
+  background: rgba(201, 162, 39, 0.1);
 }
 
 main form tbody tr:has(input:disabled) {
@@ -528,7 +528,7 @@ main form input[type="text"]:focus {
   outline: none;
   background-color: var(--surface);
   border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.15);
+  box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.15);
 }
 
 /* Primary CTA — same treatment as the auth submit buttons */
@@ -565,7 +565,7 @@ main form button[type="submit"]:active {
 }
 
 main form button[type="submit"]:focus-visible {
-  outline: 3px solid rgba(29, 158, 117, 0.5);
+  outline: 3px solid rgba(201, 162, 39, 0.5);
   outline-offset: 2px;
 }
 

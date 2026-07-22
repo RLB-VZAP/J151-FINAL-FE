@@ -4,6 +4,8 @@
 <html>
 <head>
     <title>Leaderboard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css">
 </head>
 <body>
 <%@ include file="/WEB-INF/jspf/navigation.jspf" %>

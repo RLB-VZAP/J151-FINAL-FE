@@ -1,11 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>Transfers - Fantasy TryTons</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css">
 </head>
 <body>
 <%@ include file="/WEB-INF/jspf/navigation.jspf" %>
@@ -47,7 +50,7 @@
         </p>
 
         <c:if test="${not empty transfer.valueDifference}">
-            <p>Value difference: ${transfer.valueDifference}</p>
+            <p>Value difference: <t:money value="${transfer.valueDifference}" /></p>
         </c:if>
 
         <c:if test="${transfer.penaltyPoints > 0}">
@@ -100,11 +103,12 @@
     <h2>Budget</h2>
 
     <c:choose>
+        <%-- Budgets are whole rands, unlike the per-player values above. --%>
         <c:when test="${not empty remainingBudget}">
-            <p>Remaining budget: ${remainingBudget}</p>
+            <p>Remaining budget: <t:money value="${remainingBudget}" plain="true" /></p>
         </c:when>
         <c:when test="${not empty budget}">
-            <p>Remaining budget: ${budget}</p>
+            <p>Remaining budget: <t:money value="${budget}" plain="true" /></p>
         </c:when>
         <c:otherwise>
             <p>Budget information will show once your team details are available.</p>
@@ -182,7 +186,7 @@
                             <td>${player.playerName}</td>
                             <td>${player.clubName}</td>
                             <td>${player.positionName}</td>
-                            <td>${player.value}</td>
+                            <td><t:money value="${player.value}" /></td>
                             <td>${player.totalFantasyPoints}</td>
                         </tr>
                     </c:forEach>
@@ -225,8 +229,8 @@
                             <td>${player.playerName}</td>
                             <td>${clubNamesById[player.clubId]}</td>
                             <td>${positionNamesById[player.positionId]}</td>
-                            <td>${player.value}</td>
-                            <td>${player.currentForm}</td>
+                            <td><t:money value="${player.value}" /></td>
+                            <td><t:rating value="${player.currentForm}" /></td>
                         </tr>
                     </c:forEach>
                     </tbody>

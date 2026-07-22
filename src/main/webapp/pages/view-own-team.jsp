@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
 <!DOCTYPE html>
@@ -8,7 +9,9 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>TryTons - My Team</title>
-    </head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css">
+</head>
 
     <body>
         <% request.setAttribute("activeNav", "create-team"); %>
@@ -37,11 +40,12 @@
                         </tr>
                         <tr>
                             <th scope="row">Total team value</th>
-                            <td>R <c:out value="${team.totalTeamValue}" /></td>
+                            <%-- A sum of per-player values, so the same "m" scale as those. --%>
+                            <td><t:money value="${team.totalTeamValue}" /></td>
                         </tr>
                         <tr>
                             <th scope="row">Remaining budget</th>
-                            <td>R <c:out value="${team.remainingBudget}" /></td>
+                            <td><t:money value="${team.remainingBudget}" plain="true" /></td>
                         </tr>
                         <tr>
                             <th scope="row">Total points</th>
@@ -93,19 +97,19 @@
                                     <td><c:out value="${selection.playerName}" /></td>
                                     <td><c:out value="${selection.positionName}" /></td>
                                     <td><c:out value="${selection.clubName}" /></td>
-                                    <td>R <c:out value="${selection.value}" /></td>
+                                    <td><t:money value="${selection.value}" /></td>
                                     <td><c:out value="${selection.squadRole}" /></td>
                                     <td>${selection.isCaptain ? 'Yes' : 'No'}</td>
                                     <td>${selection.isViceCaptain ? 'Yes' : 'No'}</td>
                                     <td>${selection.isActive ? 'Yes' : 'No'}</td>
                                     <td><c:out value="${selection.totalFantasyPoints}" /></td>
-                                    <td><c:out value="${selection.attackingAbility}" /></td>
-                                    <td><c:out value="${selection.defensiveAbility}" /></td>
-                                    <td><c:out value="${selection.kickingAbility}" /></td>
-                                    <td><c:out value="${selection.discipline}" /></td>
-                                    <td><c:out value="${selection.consistency}" /></td>
-                                    <td><c:out value="${selection.fitness}" /></td>
-                                    <td><c:out value="${selection.currentForm}" /></td>
+                                    <td><t:rating value="${selection.attackingAbility}" /></td>
+                                    <td><t:rating value="${selection.defensiveAbility}" /></td>
+                                    <td><t:rating value="${selection.kickingAbility}" /></td>
+                                    <td><t:rating value="${selection.discipline}" /></td>
+                                    <td><t:rating value="${selection.consistency}" /></td>
+                                    <td><t:rating value="${selection.fitness}" /></td>
+                                    <td><t:rating value="${selection.currentForm}" /></td>
                                 </tr>
                                 </c:forEach>
                             </tbody>

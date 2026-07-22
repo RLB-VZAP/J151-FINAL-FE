@@ -1,9 +1,8 @@
 /* ============================================================================
-   TryTons — Fantasy Rugby | Notifications (E2E-15)
-   Vanilla CSS. Shares the palette/type/radii/spacing tokens used by the other
-   admin/user screens (see admin-positions.css / create-team.css). Targets only
-   the markup in notifications.jsp; the page uses navigation.jspf (plain nav),
-   not nav.jspf, so no .site-header/.site-nav styling is needed here.
+   TryTons — Fantasy Rugby | Admin User Management
+   Vanilla CSS. Shares the palette, type, radii and spacing tokens used by the
+   other admin CRUD screens so this page sits alongside the rest of the admin
+   area. Targets only the markup in admin-users.jsp.
    ========================================================================== */
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
@@ -40,22 +39,27 @@
     --sp-8: 32px;
 }
 
-body.notifications {
+body.admin-users {
     margin: 0;
     font-family: "Inter", system-ui, -apple-system, sans-serif;
     color: var(--ink);
     background: var(--bg);
 }
 
-#notifications {
-    max-width: 960px;
+#adminUsers {
+    max-width: 1000px;
     margin: 0 auto;
     padding: var(--sp-8) var(--sp-5) var(--sp-8);
 }
 
-#notifications h1 {
+#adminUsers h1 {
     color: var(--navy-700);
     margin-bottom: var(--sp-6);
+}
+
+#adminUsers h2 {
+    color: var(--navy);
+    margin-top: 0;
 }
 
 /* ---------- Feedback ------------------------------------------------------- */
@@ -79,84 +83,87 @@ body.notifications {
     border: 1px solid var(--danger-border);
 }
 
-/* ---------- Actions bar ----------------------------------------------------- */
-#notificationActions {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--sp-4);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-card);
-    padding: var(--sp-4) var(--sp-5);
-    margin-bottom: var(--sp-5);
-    flex-wrap: wrap;
-}
-
-#notificationActions label {
-    font-weight: 600;
-    font-size: 0.9rem;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sp-2);
-}
-
-#notificationActions button {
-    background: var(--teal);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius-field);
-    padding: var(--sp-3) var(--sp-5);
-    font: inherit;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s ease;
-}
-
-#notificationActions button:hover {
-    background: var(--teal-600);
-}
-
-/* ---------- List section ---------------------------------------------------- */
-#notificationListSection {
+/* ---------- Sections -------------------------------------------------------- */
+#adminUsers section {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-card);
     padding: var(--sp-5);
+    margin-bottom: var(--sp-5);
 }
 
-#notificationsEmptyState {
+/* ---------- Search form ------------------------------------------------------ */
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    margin-bottom: var(--sp-4);
+}
+
+.field label {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+#adminUsers input[type="text"] {
+    padding: var(--sp-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-field);
+    background: var(--field-bg);
+    font: inherit;
+    color: inherit;
+}
+
+#adminUsers input:focus {
+    outline: none;
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.18);
+}
+
+#adminUsers button {
+    background: var(--teal);
+    color: #141f0e;
+    border: none;
+    border-radius: var(--radius-field);
+    padding: var(--sp-3) var(--sp-5);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+#adminUsers button:hover {
+    background: var(--teal-600);
+}
+
+/* ---------- Users table ------------------------------------------------------ */
+#usersEmptyState {
     color: var(--ink-muted);
 }
 
-#notificationsTable {
+#usersTable {
     border-collapse: collapse;
     width: 100%;
 }
 
-#notificationsTable th,
-#notificationsTable td {
+#usersTable th,
+#usersTable td {
     text-align: left;
     padding: var(--sp-2) var(--sp-3);
     border-bottom: 1px solid var(--border);
     vertical-align: middle;
 }
 
-#notificationsTable th {
+#usersTable th {
     color: var(--ink-muted);
     font-weight: 600;
 }
 
-#notificationsTable tr.is-unread {
-    background: rgba(201, 162, 39, 0.06);
-    font-weight: 600;
-}
-
-#notificationsTable form {
+#usersTable form {
     margin: 0;
 }
 
-#notificationsTable button {
+#usersTable button {
     background: transparent;
     color: var(--teal);
     border: 1px solid var(--teal);
@@ -164,22 +171,22 @@ body.notifications {
     padding: var(--sp-2) var(--sp-3);
     font: inherit;
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease;
 }
 
-#notificationsTable button:hover {
+#usersTable button:hover {
     background: var(--teal);
-    color: #fff;
+    color: #141f0e;
 }
 
 @media (max-width: 640px) {
-    #notifications {
+    #adminUsers {
         padding: var(--sp-6) var(--sp-3) var(--sp-6);
     }
 
-    #notificationsTable {
+    #usersTable {
         display: block;
         overflow-x: auto;
         white-space: nowrap;
