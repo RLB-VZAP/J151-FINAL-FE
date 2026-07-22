@@ -78,7 +78,14 @@ public class LeagueServlet extends AbstractServlet {
                 yield "/pages/leagues.jsp";
             }
 
-            case "/league/create" -> "/pages/create-league.jsp";
+            case "/league/create" -> {
+                // Creating a league enrols the creator as its first member, which needs a
+                // team. The button on the leagues page is disabled without one, but this
+                // URL is reachable directly, so the form is withheld here too rather than
+                // letting a filled-in form fail on submit.
+                request.setAttribute("hasTeam", currentUserHasTeam());
+                yield "/pages/create-league.jsp";
+            }
 
             case "/league/join" -> {
                 // The page browses public leagues by name rather than asking for an id,

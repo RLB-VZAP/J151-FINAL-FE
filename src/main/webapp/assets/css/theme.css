@@ -163,6 +163,9 @@ a:hover {
 
 .btn-gold:disabled {
   opacity: 0.65;
+  /* theme.css sets cursor:pointer on every button, so disabled ones need this
+     or they still invite a click. */
+  cursor: not-allowed;
 }
 
 @keyframes login-spin {

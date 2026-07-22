@@ -84,10 +84,23 @@
                     </div>
                     <div class="lg-actions">
                         <a class="btn-outline" href="${pageContext.request.contextPath}/league/join">Join league</a>
-                        <a class="btn-gold" href="${pageContext.request.contextPath}/league/create">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-                            Create league
-                        </a>
+                        <%-- Creating a league enrols you as its first member and manager, which
+                             needs a team just as joining does, so it is gated the same way. --%>
+                        <c:choose>
+                            <c:when test="${hasTeam}">
+                                <a class="btn-gold" href="${pageContext.request.contextPath}/league/create">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                                    Create league
+                                </a>
+                            </c:when>
+                            <c:otherwise>
+                                <button type="button" class="btn-gold" disabled
+                                        title="Create a team before creating a league">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                                    Create league
+                                </button>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
                 </header>
 
