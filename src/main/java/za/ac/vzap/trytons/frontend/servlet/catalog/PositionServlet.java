@@ -29,6 +29,9 @@ public class PositionServlet extends AbstractServlet {
         if (submit == null) {
             submit = "";
         }
+        if (submit.isEmpty()) {
+            submit = "positions";
+        }
         String destination = switch (submit){
             case "positions" -> {
                 String search = request.getParameter("search");

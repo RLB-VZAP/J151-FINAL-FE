@@ -66,9 +66,6 @@
                                         <c:when test="${not empty transfer.transferDate}">
                                             ${transfer.transferDate}
                                         </c:when>
-                                        <c:when test="${not empty transfer.confirmedAt}">
-                                            ${transfer.confirmedAt}
-                                        </c:when>
                                         <c:when test="${not empty transfer.confirmationDate}">
                                             ${transfer.confirmationDate}
                                         </c:when>
@@ -135,33 +132,24 @@
 
                                 <td>
                                     <c:choose>
-                                        <c:when test="${transfer.penaltyApplied}">
+                                        <c:when test="${transfer.penaltyPoints > 0}">
+                                            ${transfer.penaltyPoints} points
+                                        </c:when>
+                                        <c:otherwise>
+                                            No penalty
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+
                                 <td>
-                                                                    <c:choose>
-                                                                        <c:when test="${transfer.penaltyPoints > 0}">
-                                                                            ${transfer.penaltyPoints} points
-                                                                        </c:when>
-                                                                        <c:otherwise>
-                                                                            No penalty
-                                                                        </c:otherwise>
-                                                                    </c:choose>
-                                                                </td>
-
-                                                                <td>
-                                                                    <c:choose>
-                                                                        <c:when test="${not empty transfer.status}">
-                                                                            ${transfer.status}
-                                                                        </c:when>
-                                                                        <c:otherwise>
-                                                                            Unknown
-                                                                        </c:otherwise>
-                                                                    </c:choose>
-                                                                </td>
-
-                                    <c:if test="${not empty transfer.message}">
-                                        <br>
-                                        <small>${transfer.message}</small>
-                                    </c:if>
+                                    <c:choose>
+                                        <c:when test="${not empty transfer.status}">
+                                            ${transfer.status}
+                                        </c:when>
+                                        <c:otherwise>
+                                            Unknown
+                                        </c:otherwise>
+                                    </c:choose>
                                 </td>
                             </tr>
                         </c:forEach>

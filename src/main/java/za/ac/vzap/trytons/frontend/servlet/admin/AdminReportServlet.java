@@ -77,12 +77,10 @@ public class AdminReportServlet extends AbstractServlet {
 
         Optional<SystemReportResponse> generatedReport = adminReportRestClient.generateReport(reportRequest);
         if(generatedReport.isPresent()) {
-            SystemReportResponse report = generatedReport.get();
-            request.setAttribute("success","System report '" + report.getReportTitle() + "' generated successfully");
-            request.setAttribute("newReport", report);
-        }else{
-            request.setAttribute("error","Unable to generate System Report");
+            response.sendRedirect(request.getContextPath() + "/admin/reports");
+            return;
         }
+        request.setAttribute("error","Unable to generate System Report");
         loadReports(request);
         loadLogs(request);
         forward(request, response);

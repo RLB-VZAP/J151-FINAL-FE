@@ -40,7 +40,7 @@ public class FantasyTeamServlet extends AbstractServlet{
                     request.setAttribute("error","Team id is required to view your team");
                     yield VIEW_OWN_TEAM_JSP;
                 }
-                Optional<ViewOwnTeamResponse> team = fantasyTeamRestClient.viewOwnTeam(teamId.get().toString());
+                Optional<ViewOwnTeamResponse> team = fantasyTeamRestClient.viewOwnTeam(teamId.get());
                 if(team.isPresent()){
                     request.setAttribute("team",team.get());
                 }else{
@@ -67,7 +67,7 @@ public class FantasyTeamServlet extends AbstractServlet{
                 if(teamId.isEmpty()){
                     request.setAttribute("error","Team ID is required to update your team");
                 }else {
-                    fantasyTeamRestClient.viewOwnTeam(teamId.get().toString()).ifPresentOrElse(team -> request.setAttribute("team",team),() -> request.setAttribute("error","Unable to update your team"));
+                    fantasyTeamRestClient.viewOwnTeam(teamId.get()).ifPresentOrElse(team -> request.setAttribute("team",team),() -> request.setAttribute("error","Unable to update your team"));
                     request.setAttribute("team",teamId.get());
                 }
                 loadPlayerOptions(request);
@@ -104,7 +104,7 @@ public class FantasyTeamServlet extends AbstractServlet{
         if(teamName == null || teamName.isBlank()){
             validationErrors.add("Team name is required");
         }
-        String[] playerIdParams = request.getParameterValues("playerId");
+        String[] playerIdParams = request.getParameterValues("playerIds");
         List<UUID> selectedPlayerIds = new ArrayList<>();
         if(playerIdParams != null){
             for(String value : playerIdParams){
@@ -141,7 +141,7 @@ public class FantasyTeamServlet extends AbstractServlet{
         if(teamName == null || teamName.isBlank()){
             validationErrors.add("Team name is required");
         }
-        String[] playerIdParams = request.getParameterValues("playerId");
+        String[] playerIdParams = request.getParameterValues("playerIds");
         List<UUID> selectedPlayerIds = new ArrayList<>();
         if(playerIdParams != null){
             for(String value : playerIdParams){

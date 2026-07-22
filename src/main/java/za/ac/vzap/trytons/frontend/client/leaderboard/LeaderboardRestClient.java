@@ -36,7 +36,7 @@ public class LeaderboardRestClient {
     }
 
     public Optional<LeaderboardEntryResponse> getRankingForTeam(UUID teamId, UUID leaderboardId) {
-        String path = GET_RANKING_FOR_TEAM_PATH + "/team" + "/" + encode(teamId.toString()) + "?leaderboardId=" + leaderboardId;
+        String path = GET_RANKING_FOR_TEAM_PATH + "/team" + "/" + encode(teamId.toString()) + "?leaderboardId=" + encode(leaderboardId.toString());
         Optional<LeaderboardEntryResponse> response = apiClient.get(path, LeaderboardEntryResponse.class);
         if (response.isEmpty()){
             LOG.log(Level.SEVERE, "Could not get ranking for team.");

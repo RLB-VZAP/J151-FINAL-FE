@@ -58,7 +58,6 @@
                 <th>Position</th>
                 <th>Value</th>
                 <th>Form</th>
-                <th>Fantasy Points</th>
                 <th>Availability</th>
             </tr>
             </thead>
@@ -66,11 +65,10 @@
             <c:forEach var="player" items="${players}">
                 <tr>
                     <td>${player.playerName}</td>
-                    <td>${player.club.clubName}</td>
-                    <td>${player.position.positionName}</td>
+                    <td>${clubNamesById[player.clubId]}</td>
+                    <td>${positionNamesById[player.positionId]}</td>
                     <td>${player.value}</td>
                     <td>${player.currentForm}</td>
-                    <td>${player.totalFantasyPoints}</td>
                     <td>
                         <c:choose>
                             <c:when test="${player.active}">Active</c:when>

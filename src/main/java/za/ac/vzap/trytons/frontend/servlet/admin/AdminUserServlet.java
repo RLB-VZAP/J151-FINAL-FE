@@ -12,11 +12,11 @@ import za.ac.vzap.trytons.frontend.client.admin.AdminUserStatusResponse;
 import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import static java.lang.Boolean.parseBoolean;
 
 @WebServlet(name = "AdminUserServlet", urlPatterns = {"/admin/users"})
 public class AdminUserServlet extends AbstractServlet {
@@ -54,15 +54,20 @@ public class AdminUserServlet extends AbstractServlet {
         } else if (isActive.isEmpty()) {
             request.setAttribute("error", "invalid or missing status value");
 
-        }else{
-            updateStatus(request, userId.get(), isActive.get());
+        } else if (updateStatus(request, userId.get(), isActive.get())) {
+            String redirect = request.getContextPath() + "/admin/users";
+            if (searchTerm != null && !searchTerm.isBlank()) {
+                redirect += "?searchTerm=" + URLEncoder.encode(searchTerm, StandardCharsets.UTF_8);
+            }
+            response.sendRedirect(redirect);
+            return;
         }
 
         loadUsers(request, searchTerm);
         request.getRequestDispatcher(VIEW).forward(request, response);
     }
 
-    private void updateStatus(HttpServletRequest request, UUID userId, boolean isActive){
+    private boolean updateStatus(HttpServletRequest request, UUID userId, boolean isActive){
 
         AdminUserStatusRequest statusRequest = new AdminUserStatusRequest();
         statusRequest.setActive(isActive);
@@ -70,11 +75,10 @@ public class AdminUserServlet extends AbstractServlet {
         Optional <AdminUserStatusResponse> result = adminUserRestClient.updateUserStatus(userId, statusRequest);
 
         if (result.isPresent()) {
-            request.setAttribute("success", "User status updated successfully");
-        } else {
-            request.setAttribute("error", "Unable to update user status");
+            return true;
         }
-
+        request.setAttribute("error", "Unable to update user status");
+        return false;
     }
 
     private void loadUsers(HttpServletRequest request, String searchTerm) {

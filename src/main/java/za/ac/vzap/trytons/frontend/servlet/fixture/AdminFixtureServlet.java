@@ -62,6 +62,10 @@ public class AdminFixtureServlet extends AbstractServlet {
         } else {
             updateFixtureStatus(request);
         }
+        if (request.getAttribute("success") != null) {
+            response.sendRedirect(request.getContextPath() + "/admin/fixtures");
+            return;
+        }
         // The "status" POST parameter here is the new status just applied to one fixture, not a list
         // filter — reload unfiltered so the admin can see the updated row in context.
         loadPage(request, null);

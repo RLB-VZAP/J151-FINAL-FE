@@ -61,6 +61,11 @@ public class NotificationServlet extends AbstractServlet {
             default -> request.setAttribute("error", "Unknown notification action requested");
         }
 
+        if (request.getAttribute("success") != null) {
+            response.sendRedirect(request.getContextPath() + "/notifications");
+            return;
+        }
+
         if (!loadNotifications(request, response, false)) {
             return;
         }

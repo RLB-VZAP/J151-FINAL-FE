@@ -21,7 +21,7 @@ import za.ac.vzap.trytons.frontend.client.scoring.FantasyPointBreakdownResponse;
 import za.ac.vzap.trytons.frontend.client.scoring.FantasyPointsResponse;
 import za.ac.vzap.trytons.frontend.client.scoring.FantasyPointsRestClient;
 
-@WebServlet(name ="FixtureServlet", urlPatterns = {"/fixtures","/fixture","/fixture/create","/fixture/update"} )
+@WebServlet(name ="FixtureServlet", urlPatterns = {"/fixtures","/fixture"} )
 public class FixtureServlet extends AbstractServlet {
     @Inject
     private FixtureRestClient fixtureRestClient;
