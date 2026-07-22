@@ -11,7 +11,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PlayerAvailabilityRequest {
-
     private String status;
     private LocalDate effectiveDate;
     private LocalDate endDate;

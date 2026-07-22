@@ -15,10 +15,10 @@ import java.util.logging.Logger;
 import za.ac.vzap.trytons.frontend.client.shared.APIClient;
 @Dependent
 public class ClubRestClient {
-    private String LIST_CLUBS = "/club";
-    private String GET_CLUB_BY_ID = "/club";
-    private String CREATE_CLUB = "/club";
-    private String UPDATE_CLUB = "/club";
+    private final String LIST_CLUBS = "/club";
+    private final String GET_CLUB_BY_ID = "/club";
+    private final String CREATE_CLUB = "/club";
+    private final String UPDATE_CLUB = "/club";
 
     private static final Logger LOG = Logger.getLogger(ClubRestClient.class.getName());
 
