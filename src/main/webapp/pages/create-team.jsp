@@ -83,6 +83,7 @@
                     <input type="search" id="playerSearch" placeholder="Search players"
                            autocomplete="off" aria-label="Search players">
                 </label>
+                <p class="ct-budget-note">Your budget: <strong><t:money value="${budget}" /></strong></p>
             </div>
 
             <div class="ct-layout">
