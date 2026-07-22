@@ -66,7 +66,14 @@ public class LeagueServlet extends AbstractServlet {
 
             case "/league/create" -> "/pages/create-league.jsp";
 
-            case "/league/join" -> "/pages/join-league.jsp";
+            case "/league/join" -> {
+                // The page browses public leagues by name rather than asking for an id,
+                // so it needs the same list and member counts the leagues hub uses.
+                Optional<List<LeagueResponse>> joinable = leagueRestClient.listPublicLeagues();
+                request.setAttribute("publicLeagues", joinable.orElseGet(List::of));
+                request.setAttribute("memberCounts", countMembers(joinable.orElseGet(List::of)));
+                yield "/pages/join-league.jsp";
+            }
 
             case "/league/members" -> {
                 String leagueId = request.getParameter("leagueId");
@@ -194,10 +201,7 @@ public class LeagueServlet extends AbstractServlet {
             String leagueId = league.getLeagueId();
             if (leagueId == null || leagueId.isBlank()) continue;
 
-            List<LeagueMemberResponse> members = leagueRestClient.listMembers(leagueId).orElse(List.of());
-            List<LeagueMemberResponse> active = members.stream()
-                    .filter(LeagueMemberResponse::isActive)
-                    .collect(Collectors.toList());
+            List<LeagueMemberResponse> active = activeMembers(leagueId);
             memberCounts.put(leagueId, active.size());
 
             boolean isMember = currentUserId != null && active.stream()
@@ -219,6 +223,23 @@ public class LeagueServlet extends AbstractServlet {
         request.setAttribute("leagueStandings", leagueStandings);
         request.setAttribute("currentUsername", currentUsername);
         request.setAttribute("masterStandings", leaderboardRestClient.getOverallLeaderboard().orElse(List.of()));
+    }
+
+    private List<LeagueMemberResponse> activeMembers(String leagueId) {
+        return leagueRestClient.listMembers(leagueId).orElse(List.of()).stream()
+                .filter(LeagueMemberResponse::isActive)
+                .collect(Collectors.toList());
+    }
+
+    private Map<String, Integer> countMembers(List<LeagueResponse> leagues) {
+        Map<String, Integer> counts = new HashMap<>();
+        for (LeagueResponse league : leagues) {
+            String leagueId = league.getLeagueId();
+            if (leagueId != null && !leagueId.isBlank()) {
+                counts.put(leagueId, activeMembers(leagueId).size());
+            }
+        }
+        return counts;
     }
 
     private boolean isCurrentUserManager(String leagueId) {
