@@ -11,49 +11,51 @@
     <title>Players - Fantasy TryTons</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/catalog.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/players.css">
 </head>
-<body class="players-page">
+<body class="catalog-page players-page">
 
 <c:set var="activeNav" value="players" scope="request" />
 <%@ include file="/WEB-INF/jspf/sidebar.jspf" %>
 
-<main class="players-main">
+<main class="catalog-main" data-catalog data-catalog-noun="player" data-catalog-count-suffix=" &middot; season 2025/26">
     <%-- Photo layer sits under everything, behind a heavy dark-green wash. --%>
-    <div class="players-backdrop" aria-hidden="true"></div>
+    <div class="catalog-backdrop" aria-hidden="true"></div>
 
-    <div class="players-content">
+    <div class="catalog-content">
 
-        <header class="players-header">
+        <header class="catalog-header">
             <div>
-                <p class="players-eyebrow">Fantasy TryTons League</p>
+                <p class="catalog-eyebrow">Fantasy TryTons League</p>
                 <h1 class="brand-font">Players</h1>
             </div>
-            <%-- players-filter.js keeps this in step with the filtered list. --%>
-            <p class="players-count" id="playersCount">${fn:length(players)} players &middot; season 2025/26</p>
+            <%-- catalog-filter.js keeps this in step with the filtered list. --%>
+            <p class="catalog-count" data-catalog-count>${fn:length(players)} players &middot; season 2025/26</p>
         </header>
 
         <c:if test="${not empty error}">
-            <p class="players-error" role="alert">${fn:escapeXml(error)}</p>
+            <p class="catalog-error" role="alert">${fn:escapeXml(error)}</p>
         </c:if>
 
-        <div class="players-toolbar">
+        <div class="catalog-toolbar">
             <label class="search-wrap" for="playerSearchInput">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
                 <input type="search" id="playerSearchInput" name="search"
                        placeholder="Search player name" autocomplete="off"
                        aria-label="Search player name"
+                       data-catalog-search
                        value="${fn:escapeXml(searchTerm)}">
             </label>
 
-            <select class="sel sel-filter" id="clubFilter" aria-label="Filter by club">
+            <select class="sel sel-filter" id="clubFilter" aria-label="Filter by club" data-catalog-filter="club">
                 <option value="">All clubs</option>
                 <c:forEach var="club" items="${clubs}">
                     <option value="${fn:escapeXml(club.clubId)}" ${club.clubId == selectedClubId ? 'selected' : ''}>${fn:escapeXml(club.clubName)}</option>
                 </c:forEach>
             </select>
 
-            <select class="sel sel-filter" id="positionFilter" aria-label="Filter by position">
+            <select class="sel sel-filter" id="positionFilter" aria-label="Filter by position" data-catalog-filter="position">
                 <option value="">All positions</option>
                 <c:forEach var="position" items="${positions}">
                     <option value="${fn:escapeXml(position.positionId)}" ${position.positionId == selectedPositionId ? 'selected' : ''}>${fn:escapeXml(position.positionName)}</option>
@@ -62,17 +64,17 @@
 
             <div class="sort-wrap">
                 <label class="sort-label" for="playerSort">Sort by</label>
-                <select class="sel" id="playerSort">
-                    <option value="name">Name</option>
-                    <option value="club">Club</option>
-                    <option value="value">Value</option>
-                    <option value="form">Form</option>
+                <select class="sel" id="playerSort" data-catalog-sort>
+                    <option value="name" data-dir="asc">Name</option>
+                    <option value="clubName" data-dir="asc">Club</option>
+                    <option value="value" data-dir="desc" data-type="number">Value</option>
+                    <option value="form" data-dir="desc" data-type="number">Form</option>
                 </select>
             </div>
         </div>
 
-        <div class="ptable" id="playersTable">
-            <div class="prow phead">
+        <div class="ctable" id="playersTable" data-catalog-table>
+            <div class="crow chead">
                 <span>Name</span>
                 <span>Club</span>
                 <span>Position</span>
@@ -80,7 +82,7 @@
                 <span>Form</span>
                 <span>Availability</span>
             </div>
-            <div class="pbody" id="playersBody">
+            <div class="cbody" id="playersBody" data-catalog-body>
                 <c:forEach var="player" items="${players}">
                     <c:set var="clubName" value="${clubNamesById[player.clubId]}" />
                     <c:set var="positionName" value="${positionNamesById[player.positionId]}" />
@@ -98,7 +100,7 @@
                     <c:set var="playerName" value="${empty player.playerName ? '' : player.playerName}" />
                     <c:set var="nameParts" value="${fn:split(playerName, ' ')}" />
 
-                    <div class="prow"
+                    <div class="crow"
                          data-name="${fn:escapeXml(fn:toLowerCase(playerName))}"
                          data-club="${fn:escapeXml(player.clubId)}"
                          data-club-name="${fn:escapeXml(clubName)}"
@@ -106,12 +108,12 @@
                          data-value="${player.value}"
                          data-form="${player.currentForm}">
 
-                        <span class="p-name">
-                            <span class="p-avatar" aria-hidden="true"><c:if test="${fn:length(nameParts) > 0}">${fn:toUpperCase(fn:substring(nameParts[0], 0, 1))}<c:if test="${fn:length(nameParts) > 1}">${fn:toUpperCase(fn:substring(nameParts[fn:length(nameParts) - 1], 0, 1))}</c:if></c:if></span>
-                            <span class="p-name-text" title="${fn:escapeXml(playerName)}">${fn:escapeXml(playerName)}</span>
+                        <span class="c-name">
+                            <span class="c-avatar" aria-hidden="true"><c:if test="${fn:length(nameParts) > 0}">${fn:toUpperCase(fn:substring(nameParts[0], 0, 1))}<c:if test="${fn:length(nameParts) > 1}">${fn:toUpperCase(fn:substring(nameParts[fn:length(nameParts) - 1], 0, 1))}</c:if></c:if></span>
+                            <span class="c-name-text" title="${fn:escapeXml(playerName)}">${fn:escapeXml(playerName)}</span>
                         </span>
 
-                        <span class="p-club" title="${fn:escapeXml(clubName)}">${fn:escapeXml(clubName)}</span>
+                        <span class="c-text" title="${fn:escapeXml(clubName)}">${fn:escapeXml(clubName)}</span>
 
                         <span>
                             <span class="pos-pill ${isForward ? 'pos-fwd' : 'pos-back'}">${fn:escapeXml(positionName)}</span>
@@ -150,11 +152,11 @@
             </div>
         </div>
 
-        <p class="players-empty" id="playersEmptyState" hidden>No players match your search.</p>
+        <p class="catalog-empty" id="playersEmptyState" data-catalog-empty hidden>No players match your search.</p>
 
     </div>
 </main>
 
-<script src="${pageContext.request.contextPath}/assets/js/players-filter.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/catalog-filter.js"></script>
 </body>
 </html>

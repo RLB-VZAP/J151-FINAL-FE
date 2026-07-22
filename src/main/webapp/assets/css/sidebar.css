@@ -184,6 +184,9 @@
 @media (max-width: 900px) {
     .app-sidebar {
         width: 100%;
+        /* Without this the 14px side padding is added to the 100%, pushing the
+           sidebar 28px past the viewport and scrolling the whole page sideways. */
+        box-sizing: border-box;
         border-right: none;
         border-bottom: 1px solid var(--line);
     }
