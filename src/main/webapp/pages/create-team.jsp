@@ -51,7 +51,6 @@
                 <p class="catalog-eyebrow">Fantasy TryTons League</p>
                 <h1 class="brand-font">Create Team</h1>
             </div>
-            <p class="catalog-count">Pick ${fn:escapeXml(squadSize)} players within <t:money value="${budget}" /></p>
         </header>
 
         <c:if test="${not empty error}">
@@ -156,6 +155,7 @@
                 <%-- ---------- Squad summary ---------- --%>
                 <aside class="ct-summary">
                     <h2>Your Squad</h2>
+                    <p class="ct-summary-sub">Pick ${fn:escapeXml(squadSize)} players within <t:money value="${budget}" /></p>
 
                     <div class="ct-stat">
                         <span class="ct-stat-label">Players selected</span>
