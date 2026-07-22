@@ -333,3 +333,26 @@ body.catalog-page {
         margin-left: 0;
     }
 }
+/* ---------- Position pill ------------------------------------------------------ */
+.pos-pill {
+    display: inline-block;
+    max-width: 100%;
+    border-radius: 6px;
+    padding: .2rem .5rem;
+    font-size: .72rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pos-fwd {
+    background: rgba(201, 162, 39, .14);
+    color: var(--gold-bright);
+}
+
+.pos-back {
+    background: rgba(199, 209, 201, .1);
+    color: var(--silver);
+}
+
