@@ -100,13 +100,13 @@
                     <div class="field">
                         <label for="teamAScore">Team A score</label>
                         <input type="number" id="teamAScore" name="teamAScore" min="0" step="1" required
-                               value="${not empty matchResult ? matchResult.teamAScore : ''}">
+                                value="${not empty matchResult ? matchResult.teamAScore : ''}">
                     </div>
 
                     <div class="field">
                         <label for="teamBScore">Team B score</label>
                         <input type="number" id="teamBScore" name="teamBScore" min="0" step="1" required
-                               value="${not empty matchResult ? matchResult.teamBScore : ''}">
+                                value="${not empty matchResult ? matchResult.teamBScore : ''}">
                     </div>
 
                     <p id="scorePreview" class="hint" aria-live="polite"></p>
@@ -114,7 +114,7 @@
                     <div class="field">
                         <label for="simulationReason">Reason / note (optional)</label>
                         <input type="text" id="simulationReason" name="simulationReason"
-                               placeholder="e.g. correction after review">
+                                placeholder="e.g. correction after review">
                     </div>
 
                     <button type="submit">Save match result</button>
