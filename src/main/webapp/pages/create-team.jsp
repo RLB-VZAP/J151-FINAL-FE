@@ -47,13 +47,17 @@
 
             <%
                 List<PlayerResponse> players = (List<PlayerResponse>) request.getAttribute("players");
+                // Fallbacks only, for when the servlet supplies neither. Both must
+                // track the backend: budget is millions of rands to match
+                // player.value (FantasyTeamServiceImpl.INITIAL_BUDGET) and the squad
+                // rule in SquadValidationServiceImpl is 20 players, not 15.
                 Object budget = request.getAttribute("budget");
                 if (budget == null) {
-                    budget = "50000000";
+                    budget = "200";
                 }
                 Object squadSize = request.getAttribute("squadSize");
                 if (squadSize == null) {
-                    squadSize = "15";
+                    squadSize = "20";
                 }
                 request.setAttribute("budget", budget);
                 request.setAttribute("squadSize", squadSize);
@@ -126,12 +130,12 @@
 
                 <section>
                     <h2>Your Squad</h2>
-                    <%-- Budget is whole rands, so plain formatting rather than the "m"
-                         form used for per-player values. create-team.js overwrites the
-                         used/remaining spans on load using the same style. --%>
-                    <p>Budget: <span id="budgetTotal"><t:money value="${budget}" plain="true" /></span></p>
-                    <p>Selected value: <span id="budgetUsed"><t:money value="0" plain="true" /></span></p>
-                    <p>Remaining: <span id="budgetRemaining"><t:money value="${budget}" plain="true" /></span></p>
+                    <%-- Budget is on the same millions scale as player values, so it uses
+                         the same formatting. create-team.js overwrites the used/remaining
+                         spans on load using a matching style. --%>
+                    <p>Budget: <span id="budgetTotal"><t:money value="${budget}" /></span></p>
+                    <p>Selected value: <span id="budgetUsed"><t:money value="0" /></span></p>
+                    <p>Remaining: <span id="budgetRemaining"><t:money value="${budget}" /></span></p>
                     <p>Players selected: <span><span id="selectedCount">0</span> / ${fn:escapeXml(squadSize)}</span></p>
                     <p class="error-message" role="alert" id="overBudgetWarning" hidden>
                         You are over budget. You can still submit, but the server will reject an over-budget squad.

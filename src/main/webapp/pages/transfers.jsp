@@ -103,12 +103,11 @@
     <h2>Budget</h2>
 
     <c:choose>
-        <%-- Budgets are whole rands, unlike the per-player values above. --%>
         <c:when test="${not empty remainingBudget}">
-            <p>Remaining budget: <t:money value="${remainingBudget}" plain="true" /></p>
+            <p>Remaining budget: <t:money value="${remainingBudget}" /></p>
         </c:when>
         <c:when test="${not empty budget}">
-            <p>Remaining budget: <t:money value="${budget}" plain="true" /></p>
+            <p>Remaining budget: <t:money value="${budget}" /></p>
         </c:when>
         <c:otherwise>
             <p>Budget information will show once your team details are available.</p>

@@ -45,7 +45,7 @@
                         </tr>
                         <tr>
                             <th scope="row">Remaining budget</th>
-                            <td><t:money value="${team.remainingBudget}" plain="true" /></td>
+                            <td><t:money value="${team.remainingBudget}" /></td>
                         </tr>
                         <tr>
                             <th scope="row">Total points</th>
