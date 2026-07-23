@@ -624,3 +624,15 @@
         flex-wrap: wrap;
     }
 }
+
+/* ---------- Clickable league name (Your leagues → league detail) --------------- */
+/* theme.css underlines and recolours every <a>; keep the name reading as a heading. */
+a.lg-card-name-link {
+    display: block;
+    border-bottom: none;
+    color: var(--silver-bright);
+}
+
+a.lg-card-name-link:hover {
+    color: var(--gold-bright);
+}

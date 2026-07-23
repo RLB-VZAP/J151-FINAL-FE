@@ -113,8 +113,10 @@ public class LeagueServlet extends AbstractServlet {
             case "/league/members" -> {
                 String leagueId = request.getParameter("leagueId");
                 request.setAttribute("leagueId", leagueId);
-                request.setAttribute("members", reloadMembers(leagueId));
+                List<LeagueMemberResponse> members = reloadMembers(leagueId);
+                request.setAttribute("members", members);
                 request.setAttribute("isLeagueManager", isCurrentUserManager(leagueId));
+                populateMembersView(request, leagueId, members);
                 yield "/pages/league-members.jsp";
             }
 
@@ -170,8 +172,10 @@ public class LeagueServlet extends AbstractServlet {
                 }
                 if (handleApiFailure(request, response, "Unable to remove member")) return;
                 request.setAttribute("leagueId", leagueId);
-                request.setAttribute("members", reloadMembers(leagueId));
+                List<LeagueMemberResponse> members = reloadMembers(leagueId);
+                request.setAttribute("members", members);
                 request.setAttribute("isLeagueManager", isCurrentUserManager(leagueId));
+                populateMembersView(request, leagueId, members);
                 request.getRequestDispatcher("/pages/league-members.jsp").forward(request, response);
             }
 
@@ -191,6 +195,45 @@ public class LeagueServlet extends AbstractServlet {
         if (leagueId == null || leagueId.isBlank()) return List.of();
         return leagueRestClient.listMembers(leagueId).orElse(List.of());
     }
+
+    /**
+     * Header data for the members page: the league itself (name, type, invite code,
+     * capacity, creation date, manager) which the members list does not carry, plus
+     * the active-member count / spots-left and the date labels.
+     *
+     * joinDate and creationDate are LocalDateTime, and fmt:formatDate takes a
+     * java.util.Date, so the display strings are built here.
+     */
+    private void populateMembersView(HttpServletRequest request, String leagueId,
+                                     List<LeagueMemberResponse> members) {
+        if (leagueId == null || leagueId.isBlank()) return;
+
+        leagueRestClient.getLeague(leagueId).ifPresent(league -> {
+            request.setAttribute("league", league);
+            if (league.getCreationDate() != null) {
+                request.setAttribute("creationDateLabel", league.getCreationDate().format(MEMBER_DATE));
+            }
+            // member.userId is a String and managerUserId a UUID; expose the string form
+            // so the "Manager" badge can compare them in EL.
+            if (league.getManagerUserId() != null) {
+                request.setAttribute("managerUserId", league.getManagerUserId().toString());
+            }
+        });
+
+        long activeCount = members.stream().filter(LeagueMemberResponse::isActive).count();
+        request.setAttribute("memberCount", (int) activeCount);
+
+        Map<String, String> joinLabels = new HashMap<>();
+        for (LeagueMemberResponse member : members) {
+            if (member != null && member.getMembershipId() != null && member.getJoinDate() != null) {
+                joinLabels.put(member.getMembershipId(), member.getJoinDate().format(MEMBER_DATE));
+            }
+        }
+        request.setAttribute("joinDateLabels", joinLabels);
+    }
+
+    private static final java.time.format.DateTimeFormatter MEMBER_DATE =
+            java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy", java.util.Locale.UK);
 
     private List<LeagueResponse> loadMyLeagues() {
         if (!authContext.isAuthenticated()) return List.of();
