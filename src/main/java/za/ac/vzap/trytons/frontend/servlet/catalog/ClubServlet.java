@@ -37,6 +37,7 @@ public class ClubServlet extends AbstractServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if(!requireAuthenticated(request, response)) return;
         String servletPath = request.getServletPath();
         String submit = request.getParameter("submit");
         if (submit == null) {
