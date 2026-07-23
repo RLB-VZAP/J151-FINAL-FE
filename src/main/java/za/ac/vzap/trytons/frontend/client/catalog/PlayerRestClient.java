@@ -27,6 +27,15 @@ public class PlayerRestClient {
     private APIClient apiClient;
 
     public Optional<List<PlayerResponse>> listPlayers(String search , UUID clubId , UUID positionId) {
+        return listPlayers(search, clubId, positionId, false);
+    }
+
+    /**
+     * When availableOnly is true, only players currently available for selection are
+     * returned — used by the create-team pool so it never offers a player the squad
+     * validator would reject on submit.
+     */
+    public Optional<List<PlayerResponse>> listPlayers(String search , UUID clubId , UUID positionId, boolean availableOnly) {
         StringBuilder path = new StringBuilder(LIST_PLAYERS);
         List<String> params = new ArrayList<>();
         if (search != null && !search.isBlank()) {
@@ -37,6 +46,9 @@ public class PlayerRestClient {
         }
         if (positionId != null) {
             params.add("positionId=" + encode(positionId.toString()));
+        }
+        if (availableOnly) {
+            params.add("available=true");
         }
         if (!params.isEmpty()) {
             path.append("?").append(String.join("&", params));
