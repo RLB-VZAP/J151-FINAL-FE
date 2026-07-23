@@ -54,16 +54,12 @@
                             <div class="ptbl-head">
                                 <span>Name</span>
                                 <span>Category</span>
-                                <span class="ptbl-num">Min required</span>
-                                <span class="ptbl-num">Max allowed</span>
                                 <span aria-hidden="true"></span>
                             </div>
                             <c:forEach var="pos" items="${positions}">
                                 <div class="ptbl-row">
                                     <span class="ptbl-name"><c:out value="${pos.positionName}" /></span>
                                     <span><span class="ptbl-chip"><c:out value="${pos.positionCategory}" /></span></span>
-                                    <span class="ptbl-num ptbl-figure">${pos.minRequired}</span>
-                                    <span class="ptbl-num ptbl-figure">${pos.maxAllowed}</span>
                                     <span class="ptbl-action">
                                         <a class="ptbl-edit" href="${pageContext.request.contextPath}/admin/positions?submit=position&amp;positionId=${pos.positionId}">Edit</a>
                                     </span>
@@ -108,18 +104,12 @@
                                placeholder="e.g. FORWARD" required>
                     </div>
 
-                    <div class="apos-row-2">
-                        <div class="apos-field">
-                            <label class="apos-label" for="minRequired">Min required</label>
-                            <input class="apos-input" type="number" id="minRequired" name="minRequired" min="0"
-                                   value="${not empty position ? position.minRequired : ''}" required>
-                        </div>
-                        <div class="apos-field">
-                            <label class="apos-label" for="maxAllowed">Max allowed</label>
-                            <input class="apos-input" type="number" id="maxAllowed" name="maxAllowed" min="0"
-                                   value="${not empty position ? position.maxAllowed : ''}" required>
-                        </div>
-                    </div>
+                    <%-- Squad limits (min required / max allowed) are deliberately absent:
+                         they are enforced by the backend's hardcoded squad validation and
+                         are not editable here. --%>
+                    <p class="apos-note">
+                        Squad limits for each position are fixed in the system and cannot be changed here.
+                    </p>
 
                     <button type="submit" class="btn-gold apos-submit">
                         <c:choose>

@@ -82,7 +82,7 @@
 .ptbl-head,
 .ptbl-row {
     display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 110px 110px 70px;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) 70px;
     align-items: center;
     gap: 12px;
     padding: 12px 18px;
@@ -200,13 +200,17 @@
 
 .apos-input::placeholder { color: #5c6e64; }
 
-.apos-row-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
+/* Explains why the squad limits are not offered as inputs. */
+.apos-note {
+    margin: 16px 0 0;
+    padding: .65rem .8rem;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: #0c1c13;
+    color: var(--silver-dim);
+    font-size: .78rem;
+    line-height: 1.5;
 }
-
-.apos-row-2 .apos-field + .apos-field { margin-top: 0; }
 
 .apos-submit {
     width: 100%;
@@ -233,9 +237,6 @@
 @media (max-width: 640px) {
     .apos-page .catalog-main { padding: 24px 16px 32px; }
 
-    /* Category column goes; name, the two limits and the edit link matter most. */
     .ptbl-head,
-    .ptbl-row { grid-template-columns: minmax(0, 1.4fr) 72px 72px 60px; }
-    .ptbl-head > :nth-child(2),
-    .ptbl-row > :nth-child(2) { display: none; }
+    .ptbl-row { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) 60px; }
 }
