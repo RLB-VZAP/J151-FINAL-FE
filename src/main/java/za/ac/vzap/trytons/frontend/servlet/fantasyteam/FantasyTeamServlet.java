@@ -80,6 +80,14 @@ public class FantasyTeamServlet extends AbstractServlet{
             }
 
             default -> {
+                // One team per user (uk_fantasyTeam_owner): if they already have a team,
+                // show a notice pointing at it rather than the create form.
+                Optional<UUID> existingTeamId = fantasyTeamRestClient.getMyTeam()
+                        .map(FantasyTeamResponse::getTeamId);
+                if (existingTeamId.isPresent()) {
+                    request.setAttribute("existingTeamId", existingTeamId.get());
+                    yield CREATE_TEAM_JSP;
+                }
                 loadPlayerOptions(request);
                 yield CREATE_TEAM_JSP;
             }
