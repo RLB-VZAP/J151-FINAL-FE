@@ -153,6 +153,7 @@ public class PlayerServlet extends AbstractServlet {
         Optional<PlayerResponse> created = playerRestClient.createPlayer(playerRequest);
         if(created.isPresent()){
             request.setAttribute("player", created.get());
+            toastSuccess(request, "Player created");
             return "/pages/player.jsp";
         }
         request.setAttribute("error", "Unable to create player");
@@ -169,6 +170,7 @@ public class PlayerServlet extends AbstractServlet {
         Optional<PlayerResponse> updated = playerRestClient.updatePlayer(playerId.get(), playerRequest);
         if(updated.isPresent()){
             request.setAttribute("player", updated.get());
+            toastSuccess(request, "Player updated");
             return "/pages/player.jsp";
         }
         request.setAttribute("error", "Unable to update player");
@@ -189,7 +191,7 @@ public class PlayerServlet extends AbstractServlet {
 
         if (saved.isPresent()) {
             request.setAttribute("availability", saved.get());
-            request.setAttribute("availabilityMessage", "Availability updated.");
+            toastSuccess(request, "Availability updated");
         } else {
             request.setAttribute("error", "Unable to update player availability");
         }

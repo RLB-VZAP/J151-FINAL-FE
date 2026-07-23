@@ -82,7 +82,7 @@ public class PositionServlet extends AbstractServlet {
                 Optional<PositionResponse> created = positionRestClient.createPosition(positionRequest.get());
                 if(created.isPresent()){
                     request.setAttribute("position", created.get());
-                    request.setAttribute("message", "Position created successfully.");
+                    toastSuccess(request, "Position created");
                     yield reloadPositions(request);
                 }
                 request.setAttribute("error", "Unable to create position");
@@ -102,7 +102,7 @@ public class PositionServlet extends AbstractServlet {
                 Optional<PositionResponse> updated = positionRestClient.updatePosition(positionId.get(), positionRequest.get());
                 if(updated.isPresent()){
                     request.setAttribute("position", updated.get());
-                    request.setAttribute("message", "Position updated successfully.");
+                    toastSuccess(request, "Position updated");
                     yield reloadPositions(request);
                 }
 

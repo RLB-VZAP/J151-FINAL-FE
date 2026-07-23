@@ -60,6 +60,7 @@ public class AdminFixtureServlet extends AbstractServlet {
             updateFixtureStatus(request);
         }
         if (request.getAttribute("success") != null) {
+            flashSuccess(request, (String) request.getAttribute("success"));
             response.sendRedirect(request.getContextPath() + "/admin/fixtures");
             return;
         }

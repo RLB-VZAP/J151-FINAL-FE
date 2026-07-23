@@ -125,6 +125,29 @@ public class AbstractServlet extends HttpServlet {
         session.setAttribute(FLASH_TYPE, type);
     }
 
+    // Request-scoped toast, for handlers that forward to a view instead of
+    // redirecting. Rendered by the same toast.jspf host as the session flash.
+    // Prefer flash* + a redirect where the success path already redirects.
+    protected static final String TOAST_MESSAGE = "toastMessage";
+    protected static final String TOAST_TYPE = "toastType";
+
+    protected void toastSuccess(HttpServletRequest req, String message) {
+        setToast(req, "success", message);
+    }
+
+    protected void toastError(HttpServletRequest req, String message) {
+        setToast(req, "error", message);
+    }
+
+    protected void toastInfo(HttpServletRequest req, String message) {
+        setToast(req, "info", message);
+    }
+
+    private void setToast(HttpServletRequest req, String type, String message) {
+        req.setAttribute(TOAST_MESSAGE, message);
+        req.setAttribute(TOAST_TYPE, type);
+    }
+
     // Context-relative redirect, e.g. redirectTo(resp, req, "/create-team").
     protected void redirectTo(HttpServletResponse resp, HttpServletRequest req, String contextRelativePath) throws IOException {
         resp.sendRedirect(req.getContextPath() + contextRelativePath);
