@@ -68,7 +68,7 @@
                         <div class="pf-pills">
                             <span class="pf-pill ${isAdmin ? 'pf-pill-gold' : 'pf-pill-silver'}">${fn:escapeXml(profile.role)}</span>
                             <c:choose>
-                                <c:when test="${profile.active}">
+                                <c:when test="${profile.isActive}">
                                     <span class="pf-pill pf-pill-active">Active</span>
                                 </c:when>
                                 <c:otherwise>
@@ -113,7 +113,7 @@
                             <dt>Account status</dt>
                             <dd>
                                 <c:choose>
-                                    <c:when test="${profile.active}"><span class="pf-pill pf-pill-active">Active</span></c:when>
+                                    <c:when test="${profile.isActive}"><span class="pf-pill pf-pill-active">Active</span></c:when>
                                     <c:otherwise><span class="pf-pill pf-pill-inactive">Inactive</span></c:otherwise>
                                 </c:choose>
                             </dd>
