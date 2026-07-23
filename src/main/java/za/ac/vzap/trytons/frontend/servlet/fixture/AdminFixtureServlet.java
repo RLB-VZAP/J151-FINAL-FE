@@ -19,7 +19,9 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -134,6 +136,18 @@ public class AdminFixtureServlet extends AbstractServlet {
 
         Optional<List<LeagueResponse>> leagues = leagueRestClient.listPublicLeagues();
         request.setAttribute("leagues", leagues.orElse(List.of()));
+
+        // Name lookups so the fixtures table can show a league name and round label
+        // instead of raw ids. Keyed by the id's string form; the JSP looks them up
+        // with ${map[fixture.leagueId.toString()]} since the fixture carries UUIDs.
+        Map<String, String> leagueNames = new HashMap<>();
+        leagues.orElse(List.of()).forEach(l -> leagueNames.put(l.getLeagueId(), l.getLeagueName()));
+        request.setAttribute("leagueNamesById", leagueNames);
+
+        Map<String, String> roundLabels = new HashMap<>();
+        rounds.orElse(List.of()).forEach(r ->
+                roundLabels.put(r.getRoundId(), r.getSeason() + " · Round " + r.getRoundNumber()));
+        request.setAttribute("roundLabelsById", roundLabels);
     }
 
     @Override

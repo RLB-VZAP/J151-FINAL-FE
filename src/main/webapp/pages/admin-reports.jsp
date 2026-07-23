@@ -56,14 +56,12 @@
                                     <span>Type</span>
                                     <span>Title</span>
                                     <span>Generated at</span>
-                                    <span>By</span>
                                 </div>
                                 <c:forEach var="report" items="${reports}">
                                     <div class="rtbl2-row">
                                         <span><span class="arep-chip"><c:out value="${report.reportType}" /></span></span>
                                         <span class="rtbl2-title" title="${fn:escapeXml(report.reportTitle)}"><c:out value="${report.reportTitle}" /></span>
                                         <span class="rtbl2-when">${fn:substring(fn:replace(report.generatedAt, 'T', ' '), 0, 16)}</span>
-                                        <span class="rtbl2-id" title="${fn:escapeXml(report.generatedByAdminUserId)}">${fn:substring(report.generatedByAdminUserId, 0, 8)}</span>
                                     </div>
                                 </c:forEach>
                             </div>
@@ -134,7 +132,6 @@
                                 <span>Created at</span>
                                 <span>Action</span>
                                 <span>Entity type</span>
-                                <span>Entity id</span>
                                 <span>Description</span>
                             </div>
                             <c:forEach var="log" items="${logs}">
@@ -142,7 +139,6 @@
                                     <span class="ltbl-when">${fn:substring(fn:replace(log.createdAt, 'T', ' '), 0, 16)}</span>
                                     <span><span class="arep-chip"><c:out value="${log.actionType}" /></span></span>
                                     <span class="ltbl-entity"><c:out value="${log.entityType}" /></span>
-                                    <span class="ltbl-id" title="${fn:escapeXml(log.entityId)}">${fn:substring(log.entityId, 0, 8)}</span>
                                     <span class="ltbl-desc" title="${fn:escapeXml(log.description)}"><c:out value="${log.description}" /></span>
                                 </div>
                             </c:forEach>

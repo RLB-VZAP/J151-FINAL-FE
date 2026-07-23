@@ -28,6 +28,8 @@ import za.ac.vzap.trytons.frontend.client.results.MatchResultResponse;
 import za.ac.vzap.trytons.frontend.client.results.MatchTeamScoreResponse;
 import za.ac.vzap.trytons.frontend.client.results.MatchTeamScoreRestClient;
 import za.ac.vzap.trytons.frontend.client.results.PlayerStatisticsResponse;
+import za.ac.vzap.trytons.frontend.client.catalog.PlayerRestClient;
+import za.ac.vzap.trytons.frontend.client.catalog.PlayerResponse;
 import za.ac.vzap.trytons.frontend.client.scoring.FantasyPointBreakdownResponse;
 import za.ac.vzap.trytons.frontend.client.scoring.FantasyPointsResponse;
 import za.ac.vzap.trytons.frontend.client.scoring.FantasyPointsRestClient;
@@ -46,6 +48,8 @@ public class FixtureServlet extends AbstractServlet {
     private RoundRestClient roundRestClient;
     @Inject
     private FantasyTeamRestClient fantasyTeamRestClient;
+    @Inject
+    private PlayerRestClient playerRestClient;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -201,7 +205,21 @@ public class FixtureServlet extends AbstractServlet {
         teamScores.ifPresent(scores -> request.setAttribute("teamScores", scores));
 
         Optional<List<PlayerStatisticsResponse>> playerStats = matchResultRestClient.listResultStatistics(resultId);
-        playerStats.ifPresent(stats -> request.setAttribute("playerStats", stats));
+        playerStats.ifPresent(stats -> {
+            request.setAttribute("playerStats", stats);
+            request.setAttribute("playerNamesById", buildPlayerNameLookup());
+        });
+    }
+
+    // Resolves player ids to names for the read-back table, so the page never shows a raw
+    // UUID. Keyed by the id object itself (not its string form): the JSP indexes with
+    // ${playerNamesById[ps.playerId]}, and both PlayerResponse and PlayerStatisticsResponse
+    // carry UUID player ids, so a UUID key matches on Map.get where a String key would not.
+    private Map<UUID, String> buildPlayerNameLookup() {
+        Map<UUID, String> names = new HashMap<>();
+        playerRestClient.listPlayers(null, null, null).orElse(List.of())
+                .forEach(player -> names.put(player.getPlayerId(), player.getPlayerName()));
+        return names;
     }
 
     // Optional drill-down: when the page is reloaded with ?statId=<uuid> (a link next to a row in

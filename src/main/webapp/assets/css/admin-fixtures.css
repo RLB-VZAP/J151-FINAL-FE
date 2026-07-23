@@ -210,10 +210,10 @@
 .ftbl-head,
 .ftbl-row {
     display: grid;
-    grid-template-columns: 84px 84px minmax(0, 1fr) minmax(0, 1fr) 96px 108px 210px;
+    grid-template-columns: minmax(110px, 1fr) 130px minmax(0, 1fr) minmax(0, 1fr) 96px 108px 210px;
     align-items: center;
     gap: 12px;
-    min-width: 860px;
+    min-width: 900px;
     padding: 11px 16px;
 }
 
@@ -235,10 +235,16 @@
 
 .ftbl-row:first-of-type { border-top: none; }
 
-.ftbl-code {
+.ftbl-league {
+    color: var(--silver-bright);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ftbl-round {
     color: var(--silver-dim);
-    font-family: "Space Grotesk", system-ui, sans-serif;
-    font-size: .78rem;
+    white-space: nowrap;
 }
 
 .ftbl-team {

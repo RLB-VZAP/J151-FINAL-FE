@@ -157,14 +157,14 @@
                                 <div class="stbl-body stbl-side-${fn:toLowerCase(sideKey)}">
                                     <c:forEach var="ps" items="${playerStats}">
                                         <c:if test="${ps.teamId == sideTeamId}">
-                                            <c:set var="pid" value="${fn:substring(ps.playerId, 0, 8)}" />
+                                            <c:set var="pname" value="${playerNamesById[ps.playerId]}" />
                                             <c:set var="isOpen" value="${not empty selectedPoints and ps.statId == selectedPoints.statId}" />
                                             <a class="stbl-row ${isOpen ? 'is-open' : ''}"
                                                href="${pageContext.request.contextPath}/fixture?submit=fixture&amp;fixtureId=${fixture.fixtureId}&amp;statId=${ps.statId}#stat-${ps.statId}"
                                                id="stat-${ps.statId}">
                                                 <span class="stbl-c-player">
                                                     <span class="stbl-avatar" aria-hidden="true">#</span>
-                                                    <span class="stbl-pname">Player ${pid}</span>
+                                                    <span class="stbl-pname"><c:out value="${empty pname ? 'Unknown player' : pname}" /></span>
                                                 </span>
                                                 <span>${ps.tries}</span>
                                                 <span>${ps.assists}</span>
