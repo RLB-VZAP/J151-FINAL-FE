@@ -53,6 +53,7 @@ public class FixtureServlet extends AbstractServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if(!requireAuthenticated(request, response)) return;
         String submit = request.getParameter("submit");
         if (submit == null) {
             submit = "";
@@ -91,22 +92,9 @@ public class FixtureServlet extends AbstractServlet {
         }
     }
 
-    /**
-     * Supplies what the fixtures list needs beyond the raw DTOs.
-     *
-     * FixtureResponse carries only a roundId and no score, so:
-     *  - round numbers are resolved from the rounds list, letting the page group by
-     *    "Round n" rather than falling back to grouping by date;
-     *  - scores are fetched per COMPLETED fixture. The list endpoint does not include
-     *    them and there is no bulk results call, so this is one request per completed
-     *    fixture — fine at this scale, worth revisiting if a season's worth is listed
-     *    at once;
-     *  - the caller's own team id lets the page highlight their name in a matchup.
-     */
+
     private void decorateFixtureList(HttpServletRequest request, List<FixtureResponse> fixtures) {
-        // These lookups are keyed by the id object itself, not its string form: the JSP
-        // indexes them with ${map[fixture.fixtureId]}, which passes the UUID straight to
-        // Map.get — a String key would never match and the cell would silently render empty.
+
         Map<UUID, Integer> roundNumbers = new HashMap<>();
         roundRestClient.listRounds().orElse(List.of()).forEach(
                 round -> parseUuid(round.getRoundId())
@@ -129,8 +117,6 @@ public class FixtureServlet extends AbstractServlet {
         request.setAttribute("fixtureGroups", groupByRound(fixtures, roundNumbers));
         request.setAttribute("featuredFixture", pickFeatured(fixtures));
 
-        // Dates and times are formatted here rather than in the JSP: fixtureDate is a
-        // LocalDate and fixtureTime a LocalTime, and fmt:formatDate takes java.util.Date.
         Map<UUID, String> dateLabels = new HashMap<>();
         Map<UUID, String> timeLabels = new HashMap<>();
         for (FixtureResponse fixture : fixtures) {
