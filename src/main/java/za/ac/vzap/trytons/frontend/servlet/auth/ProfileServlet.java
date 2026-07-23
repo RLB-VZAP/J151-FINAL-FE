@@ -99,6 +99,7 @@ public class ProfileServlet extends AbstractServlet {
             return;
         }
 
+        flashSuccess(request, "Profile updated");
         response.sendRedirect(request.getContextPath() + "/profile");
     }
 
@@ -112,6 +113,7 @@ public class ProfileServlet extends AbstractServlet {
 
         boolean success = profileRestClient.changePassword(changeRequest);
         if (success) {
+            flashSuccess(request, "Password changed");
             response.sendRedirect(request.getContextPath() + "/profile/change-password");
             return;
         }
