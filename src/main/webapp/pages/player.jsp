@@ -1,4 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="java.util.List" %>
+<%@ page import="za.ac.vzap.trytons.frontend.client.pricing.PlayerPriceHistoryResponse" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,6 +23,39 @@
         <dt>Current form</dt><dd>${player.currentForm}</dd>
         <dt>Status</dt><dd>${player.active ? 'Active' : 'Inactive'}</dd>
     </dl>
+
+    <h2>Recent price changes</h2>
+    <%
+        List<PlayerPriceHistoryResponse> priceHistory =
+                (List<PlayerPriceHistoryResponse>) request.getAttribute("priceHistory");
+        if (priceHistory == null || priceHistory.isEmpty()) {
+    %>
+        <p>No price changes recorded yet.</p>
+    <%
+        } else {
+    %>
+        <table class="price-history">
+            <thead>
+            <tr><th>When</th><th>From</th><th>To</th><th>Change</th><th>Reason</th></tr>
+            </thead>
+            <tbody>
+                <%
+                    for (PlayerPriceHistoryResponse row : priceHistory) {
+                        if (row == null) { continue; }
+                        pageContext.setAttribute("row", row);
+                        boolean up = row.getDelta() != null && row.getDelta().signum() > 0;
+                %>
+                <tr>
+                    <td><c:out value="${row.createdAt}"/></td>
+                    <td>${row.oldValue}</td>
+                    <td>${row.newValue}</td>
+                    <td style="color: <%= up ? "#15803d" : "#dc2626" %>;"><%= up ? "+" : "" %>${row.delta}</td>
+                    <td><c:out value="${row.reason}"/></td>
+                </tr>
+                <% } %>
+            </tbody>
+        </table>
+    <% } %>
 
     <h2>Set availability</h2>
     <c:if test="${not empty error}"><p>${error}</p></c:if>

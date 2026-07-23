@@ -14,6 +14,8 @@ import za.ac.vzap.trytons.frontend.client.catalog.PlayerResponse;
 import za.ac.vzap.trytons.frontend.client.catalog.PlayerRestClient;
 import za.ac.vzap.trytons.frontend.client.catalog.PositionResponse;
 import za.ac.vzap.trytons.frontend.client.catalog.PositionRestClient;
+import za.ac.vzap.trytons.frontend.client.pricing.PlayerPriceHistoryResponse;
+import za.ac.vzap.trytons.frontend.client.pricing.PricingRestClient;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -33,6 +35,8 @@ public class PlayerServlet extends AbstractServlet {
     private ClubRestClient clubRestClient;
     @Inject
     private PositionRestClient positionRestClient;
+    @Inject
+    private PricingRestClient pricingRestClient;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -94,6 +98,11 @@ public class PlayerServlet extends AbstractServlet {
             request.setAttribute("player", player.get());
             request.setAttribute("clubNamesById", buildClubNameLookup());
             request.setAttribute("positionNamesById", buildPositionNameLookup());
+
+            Optional<List<PlayerPriceHistoryResponse>> priceHistory =
+                    pricingRestClient.getPlayerHistory(playerId.get().toString(), 10);
+            request.setAttribute("priceHistory", priceHistory.orElse(List.of()));
+
             return "/pages/player.jsp";
         }
         request.setAttribute("error", "Player not found");
