@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import za.ac.vzap.trytons.frontend.client.leaderboard.LeaderboardEntryResponse;
 import za.ac.vzap.trytons.frontend.client.leaderboard.LeaderboardRestClient;
+import za.ac.vzap.trytons.frontend.client.league.LeagueResponse;
+import za.ac.vzap.trytons.frontend.client.league.LeagueRestClient;
 
 import java.io.IOException;
 import java.util.List;
@@ -18,6 +20,9 @@ import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
 public class LeaderboardServlet extends AbstractServlet {
     @Inject
     private LeaderboardRestClient leaderboardRestClient;
+
+    @Inject
+    private LeagueRestClient leagueRestClient;
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if(!requireAuthenticated(request,response)) {
@@ -39,6 +44,12 @@ public class LeaderboardServlet extends AbstractServlet {
                 Optional<List<LeaderboardEntryResponse>> result = leaderboardRestClient.getLeaderboardForLeague(leagueId.get());
                 if (result.isPresent()) {
                     request.setAttribute("leaderboard", result.get());
+                    // The league table's heading is the league name, which the standings
+                    // response does not carry — fetch it so the page is not headed by a bare id.
+                    request.setAttribute("leagueId", leagueId.get().toString());
+                    leagueRestClient.getLeague(leagueId.get().toString())
+                            .map(LeagueResponse::getLeagueName)
+                            .ifPresent(name -> request.setAttribute("leagueName", name));
                 } else {
                     request.setAttribute("error", "No leaderboard found");
                 }

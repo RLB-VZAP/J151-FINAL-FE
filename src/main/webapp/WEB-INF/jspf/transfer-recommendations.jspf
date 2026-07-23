@@ -1,4 +1,5 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
 <section id="transferRecommendations">
@@ -12,7 +13,7 @@
                 <c:forEach var="rec" items="${transferRecommendations}">
                     <li class="recommendation-card" data-player-id="${rec.playerId}">
                         <span class="recommendation-card__name">${fn:escapeXml(rec.playerName)}</span>
-                        <span class="recommendation-card__value">${rec.value}</span>
+                        <span class="recommendation-card__value"><t:money value="${rec.value}" /></span>
                         <button type="button" class="recommendation-card__toggle" aria-expanded="false">
                             Why?
                         </button>
