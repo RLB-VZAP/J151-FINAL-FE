@@ -56,6 +56,7 @@ public class AdminMatchResultServlet extends AbstractServlet {
         }
 
         if (request.getAttribute("success") != null) {
+            flashSuccess(request, (String) request.getAttribute("success"));
             String fixtureId = request.getParameter("fixtureId");
             String redirectUrl = request.getContextPath() + "/admin/match-results"
                     + (fixtureId != null && !fixtureId.isBlank() ? "?fixtureId=" + fixtureId : "");

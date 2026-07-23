@@ -138,4 +138,7 @@
         </c:choose>
     </div>
 </aside>
+<%-- System-wide success/error/info feedback host. Renders any pending flash
+     toast and loads toast.js for client-triggered toasts. --%>
+<%@ include file="/WEB-INF/jspf/toast.jspf" %>
 <script src="${pageContext.request.contextPath}/assets/js/page-transitions.js"></script>

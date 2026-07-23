@@ -66,6 +66,7 @@ public class AdminSimulationServlet extends AbstractServlet {
         }
 
         if (success) {
+            flashSuccess(request, "resimulate".equals(action) ? "Resimulation triggered" : "Simulation settings saved");
             String redirect = request.getContextPath() + "/admin/simulation";
             if (fixtureIdForReload != null && !fixtureIdForReload.isBlank()) {
                 redirect += "?fixtureId=" + URLEncoder.encode(fixtureIdForReload, StandardCharsets.UTF_8);

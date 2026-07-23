@@ -40,6 +40,7 @@ public class AdminScoringRuleServlet extends AbstractServlet {
         }
         String season = saveScoringRule(request);
         if (request.getAttribute("success") != null) {
+            flashSuccess(request, (String) request.getAttribute("success"));
             response.sendRedirect(request.getContextPath() + "/admin/scoring-rules?season="
                     + java.net.URLEncoder.encode(season, java.nio.charset.StandardCharsets.UTF_8));
             return;
