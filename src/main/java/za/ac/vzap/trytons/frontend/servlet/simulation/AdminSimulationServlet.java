@@ -82,6 +82,9 @@ public class AdminSimulationServlet extends AbstractServlet {
             if (fixtureIdForReload != null && !fixtureIdForReload.isBlank()) {
                 redirect += "?fixtureId=" + URLEncoder.encode(fixtureIdForReload, StandardCharsets.UTF_8);
             }
+            if ("resimulate".equals(action)) {
+                redirect += "#resimulationSection";
+            }
             response.sendRedirect(redirect);
             return;
         }

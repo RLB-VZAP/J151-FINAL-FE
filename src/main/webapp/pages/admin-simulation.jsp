@@ -209,7 +209,7 @@
                 <section class="asim-panel">
                     <h3 class="asim-panel-title">Resimulation history</h3>
 
-                    <form method="get" action="${pageContext.request.contextPath}/admin/simulation" id="resimulationHistoryForm" class="asim-inline-form">
+                    <form method="get" action="${pageContext.request.contextPath}/admin/simulation#resimulationSection" id="resimulationHistoryForm" class="asim-inline-form">
                         <div class="asim-field asim-field-grow">
                             <label class="asim-label" for="historyFixtureId">Fixture</label>
                             <select class="asim-input" id="historyFixtureId" name="fixtureId" required>
@@ -258,7 +258,7 @@
                 <section class="asim-panel">
                     <h3 class="asim-panel-title">Trigger resimulation</h3>
 
-                    <form method="post" action="${pageContext.request.contextPath}/admin/simulation" id="resimulationTriggerForm">
+                    <form method="post" action="${pageContext.request.contextPath}/admin/simulation#resimulationSection" id="resimulationTriggerForm">
                         <input type="hidden" name="action" value="resimulate">
 
                         <div class="asim-field">
