@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.TreeMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import za.ac.vzap.trytons.frontend.client.round.RoundRestClient;
 import za.ac.vzap.trytons.frontend.client.fantasyteam.FantasyTeamRestClient;
 import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
@@ -99,17 +100,21 @@ public class FixtureServlet extends AbstractServlet {
      *  - the caller's own team id lets the page highlight their name in a matchup.
      */
     private void decorateFixtureList(HttpServletRequest request, List<FixtureResponse> fixtures) {
-        Map<String, Integer> roundNumbers = new HashMap<>();
+        // These lookups are keyed by the id object itself, not its string form: the JSP
+        // indexes them with ${map[fixture.fixtureId]}, which passes the UUID straight to
+        // Map.get — a String key would never match and the cell would silently render empty.
+        Map<UUID, Integer> roundNumbers = new HashMap<>();
         roundRestClient.listRounds().orElse(List.of()).forEach(
-                round -> roundNumbers.put(String.valueOf(round.getRoundId()), round.getRoundNumber()));
+                round -> parseUuid(round.getRoundId())
+                        .ifPresent(roundId -> roundNumbers.put(roundId, round.getRoundNumber())));
         request.setAttribute("roundNumbersById", roundNumbers);
 
-        Map<String, MatchResultResponse> scores = new HashMap<>();
+        Map<UUID, MatchResultResponse> scores = new HashMap<>();
         for (FixtureResponse fixture : fixtures) {
             if (fixture == null || fixture.getFixtureId() == null) continue;
             if (!"COMPLETED".equalsIgnoreCase(fixture.getFixtureStatus())) continue;
             matchResultRestClient.getMatchResult(fixture.getFixtureId().toString())
-                    .ifPresent(result -> scores.put(fixture.getFixtureId().toString(), result));
+                    .ifPresent(result -> scores.put(fixture.getFixtureId(), result));
         }
         request.setAttribute("scoresByFixtureId", scores);
 
@@ -122,11 +127,11 @@ public class FixtureServlet extends AbstractServlet {
 
         // Dates and times are formatted here rather than in the JSP: fixtureDate is a
         // LocalDate and fixtureTime a LocalTime, and fmt:formatDate takes java.util.Date.
-        Map<String, String> dateLabels = new HashMap<>();
-        Map<String, String> timeLabels = new HashMap<>();
+        Map<UUID, String> dateLabels = new HashMap<>();
+        Map<UUID, String> timeLabels = new HashMap<>();
         for (FixtureResponse fixture : fixtures) {
             if (fixture == null || fixture.getFixtureId() == null) continue;
-            String key = fixture.getFixtureId().toString();
+            UUID key = fixture.getFixtureId();
             if (fixture.getFixtureDate() != null) {
                 dateLabels.put(key, fixture.getFixtureDate().format(FIXTURE_DATE));
             }
@@ -145,14 +150,14 @@ public class FixtureServlet extends AbstractServlet {
 
     /** Fixtures grouped under a "Round n" label, highest round first. */
     private Map<String, List<FixtureResponse>> groupByRound(List<FixtureResponse> fixtures,
-                                                            Map<String, Integer> roundNumbers) {
+                                                            Map<UUID, Integer> roundNumbers) {
         Map<Integer, List<FixtureResponse>> byRound = new TreeMap<>(Comparator.reverseOrder());
         for (FixtureResponse fixture : fixtures) {
             if (fixture == null) continue;
             // Unknown rounds sort last under their own heading rather than being dropped.
             Integer number = fixture.getRoundId() == null
                     ? null
-                    : roundNumbers.get(fixture.getRoundId().toString());
+                    : roundNumbers.get(fixture.getRoundId());
             byRound.computeIfAbsent(number == null ? Integer.MIN_VALUE : number, key -> new ArrayList<>())
                     .add(fixture);
         }

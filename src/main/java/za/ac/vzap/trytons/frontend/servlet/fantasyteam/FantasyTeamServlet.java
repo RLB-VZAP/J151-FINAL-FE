@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import za.ac.vzap.trytons.frontend.client.catalog.ClubRestClient;
 import za.ac.vzap.trytons.frontend.client.catalog.PlayerResponse;
 import za.ac.vzap.trytons.frontend.client.catalog.PositionRestClient;
+import za.ac.vzap.trytons.frontend.client.catalog.PositionResponse;
 import za.ac.vzap.trytons.frontend.client.fantasyteam.*;
 import za.ac.vzap.trytons.frontend.client.catalog.PlayerRestClient;
 import java.io.IOException;
@@ -189,6 +190,23 @@ public class FantasyTeamServlet extends AbstractServlet{
         }
         request.setAttribute("clubNamesById", buildClubNameLookup());
         request.setAttribute("positionNamesById",buildPositionNameLookUp());
+        // The squad-requirements helper reads the real per-position rules
+        // (minRequired/maxAllowed/category) straight from the backend, so it can
+        // never drift from what the server actually validates on submit.
+        request.setAttribute("positions", loadPositionRules());
+    }
+
+    /**
+     * Positions with their squad rules, forwards first then backs, each group
+     * ordered by name. Empty list if the catalogue cannot be loaded.
+     */
+    private List<PositionResponse> loadPositionRules(){
+        List<PositionResponse> positions = positionRestClient.getAllPositions().orElse(List.of());
+        List<PositionResponse> ordered = new ArrayList<>(positions);
+        ordered.sort(Comparator
+                .comparing((PositionResponse p) -> !"FORWARD".equalsIgnoreCase(p.getPositionCategory()))
+                .thenComparing(PositionResponse::getPositionName, Comparator.nullsLast(String::compareToIgnoreCase)));
+        return ordered;
     }
 
     private Map<UUID,String> buildClubNameLookup(){
