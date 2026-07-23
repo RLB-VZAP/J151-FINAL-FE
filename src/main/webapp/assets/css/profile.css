@@ -73,11 +73,20 @@
     overflow: hidden;
 }
 
+/* Absolute and after the initials in the DOM, so a loaded picture paints over
+   them. Hidden (no pic, or a broken/cleared URL) → the initials underneath show.
+   The explicit [hidden] rule is needed because this class selector would
+   otherwise outrank the UA [hidden] { display: none }. */
 .pf-avatar img {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    display: block;
+}
+
+.pf-avatar img[hidden] {
+    display: none;
 }
 
 /* Initials sit behind the image; when the image is absent or fails, they show. */
