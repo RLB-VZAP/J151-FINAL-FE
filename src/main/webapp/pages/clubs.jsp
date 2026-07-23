@@ -88,10 +88,11 @@
                     <c:set var="clubName" value="${empty club.clubName ? '' : club.clubName}" />
                     <c:set var="nameParts" value="${fn:split(clubName, ' ')}" />
 
-                    <div class="crow"
-                         data-name="${fn:escapeXml(fn:toLowerCase(clubName))}"
-                         data-location="${fn:escapeXml(club.location)}"
-                         data-venue="${fn:escapeXml(club.homeVenue)}">
+                    <a class="crow crow-link"
+                       href="${pageContext.request.contextPath}/club?clubId=${club.clubId}"
+                       data-name="${fn:escapeXml(fn:toLowerCase(clubName))}"
+                       data-location="${fn:escapeXml(club.location)}"
+                       data-venue="${fn:escapeXml(club.homeVenue)}">
 
                         <span class="c-name">
                             <span class="c-avatar" aria-hidden="true"><c:if test="${fn:length(nameParts) > 0}">${fn:toUpperCase(fn:substring(nameParts[0], 0, 1))}<c:if test="${fn:length(nameParts) > 1}">${fn:toUpperCase(fn:substring(nameParts[fn:length(nameParts) - 1], 0, 1))}</c:if></c:if></span>
@@ -112,7 +113,7 @@
                                 </c:otherwise>
                             </c:choose>
                         </span>
-                    </div>
+                    </a>
                 </c:forEach>
             </div>
         </div>
