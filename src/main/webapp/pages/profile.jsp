@@ -52,12 +52,16 @@
                     <div class="pf-identity">
                         <span class="pf-avatar">
                             <span class="pf-avatar-initials" id="heroAvatarInitials">${initials}</span>
-                            <%-- Initials sit underneath; the image covers them when it loads,
-                                 and profile.js hides it again on error or an empty URL. --%>
-                            <img id="heroAvatarImage" alt=""
-                                 src="${fn:escapeXml(profile.profilePic)}"
-                                 ${empty profile.profilePic ? 'hidden' : ''}
-                                 onerror="this.hidden=true">
+                            <%-- Initials sit underneath; the image covers them only when there
+                                 is a picture to show. The src is emitted only when non-empty —
+                                 an empty src makes the browser load the page as an image and
+                                 draw a broken-image icon over the initials. onerror hides it if
+                                 the URL is set but unreachable; profile.js manages it live. --%>
+                            <img id="heroAvatarImage" alt="" onerror="this.hidden=true"
+                                 <c:choose>
+                                     <c:when test="${not empty profile.profilePic}">src="${fn:escapeXml(profile.profilePic)}"</c:when>
+                                     <c:otherwise>hidden</c:otherwise>
+                                 </c:choose>>
                         </span>
 
                         <div class="pf-identity-text">
