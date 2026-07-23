@@ -73,7 +73,8 @@
         </c:if>
 
         <form method="post" action="${pageContext.request.contextPath}/create-team" id="createTeamForm"
-              data-budget="${fn:escapeXml(budget)}">
+              data-budget="${fn:escapeXml(budget)}"
+              data-squad-size="${fn:escapeXml(squadSize)}">
 
             <%-- Sits above the two columns, not inside the pool, so the table and the
                  squad summary start on the same line. --%>
@@ -125,6 +126,7 @@
                                                name="playerIds"
                                                value="<%= p.getPlayerId() %>"
                                                data-player-name="${fn:escapeXml(player.playerName)}"
+                                               data-position="${fn:escapeXml(positionName)}"
                                                data-value="<%= p.getValue() %>"
                                                <%= p.isActive() ? "" : "disabled" %>>
                                     </span>
@@ -179,6 +181,35 @@
                         You are over budget. You can still submit, but the server will reject an over-budget squad.
                     </p>
 
+                    <%-- ---------- Squad requirements helper ---------- --%>
+                    <%-- Rules come straight from the backend position catalogue (min/max per
+                         position), so this can never drift from what the server validates. --%>
+                    <c:if test="${not empty positions}">
+                        <section class="ct-reqs-panel" aria-labelledby="ctReqsTitle">
+                            <h3 class="ct-reqs-title" id="ctReqsTitle">Squad requirements</h3>
+                            <p class="ct-reqs-summary" id="ctReqSummary" aria-live="polite"></p>
+
+                            <c:forEach var="cat" items="${['FORWARD','BACK']}">
+                                <p class="ct-reqs-group">${cat == 'FORWARD' ? 'Forwards' : 'Backs'}</p>
+                                <ul class="ct-reqs">
+                                    <c:forEach var="pos" items="${positions}">
+                                        <c:if test="${fn:toUpperCase(pos.positionCategory) == cat}">
+                                            <li class="ct-req" data-req
+                                                data-position="${fn:escapeXml(pos.positionName)}"
+                                                data-min="${pos.minRequired}" data-max="${pos.maxAllowed}">
+                                                <span class="ct-req-dot" aria-hidden="true"></span>
+                                                <span class="ct-req-name">${fn:escapeXml(pos.positionName)}</span>
+                                                <span class="ct-req-tally">
+                                                    <span class="ct-req-count">0</span><span class="ct-req-range"> / ${pos.minRequired}&ndash;${pos.maxAllowed}</span>
+                                                </span>
+                                            </li>
+                                        </c:if>
+                                    </c:forEach>
+                                </ul>
+                            </c:forEach>
+                        </section>
+                    </c:if>
+
                     <ul class="ct-selected" id="selectedList"></ul>
 
                     <div class="ct-field">
@@ -200,6 +231,9 @@
 
     </div>
 </main>
+
+<%-- Transient message shown when a pick would break a squad rule. --%>
+<div id="ctFlash" class="ct-flash" role="alert" aria-live="assertive" hidden></div>
 
 <script src="${pageContext.request.contextPath}/assets/js/create-team.js"></script>
 </body>
