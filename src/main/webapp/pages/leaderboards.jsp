@@ -1,58 +1,33 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Overall Leaderboard</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboards - Fantasy TryTons</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/catalog.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/leaderboard.css">
 </head>
-<body>
-<%@ include file="/WEB-INF/jspf/navigation.jspf" %>
+<body class="catalog-page leaderboard-page">
 
-    <c:if test="${not empty error}">
-        <p><c:out value="${error}" /></p>
-    </c:if>
+<c:set var="activeNav" value="leaderboards" scope="request" />
+<%@ include file="/WEB-INF/jspf/sidebar.jspf" %>
 
-    <c:if test="${empty error and empty leaderboard}">
-        <p>No leaderboard entries found.</p>
-    </c:if>
+<%-- Overall (MASTER) scope. Season isn't on the standings response, so it is fixed
+     to match the rest of the redesign; the heading is the constant table name. --%>
+<c:set var="lbEyebrow" value="Season 2025/26 standings" />
+<c:set var="lbTitle" value="Master Leaderboard" />
+<c:set var="lbScope" value="MASTER" />
+<c:set var="lbOverallHref" value="${pageContext.request.contextPath}/leaderboards" />
+<%-- No single "my league" exists, so this points at Leagues to pick one. --%>
+<c:set var="lbLeagueHref" value="${pageContext.request.contextPath}/leagues" />
 
-    <c:if test="${not empty leaderboard}">
-        <table>
-            <tr>
-                <th>Rank</th>
-                <th>Movement</th>
-                <th>Team</th>
-                <th>Owner</th>
-                <th>Played</th>
-                <th>Won</th>
-                <th>Drawn</th>
-                <th>Lost</th>
-                <th>Points For</th>
-                <th>Points Against</th>
-                <th>Difference</th>
-                <th>League Points</th>
-                <th>Total Fantasy Points</th>
-            </tr>
-            <c:forEach var="entry" items="${leaderboard}">
-                <tr>
-                    <td>${entry.rank}</td>
-                    <td>${entry.rankMovement}</td>
-                    <td><c:out value="${entry.teamName}" /></td>
-                    <td><c:out value="${entry.owner}" /></td>
-                    <td>${entry.matchesPlayed}</td>
-                    <td>${entry.matchesWon}</td>
-                    <td>${entry.matchesDrawn}</td>
-                    <td>${entry.matchesLost}</td>
-                    <td>${entry.pointsFor}</td>
-                    <td>${entry.pointsAgainst}</td>
-                    <td>${entry.scoreDifference}</td>
-                    <td>${entry.leaguePoints}</td>
-                    <td>${entry.totalFantasyPoints}</td>
-                </tr>
-            </c:forEach>
-        </table>
-    </c:if>
+<%@ include file="/WEB-INF/jspf/leaderboard-view.jspf" %>
+
 </body>
 </html>
