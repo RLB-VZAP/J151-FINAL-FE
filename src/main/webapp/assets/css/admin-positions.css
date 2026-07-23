@@ -8,25 +8,25 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
 :root {
-    --navy: #1f3864;
-    --navy-700: #142544;
-    --teal: #1d9e75;
-    --teal-600: #178a65;
-    --bg: #f0f2f5;
-    --surface: #ffffff;
+    --navy: #eef3ef;
+    --navy-700: #eef3ef;
+    --teal: #c9a227;
+    --teal-600: #8a6a15;
+    --bg: #0c1712;
+    --surface: #132a1f;
 
-    --ink: #1f2a44;
-    --ink-muted: #64748b;
+    --ink: #c7d1c9;
+    --ink-muted: #7f9187;
 
-    --danger: #dc2626;
-    --danger-bg: #fef2f2;
-    --danger-border: #fca5a5;
-    --success: #15803d;
-    --success-bg: #f0fdf4;
-    --success-border: #86efac;
+    --danger: #e0847a;
+    --danger-bg: rgba(192, 82, 74, 0.12);
+    --danger-border: #c0524a;
+    --success: #6fcf8e;
+    --success-bg: rgba(21, 128, 61, 0.14);
+    --success-border: #2f6b45;
 
-    --border: #d8dee9;
-    --field-bg: #f8fafc;
+    --border: #2c4437;
+    --field-bg: #0f2118;
 
     --radius-card: 12px;
     --radius-field: 8px;
@@ -152,7 +152,7 @@ body.admin-positions {
 #positionForm input:focus {
     outline: none;
     border-color: var(--teal);
-    box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.18);
+    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.18);
 }
 
 /* ---------- Buttons / links --------------------------------------------------- */
