@@ -211,8 +211,15 @@
 
                     <form method="get" action="${pageContext.request.contextPath}/admin/simulation" id="resimulationHistoryForm" class="asim-inline-form">
                         <div class="asim-field asim-field-grow">
-                            <label class="asim-label" for="historyFixtureId">Fixture ID</label>
-                            <input class="asim-input" type="text" id="historyFixtureId" name="fixtureId" value="${fn:escapeXml(selectedFixtureId)}" required>
+                            <label class="asim-label" for="historyFixtureId">Fixture</label>
+                            <select class="asim-input" id="historyFixtureId" name="fixtureId" required>
+                                <option value="">&mdash; Select fixture &mdash;</option>
+                                <c:forEach var="fixture" items="${fixtures}">
+                                    <option value="${fixture.fixtureId}" ${fixture.fixtureId eq selectedFixtureId ? 'selected' : ''}>
+                                        <c:out value="${fixture.teamAName}" /> vs <c:out value="${fixture.teamBName}" /> &mdash; ${fixture.fixtureDate}
+                                    </option>
+                                </c:forEach>
+                            </select>
                         </div>
                         <button type="submit" class="asim-ghost">View history</button>
                     </form>
@@ -255,8 +262,15 @@
                         <input type="hidden" name="action" value="resimulate">
 
                         <div class="asim-field">
-                            <label class="asim-label" for="resimulateFixtureId">Fixture ID</label>
-                            <input class="asim-input" type="text" id="resimulateFixtureId" name="fixtureId" value="${fn:escapeXml(selectedFixtureId)}" required>
+                            <label class="asim-label" for="resimulateFixtureId">Fixture</label>
+                            <select class="asim-input" id="resimulateFixtureId" name="fixtureId" required>
+                                <option value="">&mdash; Select fixture &mdash;</option>
+                                <c:forEach var="fixture" items="${fixtures}">
+                                    <option value="${fixture.fixtureId}" ${fixture.fixtureId eq selectedFixtureId ? 'selected' : ''}>
+                                        <c:out value="${fixture.teamAName}" /> vs <c:out value="${fixture.teamBName}" /> &mdash; ${fixture.fixtureDate}
+                                    </option>
+                                </c:forEach>
+                            </select>
                         </div>
 
                         <div class="asim-field">
