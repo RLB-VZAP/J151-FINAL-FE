@@ -223,7 +223,8 @@
                                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/></svg>
                                             </span>
                                             <div class="lg-card-heading">
-                                                <p class="lg-card-name" title="${fn:escapeXml(myLeague.leagueName)}">${fn:escapeXml(myLeague.leagueName)}</p>
+                                                <%-- Opens the league detail, from which View members / standings branch. --%>
+                                                <a class="lg-card-name lg-card-name-link" href="${pageContext.request.contextPath}/league?leagueId=${myLeague.leagueId}" title="${fn:escapeXml(myLeague.leagueName)}">${fn:escapeXml(myLeague.leagueName)}</a>
                                                 <p class="lg-card-sub">${memberCount} / ${myLeague.maxMembers} teams</p>
                                             </div>
                                             <span class="lg-type ${myLeague.leagueType == 'PRIVATE' ? 'lg-type-private' : 'lg-type-public'}">
