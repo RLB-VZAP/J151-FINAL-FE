@@ -72,6 +72,20 @@
             <p class="ct-alert ct-alert-success" role="status"><c:out value="${message}" /></p>
         </c:if>
 
+        <c:choose>
+        <%-- One team per user: an existing owner gets a notice, not the create form. --%>
+        <c:when test="${not empty existingTeamId}">
+            <div class="ct-notice">
+                <span class="ct-notice-icon" aria-hidden="true">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="9" ry="5.5" transform="rotate(45 12 12)"/><path d="M9 15l6-6"/></svg>
+                </span>
+                <h2>You already have a team</h2>
+                <p>You may not have more than one team &mdash; view your current team here.</p>
+                <a class="btn-gold ct-notice-cta" href="${pageContext.request.contextPath}/fantasy-team/own">Go to my team</a>
+            </div>
+        </c:when>
+
+        <c:otherwise>
         <form method="post" action="${pageContext.request.contextPath}/create-team" id="createTeamForm"
               data-budget="${fn:escapeXml(budget)}"
               data-squad-size="${fn:escapeXml(squadSize)}">
@@ -228,6 +242,8 @@
 
             </div>
         </form>
+        </c:otherwise>
+        </c:choose>
 
     </div>
 </main>
