@@ -58,24 +58,10 @@ public class UserHistoryServlet extends AbstractServlet {
         request.getRequestDispatcher(destination).forward(request, response);
     }
 
-    /**
-     * Supplies what WeeklyPerformanceResponse does not carry.
-     *
-     * The DTO holds only a roundId and a fixtureId, both UUIDs, so this resolves
-     * friendly labels: round numbers from the rounds list and matchup names from the
-     * fixtures list — one call each rather than a lookup per row. Rows whose ids do not
-     * resolve simply fall back to the raw id in the page.
-     *
-     * The record, average and best-round figures are derived from the same list. They
-     * are computed here rather than in JSTL, which cannot easily max or count.
-     */
     private void decorateHistory(HttpServletRequest request,
                                  List<WeeklyPerformanceResponse> rounds,
                                  int totals) {
-        // Both maps are keyed by UUID, not by the id's string form: the page looks them
-        // up with ${map[round.roundId]}, and WeeklyPerformanceResponse exposes those ids
-        // as UUIDs. A String key never matches that lookup, which left every row falling
-        // back to the raw id.
+
         Map<UUID, Integer> roundNumbers = new HashMap<>();
         roundRestClient.listRounds().orElse(List.of()).forEach(
                 round -> parseUuid(round.getRoundId())
