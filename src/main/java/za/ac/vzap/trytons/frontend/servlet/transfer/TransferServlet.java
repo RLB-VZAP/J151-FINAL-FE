@@ -70,6 +70,7 @@ public class TransferServlet extends AbstractServlet {
 
                     if (history.isPresent()) {
                         request.setAttribute("history", history.get());
+                        decorateHistory(request, history.get());
                     } else {
                         request.setAttribute("error", "Unable to load transfer history");
                         request.setAttribute("history", List.of());
@@ -130,6 +131,43 @@ public class TransferServlet extends AbstractServlet {
             default -> request.getRequestDispatcher("/index.jsp").forward(request, response);
         }
     }
+
+    /**
+     * The summary stats and date labels the history page needs beyond the raw list.
+     * The net value change and penalty/confirmed totals are sums, which JSTL cannot do;
+     * transferDate/confirmationDate are LocalDateTime, which fmt:formatDate cannot take.
+     */
+    private void decorateHistory(HttpServletRequest request, List<TransferResponse> history) {
+        java.math.BigDecimal netValue = java.math.BigDecimal.ZERO;
+        int penaltyTotal = 0;
+        int confirmedCount = 0;
+        Map<String, String> dateLabels = new HashMap<>();
+
+        for (TransferResponse transfer : history) {
+            if (transfer == null) continue;
+            if (transfer.getValueDifference() != null) {
+                netValue = netValue.add(transfer.getValueDifference());
+            }
+            penaltyTotal += transfer.getPenaltyPoints();
+            if ("CONFIRMED".equalsIgnoreCase(transfer.getStatus())) {
+                confirmedCount++;
+            }
+            // transferDate, else confirmationDate; the page shows "Not recorded" when neither.
+            java.time.LocalDateTime when = transfer.getTransferDate() != null
+                    ? transfer.getTransferDate() : transfer.getConfirmationDate();
+            if (transfer.getTransferId() != null && when != null) {
+                dateLabels.put(transfer.getTransferId().toString(), when.format(HISTORY_DATE));
+            }
+        }
+
+        request.setAttribute("netValue", netValue);
+        request.setAttribute("penaltyTotal", penaltyTotal);
+        request.setAttribute("confirmedCount", confirmedCount);
+        request.setAttribute("historyDateLabels", dateLabels);
+    }
+
+    private static final java.time.format.DateTimeFormatter HISTORY_DATE =
+            java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy · HH:mm", java.util.Locale.UK);
 
     private void loadTransferPage(HttpServletRequest request) {
         String roundId = getRoundId(request);
