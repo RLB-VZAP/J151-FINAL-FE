@@ -99,6 +99,7 @@ public class ProfileServlet extends AbstractServlet {
             return;
         }
 
+        refreshSessionIdentity(request, updated.get().getUsername(), updated.get().getEmail());
         flashSuccess(request, "Profile updated");
         response.sendRedirect(request.getContextPath() + "/profile");
     }

@@ -73,6 +73,26 @@ public class AbstractServlet extends HttpServlet {
         session.setAttribute(SessionAuthContext.SESSION_AUTHENTICATED, Boolean.TRUE);
     }
 
+    // Keep the signed-in identity in sync after a profile edit. The sidebar and
+    // top nav read the HttpSession "username"/"email" attributes (set at login),
+    // so updating the profile without this would leave the old name on screen
+    // until the next login. Nulls are ignored so a partial update never blanks a
+    // field. Session id is left untouched — this is not a privilege change.
+    protected void refreshSessionIdentity(HttpServletRequest req, String username, String email){
+        HttpSession session = req.getSession(false);
+        if(session == null){
+            return;
+        }
+        if(username != null && !username.isBlank()){
+            session.setAttribute(SessionAuthContext.SESSION_USERNAME, username);
+            authContext.setUsername(username);
+        }
+        if(email != null && !email.isBlank()){
+            session.setAttribute(SessionAuthContext.SESSION_EMAIL, email);
+            authContext.setEmail(email);
+        }
+    }
+
     //used for logout
     protected void clearAuthSession(HttpServletRequest req){
         authContext.clear();
