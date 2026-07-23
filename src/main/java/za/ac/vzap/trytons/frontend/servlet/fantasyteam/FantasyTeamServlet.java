@@ -181,7 +181,9 @@ public class FantasyTeamServlet extends AbstractServlet{
     }
 
     private void loadPlayerOptions(HttpServletRequest request){
-        Optional<List<PlayerResponse>> players = playerRestClient.listPlayers(null,null,null);
+        // Only players available for selection: the squad validator rejects anyone who is
+        // injured/suspended, so offering them here would let a "complete" squad fail on submit.
+        Optional<List<PlayerResponse>> players = playerRestClient.listPlayers(null,null,null, true);
         if(players.isPresent()){
             request.setAttribute("players",players.get());
         }else{

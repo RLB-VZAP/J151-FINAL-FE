@@ -3,119 +3,131 @@
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Position Management - Fantasy TryTons</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/catalog.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin-positions.css">
 </head>
-<body class="admin-positions">
-<%@ include file="/WEB-INF/jspf/navigation.jspf" %>
+<body class="catalog-page apos-page">
 
-<main id="adminPositions">
+<c:set var="activeNav" value="admin-positions" scope="request" />
+<%@ include file="/WEB-INF/jspf/sidebar.jspf" %>
 
-    <h1>Position Management</h1>
+<main class="catalog-main" id="adminPositions">
+    <div class="catalog-content">
 
-    <c:if test="${not empty error}">
-        <p class="error-message" role="alert"><c:out value="${error}" /></p>
-    </c:if>
-    <c:if test="${not empty message}">
-        <p class="success-message" role="status"><c:out value="${message}" /></p>
-    </c:if>
-
-    <section id="positionListSection">
-        <h2>Existing Positions</h2>
-        <c:choose>
-            <c:when test="${empty positions}">
-                <p id="positionsEmptyState">No positions have been created yet.</p>
-            </c:when>
-            <c:otherwise>
-                <table id="positionsTable">
-                    <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Min Required</th>
-                        <th>Max Allowed</th>
-                        <th></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <c:forEach var="pos" items="${positions}">
-                        <tr>
-                            <td><c:out value="${pos.positionName}" /></td>
-                            <td><c:out value="${pos.positionCategory}" /></td>
-                            <td><c:out value="${pos.minRequired}" /></td>
-                            <td><c:out value="${pos.maxAllowed}" /></td>
-                            <td>
-                                <a href="${pageContext.request.contextPath}/admin/positions?submit=position&amp;positionId=${pos.positionId}">Edit</a>
-                            </td>
-                        </tr>
-                    </c:forEach>
-                    </tbody>
-                </table>
-            </c:otherwise>
-        </c:choose>
-    </section>
-
-    <section id="positionFormSection">
-        <c:choose>
-            <c:when test="${not empty position}">
-                <h2>Edit Position</h2>
-            </c:when>
-            <c:otherwise>
-                <h2>Create Position</h2>
-            </c:otherwise>
-        </c:choose>
-
-        <form method="post" action="${pageContext.request.contextPath}/admin/positions" id="positionForm">
-            <c:choose>
-                <c:when test="${not empty position}">
-                    <input type="hidden" name="submit" value="position/update" />
-                    <input type="hidden" name="positionId" value="${position.positionId}" />
-                </c:when>
-                <c:otherwise>
-                    <input type="hidden" name="submit" value="position/create" />
-                </c:otherwise>
-            </c:choose>
-
+        <header class="catalog-header">
             <div>
-                <label for="positionName">Name</label>
-                <input type="text" id="positionName" name="positionName"
-                        value="${not empty position ? fn:escapeXml(position.positionName) : ''}" required>
+                <p class="catalog-eyebrow">Administration</p>
+                <h1 class="brand-font">Position Management</h1>
             </div>
+        </header>
 
-            <div>
-                <label for="positionCategory">Category</label>
-                <input type="text" id="positionCategory" name="positionCategory"
-                        value="${not empty position ? fn:escapeXml(position.positionCategory) : ''}" required>
-            </div>
+        <c:if test="${not empty error}">
+            <p class="apos-alert apos-alert-error" role="alert"><c:out value="${error}" /></p>
+        </c:if>
+        <c:if test="${not empty message}">
+            <p class="apos-alert apos-alert-success" role="status"><c:out value="${message}" /></p>
+        </c:if>
 
-            <div>
-                <label for="minRequired">Min Required</label>
-                <input type="number" id="minRequired" name="minRequired" min="0"
-                        value="${not empty position ? position.minRequired : ''}" required>
-            </div>
+        <div class="apos-grid">
 
-            <div>
-                <label for="maxAllowed">Max Allowed</label>
-                <input type="number" id="maxAllowed" name="maxAllowed" min="0"
-                        value="${not empty position ? position.maxAllowed : ''}" required>
-            </div>
+            <%-- ---------- Existing positions ---------- --%>
+            <section id="positionListSection">
+                <div class="apos-section-head">
+                    <h2 class="apos-section-title">Existing positions</h2>
+                    <span class="apos-rule"></span>
+                    <span class="apos-count">${fn:length(positions)} position${fn:length(positions) == 1 ? '' : 's'}</span>
+                </div>
 
-            <button type="submit">
                 <c:choose>
-                    <c:when test="${not empty position}">Update Position</c:when>
-                    <c:otherwise>Create Position</c:otherwise>
+                    <c:when test="${empty positions}">
+                        <p class="apos-empty" id="positionsEmptyState">No positions have been created yet.</p>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="ptbl" id="positionsTable">
+                            <div class="ptbl-head">
+                                <span>Name</span>
+                                <span>Category</span>
+                                <span aria-hidden="true"></span>
+                            </div>
+                            <c:forEach var="pos" items="${positions}">
+                                <div class="ptbl-row">
+                                    <span class="ptbl-name"><c:out value="${pos.positionName}" /></span>
+                                    <span><span class="ptbl-chip"><c:out value="${pos.positionCategory}" /></span></span>
+                                    <span class="ptbl-action">
+                                        <a class="ptbl-edit" href="${pageContext.request.contextPath}/admin/positions?submit=position&amp;positionId=${pos.positionId}">Edit</a>
+                                    </span>
+                                </div>
+                            </c:forEach>
+                        </div>
+                    </c:otherwise>
                 </c:choose>
-            </button>
+            </section>
 
-            <c:if test="${not empty position}">
-                <a href="${pageContext.request.contextPath}/admin/positions?submit=positions">Cancel edit</a>
-            </c:if>
-        </form>
-    </section>
+            <%-- ---------- Create / edit form ---------- --%>
+            <section class="apos-panel" id="positionFormSection">
+                <h2 class="apos-panel-title">
+                    <c:choose>
+                        <c:when test="${not empty position}">Edit position</c:when>
+                        <c:otherwise>Create position</c:otherwise>
+                    </c:choose>
+                </h2>
 
+                <form method="post" action="${pageContext.request.contextPath}/admin/positions" id="positionForm">
+                    <c:choose>
+                        <c:when test="${not empty position}">
+                            <input type="hidden" name="submit" value="position/update" />
+                            <input type="hidden" name="positionId" value="${position.positionId}" />
+                        </c:when>
+                        <c:otherwise>
+                            <input type="hidden" name="submit" value="position/create" />
+                        </c:otherwise>
+                    </c:choose>
+
+                    <div class="apos-field">
+                        <label class="apos-label" for="positionName">Name</label>
+                        <input class="apos-input" type="text" id="positionName" name="positionName"
+                               value="${not empty position ? fn:escapeXml(position.positionName) : ''}"
+                               placeholder="e.g. Loose Forward" required>
+                    </div>
+
+                    <div class="apos-field">
+                        <label class="apos-label" for="positionCategory">Category</label>
+                        <input class="apos-input" type="text" id="positionCategory" name="positionCategory"
+                               value="${not empty position ? fn:escapeXml(position.positionCategory) : ''}"
+                               placeholder="e.g. FORWARD" required>
+                    </div>
+
+                    <%-- Squad limits (min required / max allowed) are deliberately absent:
+                         they are enforced by the backend's hardcoded squad validation and
+                         are not editable here. --%>
+                    <p class="apos-note">
+                        Squad limits for each position are fixed in the system and cannot be changed here.
+                    </p>
+
+                    <button type="submit" class="btn-gold apos-submit">
+                        <c:choose>
+                            <c:when test="${not empty position}">Update position</c:when>
+                            <c:otherwise>Create position</c:otherwise>
+                        </c:choose>
+                    </button>
+
+                    <c:if test="${not empty position}">
+                        <a class="apos-cancel" href="${pageContext.request.contextPath}/admin/positions?submit=positions">Cancel edit</a>
+                    </c:if>
+                </form>
+            </section>
+
+        </div>
+
+    </div>
 </main>
+
 </body>
 </html>
