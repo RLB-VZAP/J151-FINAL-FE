@@ -30,11 +30,10 @@
                         <h1 class="brand-font">My Team</h1>
                     </div>
                 </header>
-                <p class="mt-alert" role="alert">${empty error ? 'Your team could not be loaded right now.' : fn:escapeXml(error)}</p>
                 <div class="mt-empty">
-                    <h2>No team yet</h2>
-                    <p>Create your squad to see it laid out on the pitch here.</p>
-                    <a class="btn-gold" href="${pageContext.request.contextPath}/create-team">Create team</a>
+                    <h2>You do not currently have a team</h2>
+                    <p>Create a team now to view your team.</p>
+                    <a class="btn-gold" href="${pageContext.request.contextPath}/create-team">Create a team</a>
                 </div>
             </c:when>
 
