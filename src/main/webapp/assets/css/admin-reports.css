@@ -191,20 +191,20 @@
 .rtbl2-head,
 .rtbl2-row {
     display: grid;
-    grid-template-columns: minmax(140px, 1fr) minmax(0, 1.4fr) 140px 90px;
+    grid-template-columns: minmax(140px, 1fr) minmax(0, 1.6fr) 140px;
     align-items: center;
     gap: 12px;
-    min-width: 560px;
+    min-width: 480px;
     padding: 11px 16px;
 }
 
 .ltbl-head,
 .ltbl-row {
     display: grid;
-    grid-template-columns: 140px 150px 130px 90px minmax(0, 1.6fr);
+    grid-template-columns: 140px 150px 130px minmax(0, 1.8fr);
     align-items: center;
     gap: 12px;
-    min-width: 720px;
+    min-width: 640px;
     padding: 11px 16px;
 }
 

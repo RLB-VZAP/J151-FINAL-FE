@@ -158,7 +158,7 @@
 
                             <c:if test="${not empty playerStatistics}">
                                 <p class="amr-alert amr-alert-success" role="status">
-                                    Statistics saved for player <c:out value="${playerStatistics.playerId}" />.
+                                    Player statistics saved.
                                 </p>
                             </c:if>
 

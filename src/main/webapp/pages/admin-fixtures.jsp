@@ -86,8 +86,8 @@
                                     <c:forEach var="fixture" items="${fixtures}">
                                         <c:set var="fxStatus" value="${empty fixture.fixtureStatus ? 'UPCOMING' : fixture.fixtureStatus}" />
                                         <div class="ftbl-row">
-                                            <span class="ftbl-code" title="${fixture.leagueId}">${fn:substring(fixture.leagueId, 0, 8)}</span>
-                                            <span class="ftbl-code" title="${fixture.roundId}">${fn:substring(fixture.roundId, 0, 8)}</span>
+                                            <span class="ftbl-league">${empty leagueNamesById[fixture.leagueId.toString()] ? '&mdash;' : fn:escapeXml(leagueNamesById[fixture.leagueId.toString()])}</span>
+                                            <span class="ftbl-round">${empty roundLabelsById[fixture.roundId.toString()] ? '&mdash;' : fn:escapeXml(roundLabelsById[fixture.roundId.toString()])}</span>
                                             <span class="ftbl-team" title="${fn:escapeXml(fixture.teamAName)}"><c:out value="${fixture.teamAName}" /></span>
                                             <span class="ftbl-team" title="${fn:escapeXml(fixture.teamBName)}"><c:out value="${fixture.teamBName}" /></span>
                                             <span class="ftbl-date">${fixture.fixtureDate}</span>
