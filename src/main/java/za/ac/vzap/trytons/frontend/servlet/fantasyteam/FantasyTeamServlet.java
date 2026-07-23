@@ -35,9 +35,13 @@ public class FantasyTeamServlet extends AbstractServlet{
         if(!requireAuthenticated(request, response)) return;
         String destination = switch (request.getServletPath()){
             case "/fantasy-team/own" ->{
-                Optional<UUID> teamId = parseUuid(request.getParameter("teamId"));
+                // The "My Team" nav link carries no teamId, so fall back to the signed-in
+                // user's own team. uk_fantasyTeam_owner makes that unambiguous. Same pattern
+                // as transfers and fixtures; an explicit ?teamId= still wins.
+                Optional<UUID> teamId = parseUuid(request.getParameter("teamId"))
+                        .or(() -> fantasyTeamRestClient.getMyTeam().map(FantasyTeamResponse::getTeamId));
                 if(teamId.isEmpty()){
-                    request.setAttribute("error","Team id is required to view your team");
+                    request.setAttribute("error","You don't have a team yet. Create one to see it here.");
                     yield VIEW_OWN_TEAM_JSP;
                 }
                 Optional<ViewOwnTeamResponse> team = fantasyTeamRestClient.viewOwnTeam(teamId.get());

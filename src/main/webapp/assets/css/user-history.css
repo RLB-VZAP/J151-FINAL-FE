@@ -1,14 +1,14 @@
 /* User points history page - Fantasy TryTons */
 
 .user-history-page {
-    --trytons-navy: #081b2d;
-    --trytons-panel: #102b43;
-    --trytons-gold: #f4b41a;
-    --trytons-cream: #f7f4eb;
-    --trytons-muted: #b9c6d1;
-    --trytons-line: rgba(185, 198, 209, 0.22);
+    --trytons-navy: #0c1712;
+    --trytons-panel: #132a1f;
+    --trytons-gold: #c9a227;
+    --trytons-cream: #eef3ef;
+    --trytons-muted: #7f9187;
+    --trytons-line: rgba(44, 68, 55, 0.5);
     --trytons-win: #3fb27f;
-    --trytons-draw: #b9c6d1;
+    --trytons-draw: #7f9187;
     --trytons-loss: #e0596b;
 
     max-width: 1180px;
@@ -22,10 +22,10 @@
     overflow: hidden;
     margin-bottom: 2rem;
     padding: 2.25rem;
-    border: 1px solid rgba(244, 180, 26, 0.34);
+    border: 1px solid rgba(201, 162, 39, 0.34);
     border-radius: 18px;
     background: linear-gradient(135deg, var(--trytons-navy), var(--trytons-panel));
-    box-shadow: 0 16px 32px rgba(8, 27, 45, 0.2);
+    box-shadow: 0 16px 32px rgba(12, 23, 18, 0.2);
 }
 
 .user-history-eyebrow {
@@ -140,7 +140,7 @@
 }
 
 .user-history-badge-draw {
-    background: rgba(185, 198, 209, 0.18);
+    background: rgba(127, 145, 135, 0.18);
     color: var(--trytons-draw);
 }
 
