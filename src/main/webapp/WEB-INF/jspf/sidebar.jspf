@@ -97,6 +97,9 @@
                     <span class="sidebar-avatar">${fn:toUpperCase(fn:substring(sessionScope.username, 0, 1))}</span>
                     <span class="sidebar-user-text">
                         <span class="sidebar-username">${fn:escapeXml(sessionScope.username)}</span>
+                        <c:if test="${sessionScope.role == 'ADMINISTRATOR'}">
+                            <span class="sidebar-role">Administrator</span>
+                        </c:if>
                         <a class="sidebar-user-caption" href="${pageContext.request.contextPath}/profile">View profile</a>
                     </span>
                 </div>
