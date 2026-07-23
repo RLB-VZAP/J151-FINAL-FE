@@ -94,6 +94,15 @@ public class PlayerServlet extends AbstractServlet {
             request.setAttribute("player", player.get());
             request.setAttribute("clubNamesById", buildClubNameLookup());
             request.setAttribute("positionNamesById", buildPositionNameLookup());
+            // Drives the forward/back tint on the position pill; PlayerResponse carries
+            // only a position id.
+            request.setAttribute("positionCategoriesById", buildPositionCategoryLookup());
+            // Overall rating = mean of the six abilities, for the hero ring. Presentational,
+            // computed here so the JSP does not have to round a six-term average.
+            PlayerResponse p = player.get();
+            int overall = Math.round((p.getAttackingAbility() + p.getDefensiveAbility() + p.getKickingAbility()
+                    + p.getDiscipline() + p.getConsistency() + p.getFitness()) / 6f);
+            request.setAttribute("overallRating", overall);
             return "/pages/player.jsp";
         }
         request.setAttribute("error", "Player not found");
@@ -109,6 +118,12 @@ public class PlayerServlet extends AbstractServlet {
     private Map<UUID, String> buildPositionNameLookup() {
         Map<UUID, String> lookup = new HashMap<>();
         positionRestClient.getAllPositions().ifPresent(positions -> positions.forEach(position -> lookup.put(position.getPositionId(), position.getPositionName())));
+        return lookup;
+    }
+
+    private Map<UUID, String> buildPositionCategoryLookup() {
+        Map<UUID, String> lookup = new HashMap<>();
+        positionRestClient.getAllPositions().ifPresent(positions -> positions.forEach(position -> lookup.put(position.getPositionId(), position.getPositionCategory())));
         return lookup;
     }
 

@@ -100,13 +100,14 @@
                     <c:set var="playerName" value="${empty player.playerName ? '' : player.playerName}" />
                     <c:set var="nameParts" value="${fn:split(playerName, ' ')}" />
 
-                    <div class="crow"
-                         data-name="${fn:escapeXml(fn:toLowerCase(playerName))}"
-                         data-club="${fn:escapeXml(player.clubId)}"
-                         data-club-name="${fn:escapeXml(clubName)}"
-                         data-position="${fn:escapeXml(player.positionId)}"
-                         data-value="${player.value}"
-                         data-form="${player.currentForm}">
+                    <a class="crow crow-link"
+                       href="${pageContext.request.contextPath}/player?playerId=${player.playerId}"
+                       data-name="${fn:escapeXml(fn:toLowerCase(playerName))}"
+                       data-club="${fn:escapeXml(player.clubId)}"
+                       data-club-name="${fn:escapeXml(clubName)}"
+                       data-position="${fn:escapeXml(player.positionId)}"
+                       data-value="${player.value}"
+                       data-form="${player.currentForm}">
 
                         <span class="c-name">
                             <span class="c-avatar" aria-hidden="true"><c:if test="${fn:length(nameParts) > 0}">${fn:toUpperCase(fn:substring(nameParts[0], 0, 1))}<c:if test="${fn:length(nameParts) > 1}">${fn:toUpperCase(fn:substring(nameParts[fn:length(nameParts) - 1], 0, 1))}</c:if></c:if></span>
@@ -147,7 +148,7 @@
                                 </c:otherwise>
                             </c:choose>
                         </span>
-                    </div>
+                    </a>
                 </c:forEach>
             </div>
         </div>
