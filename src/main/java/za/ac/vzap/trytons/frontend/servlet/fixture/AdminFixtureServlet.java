@@ -31,9 +31,6 @@ public class AdminFixtureServlet extends AbstractServlet {
     @Inject
     private AdminFixtureRestClient adminFixtureRestClient;
 
-    // AdminFixtureRestClient exposes no list method (only createFixture/updateFixtureStatus), so the
-    // read-side listing for this admin table borrows FixtureRestClient.listFixtures, the same client
-    // AdminMatchResultServlet already injects alongside its admin-specific client for the same reason.
     @Inject
     private FixtureRestClient fixtureRestClient;
 
@@ -66,8 +63,7 @@ public class AdminFixtureServlet extends AbstractServlet {
             response.sendRedirect(request.getContextPath() + "/admin/fixtures");
             return;
         }
-        // The "status" POST parameter here is the new status just applied to one fixture, not a list
-        // filter — reload unfiltered so the admin can see the updated row in context.
+
         loadPage(request, null);
         request.getRequestDispatcher(VIEW).forward(request, response);
     }

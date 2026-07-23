@@ -19,9 +19,6 @@ import java.util.Map;
 import java.util.Optional;
 import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
 
-//Frontend MVC controller for the user history page: load the authenticated user's
-// points history and weekly performance through UserHistoryRestClient, populate request attributes,
-// and forward to the history page.
 
 @WebServlet(name = "UserHistoryServlet", urlPatterns = {"/history"})
 public class UserHistoryServlet extends AbstractServlet {

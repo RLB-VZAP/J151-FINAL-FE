@@ -192,11 +192,6 @@ public class LeagueServlet extends AbstractServlet {
         return leagueRestClient.listMembers(leagueId).orElse(List.of());
     }
 
-    // Backend GET /league takes no filter param - it always returns every public league plus every
-    // league the caller is a member of, so "my leagues" cannot be requested server-side. This narrows
-    // the result to leagues the current user manages (created). It cannot also include leagues the
-    // user has merely joined, since LeagueResponseDTO carries no per-league membership flag and there
-    // is no endpoint to check membership without listing members league-by-league.
     private List<LeagueResponse> loadMyLeagues() {
         if (!authContext.isAuthenticated()) return List.of();
         UUID currentUserId = authContext.getUserId();
