@@ -18,6 +18,10 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
             <span>Home</span>
         </a>
+        <a class="sidebar-link ${activeNav == 'my-team' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/fantasy-team/own">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="9" ry="5.5" transform="rotate(45 12 12)"/><path d="M9 15l6-6"/><path d="M10.5 13.5l1-1"/><path d="M12.5 11.5l1-1"/></svg>
+            <span>My Team</span>
+        </a>
         <a class="sidebar-link ${activeNav == 'players' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/players?submit=players">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span>Players</span>
