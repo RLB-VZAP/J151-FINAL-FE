@@ -27,6 +27,8 @@
     <c:otherwise>
         <p>
             <a href="${pageContext.request.contextPath}/league?leagueId=${leagueId}" id="backToLeagueLink">Back to league</a>
+            &nbsp;|&nbsp;
+            <a href="${pageContext.request.contextPath}/league-chat?leagueId=${leagueId}" id="openLeagueChatLink">Open league chat</a>
         </p>
 
         <section id="memberListSection">
@@ -49,6 +51,10 @@
                                 <td><c:out value="${member.userDisplayName}" /></td>
                                 <td><c:out value="${member.teamDisplayName}" /></td>
                                 <td>
+                                    <c:if test="${member.userId ne sessionScope.userId}">
+                                        <a class="member-message-link"
+                                           href="${pageContext.request.contextPath}/messages?with=${member.userId}&name=${member.userDisplayName}">Message</a>
+                                    </c:if>
                                     <%-- Remove control is only shown to the league manager as a UI convenience;
                                         the backend remains the sole judge of whether the current user is
                                         actually allowed to remove this member, and will reject the request

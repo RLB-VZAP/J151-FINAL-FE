@@ -1,0 +1,250 @@
+/* ============================================================================
+   TryTons — Fantasy Rugby | Private Messages
+   Shares the palette/type/radii/spacing tokens used by the other screens
+   (see notifications.css). Targets only the markup in messages.jsp.
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+    --navy: #1f3864;
+    --navy-700: #142544;
+    --teal: #1d9e75;
+    --teal-600: #178a65;
+    --bg: #f0f2f5;
+    --surface: #ffffff;
+    --ink: #1f2a44;
+    --ink-muted: #64748b;
+    --danger: #dc2626;
+    --danger-bg: #fef2f2;
+    --danger-border: #fca5a5;
+    --border: #d8dee9;
+    --field-bg: #f8fafc;
+    --radius-card: 12px;
+    --radius-field: 8px;
+    --sp-2: 8px;
+    --sp-3: 12px;
+    --sp-4: 16px;
+    --sp-5: 20px;
+    --sp-6: 24px;
+    --sp-8: 32px;
+}
+
+body.messages {
+    margin: 0;
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+}
+
+#messages {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-5);
+}
+
+#messages h1 {
+    color: var(--navy-700);
+    margin-bottom: var(--sp-6);
+}
+
+.error-message {
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-border);
+    color: var(--danger);
+    padding: var(--sp-3) var(--sp-4);
+    border-radius: var(--radius-field);
+    margin-bottom: var(--sp-4);
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* Two-pane layout: thread list + conversation */
+.messages-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: var(--sp-5);
+    align-items: start;
+}
+
+@media (max-width: 760px) {
+    .messages-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.thread-list,
+.conversation {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--sp-4);
+}
+
+.thread-list h2,
+.conversation-header h2 {
+    color: var(--navy-700);
+    font-size: 1.05rem;
+    margin: 0 0 var(--sp-3);
+}
+
+.empty-state {
+    color: var(--ink-muted);
+    padding: var(--sp-4);
+    text-align: center;
+}
+
+/* Thread list */
+.thread {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "name badge" "preview preview";
+    gap: 2px var(--sp-2);
+    padding: var(--sp-3);
+    border-radius: var(--radius-field);
+    text-decoration: none;
+    color: var(--ink);
+    border: 1px solid transparent;
+}
+
+.thread:hover {
+    background: var(--field-bg);
+}
+
+.thread.is-active {
+    background: var(--field-bg);
+    border-color: var(--border);
+}
+
+.thread-name {
+    grid-area: name;
+    font-weight: 600;
+    color: var(--navy);
+}
+
+.thread-preview {
+    grid-area: preview;
+    color: var(--ink-muted);
+    font-size: 0.85rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.unread-badge {
+    grid-area: badge;
+    background: var(--teal);
+    color: #fff;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 1px var(--sp-2);
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Conversation */
+.conversation-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: var(--sp-3);
+    margin-bottom: var(--sp-3);
+}
+
+.block-button {
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid var(--danger-border);
+    border-radius: var(--radius-field);
+    padding: var(--sp-2) var(--sp-3);
+    cursor: pointer;
+}
+
+.block-button:hover {
+    background: var(--danger-bg);
+}
+
+#conversationMessages {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    max-height: 52vh;
+    overflow-y: auto;
+    padding: var(--sp-2);
+}
+
+.bubble {
+    max-width: 72%;
+    padding: var(--sp-2) var(--sp-3);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+}
+
+.bubble .bubble-body {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.bubble-time {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.72rem;
+    color: var(--ink-muted);
+}
+
+.bubble.mine {
+    align-self: flex-end;
+    background: var(--navy);
+    color: #fff;
+    border-color: var(--navy);
+}
+
+.bubble.mine .bubble-time {
+    color: #cbd5e1;
+}
+
+.bubble.theirs {
+    align-self: flex-start;
+    background: var(--field-bg);
+}
+
+/* Send form */
+.send-form {
+    display: flex;
+    gap: var(--sp-2);
+    margin-top: var(--sp-3);
+}
+
+.send-form textarea {
+    flex: 1;
+    resize: vertical;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-field);
+    padding: var(--sp-2) var(--sp-3);
+    font-family: inherit;
+    background: var(--field-bg);
+}
+
+.send-form button {
+    background: var(--teal);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-field);
+    padding: 0 var(--sp-5);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.send-form button:hover {
+    background: var(--teal-600);
+}

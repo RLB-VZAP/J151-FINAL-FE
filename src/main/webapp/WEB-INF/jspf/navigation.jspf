@@ -13,11 +13,13 @@
     </c:if>
     <a href="${pageContext.request.contextPath}/history" id="navHistoryLink">History</a>
     <a href="${pageContext.request.contextPath}/notifications" id="navNotificationsLink">Notifications</a>
+    <a href="${pageContext.request.contextPath}/messages" id="navMessagesLink">Messages</a>
     <a href="${pageContext.request.contextPath}/profile" id="navProfileLink">Profile</a>
     <c:if test="${sessionScope.role == 'ADMINISTRATOR'}">
     <a href="${pageContext.request.contextPath}/admin/scoring-rules" id="navAdminScoringRulesLink">Admin: Scoring Rules</a>
     <a href="${pageContext.request.contextPath}/admin/simulation" id="navAdminSimulationLink">Admin: Simulation</a>
     <a href="${pageContext.request.contextPath}/admin/fixtures" id="navAdminFixturesLink">Admin: Fixtures</a>
+    <a href="${pageContext.request.contextPath}/admin/message-moderation" id="navAdminMessageModerationLink">Admin: Message Moderation</a>
     </c:if>
 
     <c:choose>
