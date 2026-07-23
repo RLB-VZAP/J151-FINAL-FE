@@ -12,6 +12,16 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/catalog.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin-reports.css">
+    <%-- admin-reports.css defines .rtbl2-head/.rtbl2-row as a 3-column CSS grid.
+         Bumping to 4 columns here (scoped, so it wins on source order) since a
+         "Result" column was added below. If admin-reports.css is later updated
+         to size these as 4 columns natively, this override can be removed. --%>
+    <style>
+        .arep-page .rtbl2-head,
+        .arep-page .rtbl2-row {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    </style>
 </head>
 <body class="catalog-page arep-page">
 
@@ -56,12 +66,27 @@
                                     <span>Type</span>
                                     <span>Title</span>
                                     <span>Generated at</span>
+                                    <span>Result</span>
                                 </div>
                                 <c:forEach var="report" items="${reports}">
                                     <div class="rtbl2-row">
                                         <span><span class="arep-chip"><c:out value="${report.reportType}" /></span></span>
                                         <span class="rtbl2-title" title="${fn:escapeXml(report.reportTitle)}"><c:out value="${report.reportTitle}" /></span>
                                         <span class="rtbl2-when">${fn:substring(fn:replace(report.generatedAt, 'T', ' '), 0, 16)}</span>
+                                        <span class="rtbl2-result">
+                                            <c:choose>
+                                                <c:when test="${empty report.resultJson}">
+                                                    <span class="arep-muted">No data</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <ul class="report-result-list">
+                                                        <c:forEach var="resultEntry" items="${report.resultJson}">
+                                                            <li><strong><c:out value="${resultEntry.key}" />:</strong> <c:out value="${resultEntry.value}" /></li>
+                                                        </c:forEach>
+                                                    </ul>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </span>
                                     </div>
                                 </c:forEach>
                             </div>
