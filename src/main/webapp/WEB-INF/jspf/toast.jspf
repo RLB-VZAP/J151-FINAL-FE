@@ -1,0 +1,32 @@
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%--
+    System-wide toast feedback host (Green-Gold design system).
+
+    Included from sidebar.jspf, so every page carrying the sidebar gets it with
+    no per-page work. Reads a one-shot flash message off the session, set by
+    AbstractServlet.flashSuccess/flashError before a POST-redirect-GET, and
+    renders a single toast the browser then animates in (see toast.js). The
+    flash is consumed here so a refresh never re-shows it. Pages can also raise
+    toasts from client JS via window.TrytonsToast.show(message, type).
+
+    Requires theme.css (.toast-* styles). Safe to include more than once — only
+    the first stack on the page is used.
+--%>
+<c:set var="flashMessage" value="${sessionScope['flash.message']}" scope="page" />
+<c:set var="flashType" value="${sessionScope['flash.type']}" scope="page" />
+<%
+    // Consume-once: clear the flash so a reload or back-navigation cannot
+    // resurrect it. The values were already captured into page scope above.
+    session.removeAttribute("flash.message");
+    session.removeAttribute("flash.type");
+%>
+<div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="false">
+    <c:if test="${not empty flashMessage}">
+        <c:set var="flashKind" value="${empty flashType ? 'success' : flashType}" scope="page" />
+        <div class="toast toast-${flashKind}" role="${flashKind == 'error' ? 'alert' : 'status'}" data-toast>
+            <span class="toast-msg"><c:out value="${flashMessage}" /></span>
+            <button type="button" class="toast-close" aria-label="Dismiss">&times;</button>
+        </div>
+    </c:if>
+</div>
+<script src="${pageContext.request.contextPath}/assets/js/toast.js"></script>

@@ -99,6 +99,37 @@ public class AbstractServlet extends HttpServlet {
         req.getRequestDispatcher(jspPath).forward(req, resp);
     }
 
+    // ---- Toast flash ---------------------------------------------------------
+    // A one-shot message stashed in the session, rendered once as a toast by
+    // /WEB-INF/jspf/toast.jspf on the next page load and then cleared. Pair these
+    // with redirectTo() so a successful POST follows the POST-redirect-GET pattern:
+    // the toast survives the redirect and a refresh cannot re-submit the form.
+    protected static final String FLASH_MESSAGE = "flash.message";
+    protected static final String FLASH_TYPE = "flash.type";
+
+    protected void flashSuccess(HttpServletRequest req, String message) {
+        setFlash(req, "success", message);
+    }
+
+    protected void flashError(HttpServletRequest req, String message) {
+        setFlash(req, "error", message);
+    }
+
+    protected void flashInfo(HttpServletRequest req, String message) {
+        setFlash(req, "info", message);
+    }
+
+    private void setFlash(HttpServletRequest req, String type, String message) {
+        HttpSession session = req.getSession(true);
+        session.setAttribute(FLASH_MESSAGE, message);
+        session.setAttribute(FLASH_TYPE, type);
+    }
+
+    // Context-relative redirect, e.g. redirectTo(resp, req, "/create-team").
+    protected void redirectTo(HttpServletResponse resp, HttpServletRequest req, String contextRelativePath) throws IOException {
+        resp.sendRedirect(req.getContextPath() + contextRelativePath);
+    }
+
     protected boolean sessionExpiredRedirect(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if(apiCallStatus.isUnauthorized()) {
             clearAuthSession(req);

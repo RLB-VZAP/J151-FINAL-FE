@@ -94,16 +94,26 @@ public class FantasyTeamServlet extends AbstractServlet{
         if(submit == null){
             submit = "";
         }
-        switch(submit){
+        // On success each handler stashes a toast flash and we follow
+        // POST-redirect-GET, so the message survives the redirect and a refresh
+        // cannot re-submit the team. On failure we fall through and re-render the
+        // form with its inline validation/error attributes intact.
+        boolean succeeded = switch(submit){
             case"","create-team" -> handleCreateTeam(request);
             case "update-team" -> handleUpdateTeam(request);
-            default -> request.setAttribute("error","Invalid submit");
+            default -> { request.setAttribute("error","Invalid submit"); yield false; }
+        };
+        if(succeeded){
+            redirectTo(response, request, "/create-team");
+            return;
         }
         request.getRequestDispatcher(CREATE_TEAM_JSP).forward(request, response);
 
     }
 
-    private void handleCreateTeam(HttpServletRequest request){
+    // Returns true when the team was created (caller then flashes + redirects),
+    // false when validation or the API call failed (caller re-renders the form).
+    private boolean handleCreateTeam(HttpServletRequest request){
         List<String> validationErrors = new ArrayList<>();
         String teamName = request.getParameter("teamName");
         if(teamName == null || teamName.isBlank()){
@@ -122,21 +132,21 @@ public class FantasyTeamServlet extends AbstractServlet{
         if(!validationErrors.isEmpty()){
             request.setAttribute("validationErrors",validationErrors);
             loadPlayerOptions(request);
-            return;
+            return false;
         }
 
         FantasyTeamRequest fantasyTeamRequest = buildFantasyTeamRequest(teamName,selectedPlayerIds);
         Optional<FantasyTeamResponse> fantasyTeamResponse = fantasyTeamRestClient.createTeam(fantasyTeamRequest);
         if(fantasyTeamResponse.isPresent()){
-            request.setAttribute("message","Team created successfully");
-            request.setAttribute("team",fantasyTeamResponse.get());
-        }else{
-            request.setAttribute("error","Team could not be created. Check your squad rules and budget and try again");
+            flashSuccess(request, "Team created");
+            return true;
         }
+        request.setAttribute("error","Team could not be created. Check your squad rules and budget and try again");
         loadPlayerOptions(request);
+        return false;
     }
 
-    private void handleUpdateTeam(HttpServletRequest request){
+    private boolean handleUpdateTeam(HttpServletRequest request){
         List<String> validationErrors = new ArrayList<>();
         Optional<UUID> teamId = parseUuid(request.getParameter("teamId"));
         if(teamId.isEmpty()){
@@ -159,17 +169,17 @@ public class FantasyTeamServlet extends AbstractServlet{
         if(!validationErrors.isEmpty()){
             request.setAttribute("validationErrors",validationErrors);
             loadPlayerOptions(request);
-            return;
+            return false;
         }
         FantasyTeamRequest fantasyTeamRequest = buildFantasyTeamRequest(teamName, selectedPlayerIds);
         Optional<FantasyTeamResponse> fantasyTeamResponse = fantasyTeamRestClient.updateTeam(teamId.get(),fantasyTeamRequest);
         if(fantasyTeamResponse.isPresent()){
-            request.setAttribute("message","Team updated successfully");
-            request.setAttribute("team",fantasyTeamResponse.get());
-        }else{
-            request.setAttribute("error","Team could not be updated. Check your squad rules and budget and try again");
+            flashSuccess(request, "Team updated");
+            return true;
         }
+        request.setAttribute("error","Team could not be updated. Check your squad rules and budget and try again");
         loadPlayerOptions(request);
+        return false;
     }
 
     private FantasyTeamRequest buildFantasyTeamRequest(String teamName,List<UUID> selectedPlayerIds){
