@@ -148,13 +148,33 @@
                     </div>
 
                     <div class="afx-field">
-                        <label class="afx-label" for="createFixtureTeamAId">Team A ID</label>
-                        <input class="afx-input" type="text" id="createFixtureTeamAId" name="teamAId" required>
+                        <label class="afx-label" for="createFixtureTeamAId">Team A</label>
+                        <div class="afx-select-wrap">
+                            <select class="afx-select" id="createFixtureTeamAId" name="teamAId" required>
+                                <option value="">&mdash; Select league first &mdash;</option>
+                                <c:forEach var="league" items="${leagues}">
+                                    <c:forEach var="member" items="${teamsByLeagueId[league.leagueId]}">
+                                        <option value="${member.teamId}" data-league-id="${league.leagueId}"><c:out value="${member.teamDisplayName}" /></option>
+                                    </c:forEach>
+                                </c:forEach>
+                            </select>
+                            <svg class="afx-select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                        </div>
                     </div>
 
                     <div class="afx-field">
-                        <label class="afx-label" for="createFixtureTeamBId">Team B ID</label>
-                        <input class="afx-input" type="text" id="createFixtureTeamBId" name="teamBId" required>
+                        <label class="afx-label" for="createFixtureTeamBId">Team B</label>
+                        <div class="afx-select-wrap">
+                            <select class="afx-select" id="createFixtureTeamBId" name="teamBId" required>
+                                <option value="">&mdash; Select league first &mdash;</option>
+                                <c:forEach var="league" items="${leagues}">
+                                    <c:forEach var="member" items="${teamsByLeagueId[league.leagueId]}">
+                                        <option value="${member.teamId}" data-league-id="${league.leagueId}"><c:out value="${member.teamDisplayName}" /></option>
+                                    </c:forEach>
+                                </c:forEach>
+                            </select>
+                            <svg class="afx-select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                        </div>
                     </div>
 
                     <div class="afx-row-2">
@@ -177,5 +197,6 @@
     </div>
 </main>
 
+<script src="${pageContext.request.contextPath}/assets/js/admin-fixtures.js"></script>
 </body>
 </html>

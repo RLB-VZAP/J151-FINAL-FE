@@ -52,4 +52,29 @@
             }
         });
     });
+
+    /* Player select only offers the chosen team's roster — both sides' players
+       are rendered into the same <select> (each option tagged with its fantasy
+       team id via data-team-id) so this is a client-side filter, not a re-render. */
+    var teamSelect = document.getElementById("teamId");
+    var playerSelect = document.getElementById("playerId");
+    if (teamSelect && playerSelect) {
+        var playerOptions = Array.prototype.slice.call(playerSelect.options);
+
+        function refreshPlayerOptions() {
+            var teamId = teamSelect.value;
+            playerOptions.forEach(function (option) {
+                if (!option.value) return; // keep the placeholder
+                var matches = option.getAttribute("data-team-id") === teamId;
+                option.hidden = !matches;
+                option.disabled = !matches;
+            });
+            if (playerSelect.selectedOptions[0] && playerSelect.selectedOptions[0].disabled) {
+                playerSelect.value = "";
+            }
+        }
+
+        teamSelect.addEventListener("change", refreshPlayerOptions);
+        refreshPlayerOptions();
+    }
 })();

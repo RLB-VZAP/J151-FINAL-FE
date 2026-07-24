@@ -9,6 +9,7 @@ import za.ac.vzap.trytons.frontend.client.fixture.AdminFixtureRestClient;
 import za.ac.vzap.trytons.frontend.client.fixture.FixtureRequest;
 import za.ac.vzap.trytons.frontend.client.fixture.FixtureResponse;
 import za.ac.vzap.trytons.frontend.client.fixture.FixtureRestClient;
+import za.ac.vzap.trytons.frontend.client.league.LeagueMemberResponse;
 import za.ac.vzap.trytons.frontend.client.league.LeagueResponse;
 import za.ac.vzap.trytons.frontend.client.league.LeagueRestClient;
 import za.ac.vzap.trytons.frontend.client.round.RoundResponse;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -137,6 +139,23 @@ public class AdminFixtureServlet extends AbstractServlet {
 
         Optional<List<LeagueResponse>> leagues = leagueRestClient.listPublicLeagues();
         request.setAttribute("leagues", leagues.orElse(List.of()));
+
+        // A fixture's team_a_id/team_b_id are fantasy team ids that must be active
+        // members of the fixture's own league (fk_fixture_team_a/b_membership), so
+        // admins pick a team by name from that league's roster instead of typing a
+        // raw team id they have no way to look up.
+        Map<String, List<LeagueMemberResponse>> teamsByLeagueId = new HashMap<>();
+        for (LeagueResponse league : leagues.orElse(List.of())) {
+            List<LeagueMemberResponse> members = leagueRestClient.listMembers(league.getLeagueId()).orElse(List.of());
+            List<LeagueMemberResponse> activeMembers = new ArrayList<>();
+            for (LeagueMemberResponse member : members) {
+                if (member.isActive()) {
+                    activeMembers.add(member);
+                }
+            }
+            teamsByLeagueId.put(league.getLeagueId(), activeMembers);
+        }
+        request.setAttribute("teamsByLeagueId", teamsByLeagueId);
 
         // Name lookups so the fixtures table can show a league name and round label
         // instead of raw ids. Keyed by the id's string form; the JSP looks them up
