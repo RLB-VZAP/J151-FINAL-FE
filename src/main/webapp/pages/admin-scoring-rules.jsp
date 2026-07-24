@@ -21,6 +21,13 @@
 <main class="catalog-main" id="adminScoringRules">
     <div class="catalog-content">
 
+        <c:if test="${seasonLocked}">
+            <div class="asr-lock-banner" role="alert">
+                <span class="asr-lock-icon" aria-hidden="true">&#128274;</span>
+                <span><strong>Season in progress.</strong> Scoring cannot be edited until you start a new season.</span>
+            </div>
+        </c:if>
+
         <header class="catalog-header">
             <div>
                 <p class="catalog-eyebrow">Administration</p>
@@ -93,7 +100,14 @@
                                         <span class="srtbl-c"><span class="asr-flag ${rule.active ? 'is-yes' : 'is-no'}">${rule.active ? 'Yes' : 'No'}</span></span>
                                         <span class="srtbl-desc" title="${fn:escapeXml(rule.description)}"><c:out value="${rule.description}" /></span>
                                         <span class="srtbl-action">
-                                            <a class="srtbl-edit" href="${pageContext.request.contextPath}/admin/scoring-rules?season=${fn:escapeXml(selectedSeason)}&amp;ruleId=${rule.ruleId}">Edit</a>
+                                            <c:choose>
+                                                <c:when test="${seasonLocked}">
+                                                    <span class="srtbl-locked" title="Season in progress">Locked</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <a class="srtbl-edit" href="${pageContext.request.contextPath}/admin/scoring-rules?season=${fn:escapeXml(selectedSeason)}&amp;ruleId=${rule.ruleId}">Edit</a>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </span>
                                     </div>
                                 </c:forEach>
@@ -107,6 +121,7 @@
             <section class="asr-panel" id="scoringRuleFormSection">
                 <h2 class="asr-panel-title">
                     <c:choose>
+                        <c:when test="${seasonLocked}">Scoring rules locked</c:when>
                         <c:when test="${not empty editingRule}">Edit scoring rule</c:when>
                         <c:otherwise>Create scoring rule</c:otherwise>
                     </c:choose>
@@ -117,51 +132,59 @@
                         <input type="hidden" name="ruleId" value="${editingRule.ruleId}">
                     </c:if>
 
-                    <div class="asr-field">
-                        <label class="asr-label" for="eventType">Event type</label>
-                        <input class="asr-input" type="text" id="eventType" name="eventType"
-                               value="${not empty editingRule ? fn:escapeXml(editingRule.eventType) : ''}"
-                               placeholder="e.g. TRY" required>
-                    </div>
+                    <%-- A disabled fieldset makes every control inside read-only and blocks
+                         submission, so a season with results cannot be re-scored from here. --%>
+                    <fieldset class="asr-fieldset ${seasonLocked ? 'is-locked' : ''}" ${seasonLocked ? 'disabled' : ''}>
+                        <div class="asr-field">
+                            <label class="asr-label" for="eventType">Event type</label>
+                            <input class="asr-input" type="text" id="eventType" name="eventType"
+                                   value="${not empty editingRule ? fn:escapeXml(editingRule.eventType) : ''}"
+                                   placeholder="e.g. TRY" required>
+                        </div>
 
-                    <div class="asr-field">
-                        <label class="asr-label" for="pointsAwarded">Points awarded</label>
-                        <input class="asr-input" type="number" id="pointsAwarded" name="pointsAwarded" step="1"
-                               value="${not empty editingRule ? editingRule.pointsAwarded : ''}" required>
-                    </div>
+                        <div class="asr-field">
+                            <label class="asr-label" for="pointsAwarded">Points awarded</label>
+                            <input class="asr-input" type="number" id="pointsAwarded" name="pointsAwarded" step="1"
+                                   value="${not empty editingRule ? editingRule.pointsAwarded : ''}" required>
+                        </div>
 
-                    <div class="asr-field">
-                        <label class="asr-label" for="season">Season</label>
-                        <input class="asr-input" type="text" id="season" name="season"
-                               value="${not empty editingRule ? fn:escapeXml(editingRule.season) : fn:escapeXml(selectedSeason)}" required>
-                    </div>
+                        <div class="asr-field">
+                            <label class="asr-label" for="season">Season</label>
+                            <input class="asr-input" type="text" id="season" name="season"
+                                   value="${not empty editingRule ? fn:escapeXml(editingRule.season) : fn:escapeXml(selectedSeason)}" required>
+                        </div>
 
-                    <div class="asr-field">
-                        <label class="asr-label" for="description">Description</label>
-                        <input class="asr-input" type="text" id="description" name="description"
-                               value="${not empty editingRule ? fn:escapeXml(editingRule.description) : ''}"
-                               placeholder="Optional">
-                    </div>
+                        <div class="asr-field">
+                            <label class="asr-label" for="description">Description</label>
+                            <input class="asr-input" type="text" id="description" name="description"
+                                   value="${not empty editingRule ? fn:escapeXml(editingRule.description) : ''}"
+                                   placeholder="Optional">
+                        </div>
 
-                    <div class="asr-checks">
-                        <label class="asr-check" for="active">
-                            <input type="checkbox" id="active" name="active"
-                                   ${(empty editingRule) or editingRule.active ? 'checked' : ''}>
-                            <span>Active</span>
-                        </label>
-                        <label class="asr-check" for="isDeduction">
-                            <input type="checkbox" id="isDeduction" name="isDeduction"
-                                   ${(not empty editingRule) and editingRule.isDeduction ? 'checked' : ''}>
-                            <span>Deduction</span>
-                        </label>
-                    </div>
+                        <div class="asr-checks">
+                            <label class="asr-check" for="active">
+                                <input type="checkbox" id="active" name="active"
+                                       ${(empty editingRule) or editingRule.active ? 'checked' : ''}>
+                                <span>Active</span>
+                            </label>
+                            <label class="asr-check" for="isDeduction">
+                                <input type="checkbox" id="isDeduction" name="isDeduction"
+                                       ${(not empty editingRule) and editingRule.isDeduction ? 'checked' : ''}>
+                                <span>Deduction</span>
+                            </label>
+                        </div>
 
-                    <button type="submit" name="submit" value="save-scoring-rule" class="btn-gold asr-submit">
-                        <c:choose>
-                            <c:when test="${not empty editingRule}">Update scoring rule</c:when>
-                            <c:otherwise>Create scoring rule</c:otherwise>
-                        </c:choose>
-                    </button>
+                        <button type="submit" name="submit" value="save-scoring-rule" class="btn-gold asr-submit">
+                            <c:choose>
+                                <c:when test="${not empty editingRule}">Update scoring rule</c:when>
+                                <c:otherwise>Create scoring rule</c:otherwise>
+                            </c:choose>
+                        </button>
+                    </fieldset>
+
+                    <c:if test="${seasonLocked}">
+                        <p class="asr-lock-note">This season already has results, so its scoring rules are frozen. Start a new season to make changes.</p>
+                    </c:if>
 
                     <c:if test="${not empty editingRule}">
                         <a class="asr-cancel" href="${pageContext.request.contextPath}/admin/scoring-rules?season=${fn:escapeXml(selectedSeason)}">Cancel edit</a>

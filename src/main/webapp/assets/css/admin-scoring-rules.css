@@ -32,6 +32,75 @@
 .asr-alert-success { border-left-color: #5fae7a; }
 .asr-alert-error { border-left-color: #c0524a; }
 
+/* ---------- Season-locked banner ---------------------------------------------------- */
+.asr-lock-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 20px;
+    border: 1px solid rgba(192, 82, 74, .55);
+    border-left: 4px solid #c0524a;
+    border-radius: 12px;
+    padding: .9rem 1.1rem;
+    background: rgba(192, 82, 74, .1);
+    color: var(--silver-bright);
+    font-size: .9rem;
+    line-height: 1.5;
+}
+
+.asr-lock-banner strong { color: #f0b7b1; }
+
+.asr-lock-icon { font-size: 1.15rem; line-height: 1; }
+
+.asr-lock-note {
+    margin: 14px 0 0;
+    color: var(--silver-dim);
+    font-size: .8rem;
+    line-height: 1.5;
+}
+
+/* ---------- Locked / disabled form -------------------------------------------------- */
+/* The "no entry" cursor the brief asked for, on every frozen control. */
+.asr-fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+}
+
+.asr-fieldset.is-locked { cursor: not-allowed; }
+
+.asr-input:disabled,
+.asr-check input[type="checkbox"]:disabled,
+.asr-submit:disabled {
+    cursor: not-allowed;
+}
+
+.asr-fieldset.is-locked .asr-input,
+.asr-fieldset.is-locked .asr-check,
+.asr-fieldset.is-locked .asr-check input[type="checkbox"] {
+    cursor: not-allowed;
+}
+
+.asr-fieldset.is-locked .asr-input {
+    opacity: .55;
+    background: #0a160f;
+}
+
+.asr-fieldset.is-locked .asr-check { opacity: .55; }
+
+.asr-submit:disabled {
+    opacity: .5;
+    filter: grayscale(35%);
+}
+
+.srtbl-locked {
+    color: var(--silver-dim);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: not-allowed;
+}
+
 /* ---------- Panels ------------------------------------------------------------------ */
 .asr-panel {
     padding: 20px 22px;
