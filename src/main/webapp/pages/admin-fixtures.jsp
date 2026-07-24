@@ -160,8 +160,13 @@
                     <div class="afx-field">
                         <label class="afx-label" for="createFixtureTeamAId">Team A</label>
                         <div class="afx-select-wrap">
-                            <select class="afx-select" id="createFixtureTeamAId" name="teamAId" required disabled>
-                                <option value="">&mdash; Select a league first &mdash;</option>
+                            <select class="afx-select" id="createFixtureTeamAId" name="teamAId" required>
+                                <option value="">&mdash; Select league first &mdash;</option>
+                                <c:forEach var="league" items="${leagues}">
+                                    <c:forEach var="member" items="${teamsByLeagueId[league.leagueId]}">
+                                        <option value="${member.teamId}" data-league-id="${league.leagueId}"><c:out value="${member.teamDisplayName}" /></option>
+                                    </c:forEach>
+                                </c:forEach>
                             </select>
                             <svg class="afx-select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
                         </div>
@@ -170,8 +175,13 @@
                     <div class="afx-field">
                         <label class="afx-label" for="createFixtureTeamBId">Team B</label>
                         <div class="afx-select-wrap">
-                            <select class="afx-select" id="createFixtureTeamBId" name="teamBId" required disabled>
-                                <option value="">&mdash; Select a league first &mdash;</option>
+                            <select class="afx-select" id="createFixtureTeamBId" name="teamBId" required>
+                                <option value="">&mdash; Select league first &mdash;</option>
+                                <c:forEach var="league" items="${leagues}">
+                                    <c:forEach var="member" items="${teamsByLeagueId[league.leagueId]}">
+                                        <option value="${member.teamId}" data-league-id="${league.leagueId}"><c:out value="${member.teamDisplayName}" /></option>
+                                    </c:forEach>
+                                </c:forEach>
                             </select>
                             <svg class="afx-select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
                         </div>
@@ -203,62 +213,6 @@
     </div>
 </main>
 
-<script>
-    // Populate the Team A / Team B dropdowns from the teams that are active members
-    // of the league selected above. A fixture can only pair teams within one league,
-    // so the team choices are filtered to the chosen league and reset when it changes.
-    (function () {
-        var dataEl = document.getElementById('afxTeamsByLeague');
-        var leagueSelect = document.getElementById('createFixtureLeagueId');
-        var teamA = document.getElementById('createFixtureTeamAId');
-        var teamB = document.getElementById('createFixtureTeamBId');
-        if (!dataEl || !leagueSelect || !teamA || !teamB) {
-            return;
-        }
-
-        var teamsByLeague = {};
-        try {
-            teamsByLeague = JSON.parse(dataEl.value || '{}');
-        } catch (e) {
-            teamsByLeague = {};
-        }
-
-        function fill(select, teams, placeholder) {
-            select.innerHTML = '';
-            var first = document.createElement('option');
-            first.value = '';
-            first.textContent = placeholder;
-            select.appendChild(first);
-            teams.forEach(function (team) {
-                var option = document.createElement('option');
-                option.value = team.id;
-                option.textContent = team.name;
-                select.appendChild(option);
-            });
-        }
-
-        function refresh() {
-            var leagueId = leagueSelect.value;
-            var teams = (leagueId && teamsByLeague[leagueId]) ? teamsByLeague[leagueId] : [];
-            var placeholder;
-            if (!leagueId) {
-                placeholder = '— Select a league first —';
-            } else if (teams.length === 0) {
-                placeholder = '— No teams in this league —';
-            } else {
-                placeholder = '— Select team —';
-            }
-            fill(teamA, teams, placeholder);
-            fill(teamB, teams, placeholder);
-            // Enable only once a league is chosen; keeps `required` meaningful.
-            teamA.disabled = !leagueId;
-            teamB.disabled = !leagueId;
-        }
-
-        leagueSelect.addEventListener('change', refresh);
-        refresh();
-    })();
-</script>
-
+<script src="${pageContext.request.contextPath}/assets/js/admin-fixtures.js"></script>
 </body>
 </html>

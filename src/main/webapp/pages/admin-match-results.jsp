@@ -169,12 +169,34 @@
 
                                 <div class="amr-row-2">
                                     <div class="amr-field">
-                                        <label class="amr-label" for="teamId">Team ID</label>
-                                        <input class="amr-input" type="text" id="teamId" name="teamId" required>
+                                        <label class="amr-label" for="teamId">Team</label>
+                                        <div class="amr-select-wrap">
+                                            <select class="amr-select" id="teamId" name="teamId" required>
+                                                <option value="">&mdash; Choose a team &mdash;</option>
+                                                <c:if test="${not empty selectedFixture}">
+                                                    <option value="${selectedFixture.teamAId}">${fn:escapeXml(selectedFixture.teamAName)}</option>
+                                                    <option value="${selectedFixture.teamBId}">${fn:escapeXml(selectedFixture.teamBName)}</option>
+                                                </c:if>
+                                            </select>
+                                            <svg class="amr-select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                                        </div>
                                     </div>
                                     <div class="amr-field">
-                                        <label class="amr-label" for="playerId">Player ID</label>
-                                        <input class="amr-input" type="text" id="playerId" name="playerId" required>
+                                        <label class="amr-label" for="playerId">Player</label>
+                                        <div class="amr-select-wrap">
+                                            <select class="amr-select" id="playerId" name="playerId" required>
+                                                <option value="">&mdash; Choose a team first &mdash;</option>
+                                                <c:if test="${not empty selectedFixture}">
+                                                    <c:forEach var="rosterPlayer" items="${teamAPlayers}">
+                                                        <option value="${rosterPlayer.playerId}" data-team-id="${selectedFixture.teamAId}">${fn:escapeXml(rosterPlayer.playerName)}</option>
+                                                    </c:forEach>
+                                                    <c:forEach var="rosterPlayer" items="${teamBPlayers}">
+                                                        <option value="${rosterPlayer.playerId}" data-team-id="${selectedFixture.teamBId}">${fn:escapeXml(rosterPlayer.playerName)}</option>
+                                                    </c:forEach>
+                                                </c:if>
+                                            </select>
+                                            <svg class="amr-select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                                        </div>
                                     </div>
                                 </div>
 

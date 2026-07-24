@@ -72,14 +72,33 @@ public class FantasyTeamServlet extends AbstractServlet{
                 if(teamId.isEmpty()){
                     request.setAttribute("error","Team ID is required to update your team");
                 }else {
-                    fantasyTeamRestClient.viewOwnTeam(teamId.get()).ifPresentOrElse(team -> request.setAttribute("team",team),() -> request.setAttribute("error","Unable to update your team"));
-                    request.setAttribute("team",teamId.get());
+                    // A stray overwrite here used to clobber the loaded ViewOwnTeamResponse
+                    // with the raw teamId, so the JSP could never tell it was in edit mode
+                    // and always rendered a blank create form. That silently discarded the
+                    // existing squad/team name, so every "edit" actually submitted as a
+                    // brand new create — which then failed on the one-team-per-user
+                    // constraint with a generic, unhelpful error.
+                    fantasyTeamRestClient.viewOwnTeam(teamId.get()).ifPresentOrElse(team -> {
+                        request.setAttribute("teamId", team.getTeamId());
+                        request.setAttribute("teamName", team.getTeamName());
+                        List<UUID> ownedPlayerIds = new ArrayList<>();
+                        if(team.getPlayers() != null){
+                            for(FantasyTeamPlayerSelectionResponse player : team.getPlayers()){
+                                ownedPlayerIds.add(player.getPlayerId());
+                            }
+                        }
+                        request.setAttribute("selectedPlayerIds", ownedPlayerIds);
+                    }, () -> request.setAttribute("error","Unable to load your team"));
                 }
                 loadPlayerOptions(request);
                 yield CREATE_TEAM_JSP;
             }
 
             default -> {
+                if(authContext.isAdmin()){
+                    request.setAttribute("adminCannotCreate", true);
+                    yield CREATE_TEAM_JSP;
+                }
                 // One team per user (uk_fantasyTeam_owner): if they already have a team,
                 // show a notice pointing at it rather than the create form.
                 Optional<UUID> existingTeamId = fantasyTeamRestClient.getMyTeam()
@@ -106,13 +125,18 @@ public class FantasyTeamServlet extends AbstractServlet{
         // POST-redirect-GET, so the message survives the redirect and a refresh
         // cannot re-submit the team. On failure we fall through and re-render the
         // form with its inline validation/error attributes intact.
+        if(("".equals(submit) || "create-team".equals(submit)) && authContext.isAdmin()){
+            request.setAttribute("adminCannotCreate", true);
+            request.getRequestDispatcher(CREATE_TEAM_JSP).forward(request, response);
+            return;
+        }
         boolean succeeded = switch(submit){
             case"","create-team" -> handleCreateTeam(request);
             case "update-team" -> handleUpdateTeam(request);
             default -> { request.setAttribute("error","Invalid submit"); yield false; }
         };
         if(succeeded){
-            redirectTo(response, request, "/create-team");
+            redirectTo(response, request, "update-team".equals(submit) ? "/fantasy-team/own" : "/create-team");
             return;
         }
         request.getRequestDispatcher(CREATE_TEAM_JSP).forward(request, response);
@@ -137,6 +161,10 @@ public class FantasyTeamServlet extends AbstractServlet{
         if(selectedPlayerIds.isEmpty()){
             validationErrors.add("You must select at least one player");
         }
+        // Re-offered on any failure below so a rejected submission does not
+        // dump the user back to an empty, unchecked player pool.
+        request.setAttribute("teamName", teamName);
+        request.setAttribute("selectedPlayerIds", selectedPlayerIds);
         if(!validationErrors.isEmpty()){
             request.setAttribute("validationErrors",validationErrors);
             loadPlayerOptions(request);
@@ -149,7 +177,7 @@ public class FantasyTeamServlet extends AbstractServlet{
             flashSuccess(request, "Team created");
             return true;
         }
-        request.setAttribute("error","Team could not be created. Check your squad rules and budget and try again");
+        request.setAttribute("error", apiCallStatus.getMessage("Team could not be created. Check your squad rules and budget and try again"));
         loadPlayerOptions(request);
         return false;
     }
@@ -174,6 +202,12 @@ public class FantasyTeamServlet extends AbstractServlet{
         if(selectedPlayerIds.isEmpty()){
             validationErrors.add("You must select at least one player");
         }
+        // Re-offered on any failure below so a rejected submission stays in edit
+        // mode with the attempted picks intact, instead of reverting to a blank
+        // create form.
+        teamId.ifPresent(id -> request.setAttribute("teamId", id));
+        request.setAttribute("teamName", teamName);
+        request.setAttribute("selectedPlayerIds", selectedPlayerIds);
         if(!validationErrors.isEmpty()){
             request.setAttribute("validationErrors",validationErrors);
             loadPlayerOptions(request);
@@ -185,7 +219,7 @@ public class FantasyTeamServlet extends AbstractServlet{
             flashSuccess(request, "Team updated");
             return true;
         }
-        request.setAttribute("error","Team could not be updated. Check your squad rules and budget and try again");
+        request.setAttribute("error", apiCallStatus.getMessage("Team could not be updated. Check your squad rules and budget and try again"));
         loadPlayerOptions(request);
         return false;
     }

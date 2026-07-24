@@ -135,7 +135,17 @@
             </section>
 
             <section class="asim-panel" id="settingsFormSection">
-                <h2 class="asim-panel-title" id="simulationSettingForm">Create / update settings</h2>
+                <%-- Create is the default, always-available state; Update only replaces it
+                     once an "Edit" link has actually loaded a row (trytonsFillSettingsForm
+                     below) — the two are visually distinct rather than one ambiguous panel
+                     that silently repurposes itself between create and edit. --%>
+                <div class="asim-panel-head" id="createSettingsHead">
+                    <h2 class="asim-panel-title" id="simulationSettingForm">Create settings</h2>
+                </div>
+                <div class="asim-panel-head" id="updateSettingsHead" hidden>
+                    <h2 class="asim-panel-title">Update settings &mdash; <span id="updateSettingsSeason"></span></h2>
+                    <button type="button" class="asim-ghost asim-form-reset" onclick="return trytonsResetSettingsForm();">Cancel edit</button>
+                </div>
 
                 <form method="post" action="${pageContext.request.contextPath}/admin/simulation" id="simulationSettingsForm">
                     <input type="hidden" name="action" value="saveSettings">
@@ -185,7 +195,7 @@
                         </label>
                     </div>
 
-                    <button type="submit" class="btn-gold asim-submit">Save simulation settings</button>
+                    <button type="submit" class="btn-gold asim-submit" id="settingsSubmitBtn">Save simulation settings</button>
                 </form>
             </section>
 
@@ -198,12 +208,11 @@
                 <span class="asim-rule-line"></span>
             </div>
 
-            <p class="asim-stub" role="note">
-                The controlled resimulation backend service is still a stub, so triggering a resimulation or
-                loading a fixture's history may currently return no result. The form below is wired and ready
-                for when that service lands.
-            </p>
-
+            <%-- No static disclaimer here: the backend (ControlledResimulationServiceImpl) is
+                 fully implemented, and a rejected trigger already surfaces its specific
+                 reason (e.g. "The round has not reached its lock deadline.") through the
+                 ${error} alert above — that is the only explanation an admin needs, and
+                 only appears when something actually goes wrong. --%>
             <div class="asim-grid asim-grid-even">
 
                 <section class="asim-panel">
@@ -300,6 +309,21 @@
         document.getElementById("requireAdminApproval").checked = requireAdminApproval;
         document.getElementById("allowResimulation").checked = allowResimulation;
         document.getElementById("isActive").checked = isActive;
+        document.getElementById("createSettingsHead").hidden = true;
+        document.getElementById("updateSettingsHead").hidden = false;
+        document.getElementById("updateSettingsSeason").textContent = season;
+        document.getElementById("settingsSubmitBtn").textContent = "Save changes";
+        return false;
+    }
+
+    // The only way back to the create form once a row has been loaded for editing —
+    // without this, admins had to reload the whole page to create a new setting.
+    function trytonsResetSettingsForm() {
+        document.getElementById("simulationSettingsForm").reset();
+        document.getElementById("settingsId").value = "";
+        document.getElementById("createSettingsHead").hidden = false;
+        document.getElementById("updateSettingsHead").hidden = true;
+        document.getElementById("settingsSubmitBtn").textContent = "Save simulation settings";
         return false;
     }
 </script>

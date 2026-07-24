@@ -161,6 +161,29 @@
     color: var(--silver-bright);
 }
 
+.asim-panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+/* An author rule's `display: flex` above beats the browser's default
+   `[hidden] { display: none }` (UA styles always lose to author styles,
+   regardless of specificity), so the hidden panel head must be told to
+   collapse explicitly or both Create and Update heads render at once. */
+.asim-panel-head[hidden] { display: none; }
+
+.asim-panel-head .asim-panel-title { margin-bottom: 0; }
+
+.asim-form-reset {
+    display: inline-flex;
+    height: auto;
+    padding: 6px 12px;
+    font-size: .8rem;
+}
+
 /* ---------- All-settings table ---------------------------------------------------------- */
 .stbl2 {
     border: 1px solid var(--line);
