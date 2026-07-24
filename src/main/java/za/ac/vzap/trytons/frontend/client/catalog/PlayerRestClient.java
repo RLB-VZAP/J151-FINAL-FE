@@ -21,6 +21,7 @@ public class PlayerRestClient {
     private final String CREATE_PLAYER = "/player";
     private final String UPDATE_PLAYER ="/player";
     private final String PLAYER_AVAILABILITY ="/player";
+    private final String IMPORT_PLAYERS ="/player/import";
 
     private static final Logger LOG = Logger.getLogger(PlayerRestClient.class.getName());
     @Inject
@@ -82,6 +83,21 @@ public class PlayerRestClient {
         Optional<PlayerResponse> response = apiClient.put(path,request,PlayerResponse.class);
         if(response.isEmpty()){
             LOG.log(Level.SEVERE, "Unable to update player");
+        }
+        return response;
+    }
+
+    /**
+     * Triggers a live-feed refresh of the player catalog. The backend re-scrapes its
+     * source on every call and takes about a minute, so this is a single deliberate
+     * request, never a poll. The endpoint takes no body, so an empty JSON object is
+     * sent (JAX-RS rejects a null POST entity).
+     */
+    public Optional<PlayerImportSummaryResponse> importPlayers() {
+        Optional<PlayerImportSummaryResponse> response =
+                apiClient.post(IMPORT_PLAYERS, java.util.Map.of(), PlayerImportSummaryResponse.class);
+        if (response.isEmpty()) {
+            LOG.log(Level.SEVERE, "Unable to import players from live feed");
         }
         return response;
     }
