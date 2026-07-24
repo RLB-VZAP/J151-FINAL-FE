@@ -78,7 +78,9 @@ public class AdminScoringRuleServlet extends AbstractServlet {
         if (saved.isPresent()) {
             request.setAttribute("success", "Scoring rule saved successfully");
         } else {
-            request.setAttribute("error", "Scoring rule could not be saved");
+            // Surface the backend's specific reason (e.g. a season whose ruleset is locked
+            // because it already has results) rather than an opaque generic failure.
+            request.setAttribute("error", apiCallStatus.getMessage("Scoring rule could not be saved"));
         }
         return season;
     }
@@ -95,6 +97,11 @@ public class AdminScoringRuleServlet extends AbstractServlet {
             request.setAttribute("rulesError", "Unable to load scoring rules for the selected season");
         }
         request.setAttribute("scoringRules", scoringRules);
+
+        // Determined straight from the backend (does the season have results?) rather than
+        // inferred from the rules list, so a locked season with no active rules still locks.
+        boolean seasonLocked = scoringRuleRestClient.isSeasonLocked(season);
+        request.setAttribute("seasonLocked", seasonLocked);
 
         if (ruleIdParam != null && !ruleIdParam.isBlank()) {
             for (ScoringRuleResponse rule : scoringRules) {

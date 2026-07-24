@@ -93,18 +93,28 @@
                                             <span class="ftbl-date">${fixture.fixtureDate}</span>
                                             <span><span class="afx-pill afx-pill-${fn:toLowerCase(fxStatus)}">${fn:substring(fxStatus, 0, 1)}${fn:toLowerCase(fn:substring(fxStatus, 1, fn:length(fxStatus)))}</span></span>
                                             <span class="ftbl-update">
-                                                <form method="post" action="${pageContext.request.contextPath}/admin/fixtures" class="statusUpdateForm afx-update-form">
-                                                    <input type="hidden" name="fixtureId" value="${fixture.fixtureId}">
-                                                    <div class="afx-select-wrap afx-update-select">
-                                                        <select class="afx-select afx-select-sm" name="status" aria-label="New status">
-                                                            <c:forEach var="s" items="${fn:split(statusOptions, ',')}">
-                                                                <option value="${s}" ${fxStatus eq s ? 'selected' : ''}>${fn:substring(s, 0, 1)}${fn:toLowerCase(fn:substring(s, 1, fn:length(s)))}</option>
-                                                            </c:forEach>
-                                                        </select>
-                                                        <svg class="afx-select-caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                                                    </div>
-                                                    <button type="submit" class="afx-update-btn">Update</button>
-                                                </form>
+                                                <%-- Only offer transitions the backend allows for the current status; a
+                                                     terminal status (processed / cancelled) has none. --%>
+                                                <c:set var="nextStatuses" value="${statusTransitions[fxStatus]}" />
+                                                <c:choose>
+                                                    <c:when test="${empty nextStatuses}">
+                                                        <span class="afx-update-none">No further changes</span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <form method="post" action="${pageContext.request.contextPath}/admin/fixtures" class="statusUpdateForm afx-update-form">
+                                                            <input type="hidden" name="fixtureId" value="${fixture.fixtureId}">
+                                                            <div class="afx-select-wrap afx-update-select">
+                                                                <select class="afx-select afx-select-sm" name="status" aria-label="New status">
+                                                                    <c:forEach var="s" items="${nextStatuses}">
+                                                                        <option value="${s}">${fn:substring(s, 0, 1)}${fn:toLowerCase(fn:substring(s, 1, fn:length(s)))}</option>
+                                                                    </c:forEach>
+                                                                </select>
+                                                                <svg class="afx-select-caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                                                            </div>
+                                                            <button type="submit" class="afx-update-btn">Update</button>
+                                                        </form>
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </span>
                                         </div>
                                     </c:forEach>
@@ -176,6 +186,12 @@
                             <svg class="afx-select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
                         </div>
                     </div>
+
+                    <%-- League -> active teams map, consumed by the script below to
+                         populate the team dropdowns when a league is chosen. Held in a
+                         hidden input so HTML attribute escaping keeps the JSON safe. --%>
+                    <input type="hidden" id="afxTeamsByLeague" value="${fn:escapeXml(teamsByLeagueJson)}">
+
 
                     <div class="afx-row-2">
                         <div class="afx-field">
