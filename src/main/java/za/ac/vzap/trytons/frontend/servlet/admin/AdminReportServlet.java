@@ -1,7 +1,6 @@
 package za.ac.vzap.trytons.frontend.servlet.admin;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -13,14 +12,15 @@ import za.ac.vzap.trytons.frontend.client.admin.LogResponse;
 import za.ac.vzap.trytons.frontend.client.admin.SystemReportRequest;
 import za.ac.vzap.trytons.frontend.client.admin.SystemReportResponse;
 import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
+import za.ac.vzap.trytons.frontend.util.report.ReportRenderer;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
 
 @WebServlet(name = "AdminReportServlet", urlPatterns = {"/admin/reports"})
 public class AdminReportServlet extends AbstractServlet {
 
     private static final String VIEW = "/pages/admin-reports.jsp";
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Inject
     private AdminReportRestClient adminReportRestClient;
@@ -41,14 +41,14 @@ public class AdminReportServlet extends AbstractServlet {
         // triggers when either is present. Download wins if both somehow arrive; it is
         // the only one that sets the attachment header.
         if(viewId != null || downloadId != null) {
-            streamReport(downloadId != null ? downloadId : viewId, downloadId != null, response);
+            streamReport(request, downloadId != null ? downloadId : viewId, downloadId != null, response);
             return;
         }
         loadReports(request);
         loadLogs(request);
         forward(request, response);
     }
-    private void streamReport(String reportId, boolean asAttachment, HttpServletResponse response) throws IOException {
+    private void streamReport(HttpServletRequest request, String reportId, boolean asAttachment, HttpServletResponse response) throws IOException {
         UUID id;
         try {
             id = UUID.fromString(reportId);
@@ -61,12 +61,33 @@ public class AdminReportServlet extends AbstractServlet {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Report not found");
             return;
         }
-        String json = OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(reportOpt.get().getResultJson());
-        response.setContentType("application/json;charset=UTF-8");
-        if(asAttachment) {
-            response.setHeader("Content-Disposition", "attachment; filename=\"report-" + id + ".json\"");
+        SystemReportResponse report = reportOpt.get();
+
+        if (asAttachment) {
+            // Download: a rendered PDF, not raw JSON.
+            response.setContentType("application/pdf");
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + downloadFilename(report, id) + "\"");
+            try (OutputStream out = response.getOutputStream()) {
+                ReportRenderer.writePdf(report, out);
+            }
+        } else {
+            // View: a readable HTML report page in the browser, not raw JSON.
+            response.setContentType("text/html;charset=UTF-8");
+            response.getWriter().write(ReportRenderer.toHtml(report, request.getContextPath()));
         }
-        response.getWriter().write(json);
+    }
+
+    /** A friendly, filesystem-safe PDF filename derived from the report title. */
+    private String downloadFilename(SystemReportResponse report, UUID id) {
+        String base = report.getReportTitle();
+        if (base == null || base.isBlank()) {
+            base = "system-report-" + id;
+        }
+        String slug = base.trim().toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("(^-|-$)", "");
+        if (slug.isBlank()) {
+            slug = "system-report-" + id;
+        }
+        return slug + ".pdf";
     }
 
 

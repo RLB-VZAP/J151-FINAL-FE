@@ -93,18 +93,28 @@
                                             <span class="ftbl-date">${fixture.fixtureDate}</span>
                                             <span><span class="afx-pill afx-pill-${fn:toLowerCase(fxStatus)}">${fn:substring(fxStatus, 0, 1)}${fn:toLowerCase(fn:substring(fxStatus, 1, fn:length(fxStatus)))}</span></span>
                                             <span class="ftbl-update">
-                                                <form method="post" action="${pageContext.request.contextPath}/admin/fixtures" class="statusUpdateForm afx-update-form">
-                                                    <input type="hidden" name="fixtureId" value="${fixture.fixtureId}">
-                                                    <div class="afx-select-wrap afx-update-select">
-                                                        <select class="afx-select afx-select-sm" name="status" aria-label="New status">
-                                                            <c:forEach var="s" items="${fn:split(statusOptions, ',')}">
-                                                                <option value="${s}" ${fxStatus eq s ? 'selected' : ''}>${fn:substring(s, 0, 1)}${fn:toLowerCase(fn:substring(s, 1, fn:length(s)))}</option>
-                                                            </c:forEach>
-                                                        </select>
-                                                        <svg class="afx-select-caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                                                    </div>
-                                                    <button type="submit" class="afx-update-btn">Update</button>
-                                                </form>
+                                                <%-- Only offer transitions the backend allows for the current status; a
+                                                     terminal status (processed / cancelled) has none. --%>
+                                                <c:set var="nextStatuses" value="${statusTransitions[fxStatus]}" />
+                                                <c:choose>
+                                                    <c:when test="${empty nextStatuses}">
+                                                        <span class="afx-update-none">No further changes</span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <form method="post" action="${pageContext.request.contextPath}/admin/fixtures" class="statusUpdateForm afx-update-form">
+                                                            <input type="hidden" name="fixtureId" value="${fixture.fixtureId}">
+                                                            <div class="afx-select-wrap afx-update-select">
+                                                                <select class="afx-select afx-select-sm" name="status" aria-label="New status">
+                                                                    <c:forEach var="s" items="${nextStatuses}">
+                                                                        <option value="${s}">${fn:substring(s, 0, 1)}${fn:toLowerCase(fn:substring(s, 1, fn:length(s)))}</option>
+                                                                    </c:forEach>
+                                                                </select>
+                                                                <svg class="afx-select-caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                                                            </div>
+                                                            <button type="submit" class="afx-update-btn">Update</button>
+                                                        </form>
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </span>
                                         </div>
                                     </c:forEach>
@@ -148,14 +158,30 @@
                     </div>
 
                     <div class="afx-field">
-                        <label class="afx-label" for="createFixtureTeamAId">Team A ID</label>
-                        <input class="afx-input" type="text" id="createFixtureTeamAId" name="teamAId" required>
+                        <label class="afx-label" for="createFixtureTeamAId">Team A</label>
+                        <div class="afx-select-wrap">
+                            <select class="afx-select" id="createFixtureTeamAId" name="teamAId" required disabled>
+                                <option value="">&mdash; Select a league first &mdash;</option>
+                            </select>
+                            <svg class="afx-select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                        </div>
                     </div>
 
                     <div class="afx-field">
-                        <label class="afx-label" for="createFixtureTeamBId">Team B ID</label>
-                        <input class="afx-input" type="text" id="createFixtureTeamBId" name="teamBId" required>
+                        <label class="afx-label" for="createFixtureTeamBId">Team B</label>
+                        <div class="afx-select-wrap">
+                            <select class="afx-select" id="createFixtureTeamBId" name="teamBId" required disabled>
+                                <option value="">&mdash; Select a league first &mdash;</option>
+                            </select>
+                            <svg class="afx-select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                        </div>
                     </div>
+
+                    <%-- League -> active teams map, consumed by the script below to
+                         populate the team dropdowns when a league is chosen. Held in a
+                         hidden input so HTML attribute escaping keeps the JSON safe. --%>
+                    <input type="hidden" id="afxTeamsByLeague" value="${fn:escapeXml(teamsByLeagueJson)}">
+
 
                     <div class="afx-row-2">
                         <div class="afx-field">
@@ -176,6 +202,63 @@
 
     </div>
 </main>
+
+<script>
+    // Populate the Team A / Team B dropdowns from the teams that are active members
+    // of the league selected above. A fixture can only pair teams within one league,
+    // so the team choices are filtered to the chosen league and reset when it changes.
+    (function () {
+        var dataEl = document.getElementById('afxTeamsByLeague');
+        var leagueSelect = document.getElementById('createFixtureLeagueId');
+        var teamA = document.getElementById('createFixtureTeamAId');
+        var teamB = document.getElementById('createFixtureTeamBId');
+        if (!dataEl || !leagueSelect || !teamA || !teamB) {
+            return;
+        }
+
+        var teamsByLeague = {};
+        try {
+            teamsByLeague = JSON.parse(dataEl.value || '{}');
+        } catch (e) {
+            teamsByLeague = {};
+        }
+
+        function fill(select, teams, placeholder) {
+            select.innerHTML = '';
+            var first = document.createElement('option');
+            first.value = '';
+            first.textContent = placeholder;
+            select.appendChild(first);
+            teams.forEach(function (team) {
+                var option = document.createElement('option');
+                option.value = team.id;
+                option.textContent = team.name;
+                select.appendChild(option);
+            });
+        }
+
+        function refresh() {
+            var leagueId = leagueSelect.value;
+            var teams = (leagueId && teamsByLeague[leagueId]) ? teamsByLeague[leagueId] : [];
+            var placeholder;
+            if (!leagueId) {
+                placeholder = '— Select a league first —';
+            } else if (teams.length === 0) {
+                placeholder = '— No teams in this league —';
+            } else {
+                placeholder = '— Select team —';
+            }
+            fill(teamA, teams, placeholder);
+            fill(teamB, teams, placeholder);
+            // Enable only once a league is chosen; keeps `required` meaningful.
+            teamA.disabled = !leagueId;
+            teamB.disabled = !leagueId;
+        }
+
+        leagueSelect.addEventListener('change', refresh);
+        refresh();
+    })();
+</script>
 
 </body>
 </html>
