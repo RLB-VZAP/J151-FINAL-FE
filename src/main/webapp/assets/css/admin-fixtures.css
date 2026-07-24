@@ -210,10 +210,10 @@
 .ftbl-head,
 .ftbl-row {
     display: grid;
-    grid-template-columns: minmax(110px, 1fr) 130px minmax(0, 1fr) minmax(0, 1fr) 96px 108px 210px;
+    grid-template-columns: minmax(104px, 1fr) 118px minmax(0, 1fr) minmax(0, 1fr) 92px 104px 196px;
     align-items: center;
     gap: 12px;
-    min-width: 900px;
+    min-width: 820px;
     padding: 11px 16px;
 }
 
@@ -288,6 +288,13 @@
 
 .afx-update-select { flex: 1; min-width: 0; }
 
+/* Terminal states (processed / cancelled) have no valid next status. */
+.afx-update-none {
+    color: var(--silver-dim);
+    font-size: .78rem;
+    font-style: italic;
+}
+
 .afx-update-btn {
     flex-shrink: 0;
     height: 34px;
@@ -306,8 +313,12 @@
 .afx-update-btn:hover { background: rgba(201, 162, 39, .2); filter: none; }
 
 /* ---------- Narrow screens ----------------------------------------------------------- */
-@media (max-width: 1040px) {
+/* The two-column layout only leaves room for the full fixtures table on very wide
+   screens; below that, stack the create panel under the table so every column
+   (including "Update status") is visible without horizontal scrolling. */
+@media (max-width: 1500px) {
     .afx-grid { grid-template-columns: minmax(0, 1fr); }
+    #createFixtureSection { max-width: 520px; }
 }
 
 @media (max-width: 640px) {
