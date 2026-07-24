@@ -37,8 +37,11 @@ public class AdminReportServlet extends AbstractServlet {
         }
         String viewId = request.getParameter("view");
         String downloadId = request.getParameter("download");
-        if(viewId != null && downloadId != null) {
-            streamReport(viewId !=null ? viewId: downloadId,downloadId != null, response);
+        // The page links to either ?view=<id> or ?download=<id>, never both, so this
+        // triggers when either is present. Download wins if both somehow arrive; it is
+        // the only one that sets the attachment header.
+        if(viewId != null || downloadId != null) {
+            streamReport(downloadId != null ? downloadId : viewId, downloadId != null, response);
             return;
         }
         loadReports(request);
