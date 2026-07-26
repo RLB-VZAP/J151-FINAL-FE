@@ -94,6 +94,7 @@
     <a href="${pageContext.request.contextPath}/admin/scoring-rules" id="navAdminScoringRulesLink">Admin: Scoring Rules</a>
     <a href="${pageContext.request.contextPath}/admin/simulation" id="navAdminSimulationLink">Admin: Simulation</a>
     <a href="${pageContext.request.contextPath}/admin/fixtures" id="navAdminFixturesLink">Admin: Fixtures</a>
+    <a href="${pageContext.request.contextPath}/admin/pricing" id="navAdminPricingLink">Admin: Pricing</a>
     </c:if>
 
     <c:choose>
