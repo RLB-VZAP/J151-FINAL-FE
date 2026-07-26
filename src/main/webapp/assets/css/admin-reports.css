@@ -1,0 +1,269 @@
+/* ============================================================================
+   TryTons — Admin: System Reports (Green-Gold redesign)
+   Generate-report form beside a generated-reports table, then a full-width
+   system-activity log table. Loads on top of theme.css (palette tokens,
+   fonts, .brand-font, .btn-gold), sidebar.css (shared left nav, including the
+   admin-only Administration section) and catalog.css (main column, header).
+   ========================================================================== */
+
+.arep-page .catalog-main {
+    padding: 32px 40px 48px;
+}
+
+/* ---------- Feedback ---------------------------------------------------------------- */
+.arep-alert {
+    margin: 0 0 18px;
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--gold);
+    border-radius: 10px;
+    padding: .7rem .95rem;
+    color: var(--silver-bright);
+    font-size: .85rem;
+}
+
+.arep-alert-success { border-left-color: #5fae7a; }
+.arep-alert-error { border-left-color: #c0524a; }
+
+/* ---------- Section header ----------------------------------------------------------- */
+.arep-section-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+}
+
+.arep-section-title {
+    margin: 0;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--silver-bright);
+    white-space: nowrap;
+}
+
+.arep-rule-line { flex: 1; height: 1px; background: var(--line); }
+
+.arep-count {
+    color: var(--silver-dim);
+    font-size: .78rem;
+    white-space: nowrap;
+}
+
+.arep-empty {
+    margin: 0;
+    padding: 34px 20px;
+    border: 1px dashed var(--line);
+    border-radius: 14px;
+    text-align: center;
+    color: var(--silver-dim);
+    font-size: .88rem;
+}
+
+/* ---------- Layout ------------------------------------------------------------------ */
+.arep-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 22px;
+    align-items: start;
+}
+
+#systemLogs { margin-top: 30px; }
+
+/* ---------- Generate-report panel ---------------------------------------------------- */
+.arep-panel {
+    padding: 20px 22px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #091810;
+}
+
+.arep-panel-title {
+    margin: 0 0 16px;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--silver-bright);
+}
+
+.arep-field + .arep-field { margin-top: 16px; }
+
+.arep-label {
+    display: block;
+    margin-bottom: .45rem;
+    color: var(--silver-dim);
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.arep-input,
+.arep-select,
+.arep-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 .8rem;
+    background: #0c1c13;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    color: var(--silver-bright);
+    font-family: inherit;
+    font-size: .88rem;
+    transition: border-color .15s ease;
+}
+
+.arep-input,
+.arep-select { height: 42px; }
+
+.arep-textarea {
+    padding: .65rem .8rem;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 92px;
+}
+
+.arep-input:focus,
+.arep-select:focus,
+.arep-textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+
+.arep-input::placeholder,
+.arep-textarea::placeholder { color: #5c6e64; }
+
+.arep-select-wrap { position: relative; }
+
+.arep-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 2.2rem;
+    cursor: pointer;
+}
+
+.arep-select-caret {
+    position: absolute;
+    top: 50%;
+    right: .8rem;
+    transform: translateY(-50%);
+    color: var(--silver-dim);
+    pointer-events: none;
+}
+
+.arep-help {
+    margin: .5rem 0 0;
+    color: var(--silver-dim);
+    font-size: .76rem;
+}
+
+.arep-submit {
+    width: 100%;
+    margin-top: 20px;
+    padding: .8rem 1rem;
+}
+
+/* ---------- Type / action chip ------------------------------------------------------- */
+.arep-chip {
+    display: inline-block;
+    padding: .18rem .5rem;
+    border-radius: 6px;
+    background: rgba(201, 162, 39, .12);
+    color: var(--gold-bright);
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .03em;
+    white-space: nowrap;
+}
+
+/* ---------- Tables (shared look) ----------------------------------------------------- */
+.rtbl2,
+.ltbl {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #091810;
+    overflow: hidden;
+}
+
+.rtbl2-scroll,
+.ltbl-scroll { overflow-x: auto; }
+
+.rtbl2-head,
+.rtbl2-row {
+    display: grid;
+    grid-template-columns: minmax(140px, 1fr) minmax(0, 1.6fr) 140px;
+    align-items: center;
+    gap: 12px;
+    min-width: 480px;
+    padding: 11px 16px;
+}
+
+.ltbl-head,
+.ltbl-row {
+    display: grid;
+    grid-template-columns: 140px 150px 130px minmax(0, 1.8fr);
+    align-items: center;
+    gap: 12px;
+    min-width: 640px;
+    padding: 11px 16px;
+}
+
+.rtbl2-head,
+.ltbl-head {
+    color: var(--silver-dim);
+    font-size: .66rem;
+    font-weight: 600;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--line);
+    background: rgba(255, 255, 255, .015);
+}
+
+.rtbl2-row,
+.ltbl-row {
+    border-top: 1px solid rgba(44, 68, 55, .5);
+    font-size: .84rem;
+    color: var(--silver);
+}
+
+.rtbl2-row:first-of-type,
+.ltbl-row:first-of-type { border-top: none; }
+
+.rtbl2-title {
+    color: var(--silver-bright);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rtbl2-when,
+.ltbl-when {
+    color: var(--silver-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+.rtbl2-id,
+.ltbl-id {
+    color: var(--silver-dim);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: .8rem;
+}
+
+.ltbl-entity { color: var(--silver-bright); }
+
+.ltbl-desc {
+    color: var(--silver-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ---------- Narrow screens ----------------------------------------------------------- */
+@media (max-width: 1000px) {
+    .arep-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 640px) {
+    .arep-page .catalog-main { padding: 24px 16px 32px; }
+}

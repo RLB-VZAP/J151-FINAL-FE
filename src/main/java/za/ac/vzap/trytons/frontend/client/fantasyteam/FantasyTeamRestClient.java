@@ -15,6 +15,7 @@ import za.ac.vzap.trytons.frontend.client.shared.APIClient;
 public class FantasyTeamRestClient {
     private static final String FANTASY_TEAM_PATH = "/fantasy-team";
     private static final String OWN_TEAM_PATH = "/own";
+    private static final String MY_TEAM_PATH = "/mine";
     private static final String OPPONENT_TEAM_PATH = "/opponent";
     private static final Logger LOG = Logger.getLogger(FantasyTeamRestClient.class.getName());
 
@@ -24,6 +25,19 @@ public class FantasyTeamRestClient {
         Optional<FantasyTeamResponse> response = apiClient.post(FANTASY_TEAM_PATH,request,FantasyTeamResponse.class);
         if(response.isEmpty()){
             LOG.log(Level.WARNING, "Unable to create fantasy team.");
+        }
+        return response;
+    }
+
+    /**
+     * The signed-in user's own team, or empty when they have not created one.
+     * The backend answers 404 in that case, which is a normal state for a new
+     * account rather than a failure — so this is logged at FINE, not WARNING.
+     */
+    public Optional<FantasyTeamResponse> getMyTeam(){
+        Optional<FantasyTeamResponse> response = apiClient.get(FANTASY_TEAM_PATH + MY_TEAM_PATH, FantasyTeamResponse.class);
+        if(response.isEmpty()){
+            LOG.log(Level.FINE, "No fantasy team for the current user.");
         }
         return response;
     }

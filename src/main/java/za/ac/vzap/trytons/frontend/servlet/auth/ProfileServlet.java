@@ -12,6 +12,8 @@ import za.ac.vzap.trytons.frontend.client.auth.ProfileUpdateRequest;
 import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
 
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Optional;
 
 @WebServlet(name = "ProfileServlet", urlPatterns = {"/profile", "/profile/change-password"})
@@ -43,10 +45,26 @@ public class ProfileServlet extends AbstractServlet {
             request.setAttribute("error", "Unable to load your profile right now");
         } else {
             request.setAttribute("profile", profile.get());
+            addDateLabels(request, profile.get());
         }
 
         request.getRequestDispatcher(PROFILE_VIEW).forward(request, response);
     }
+
+    // registrationDate and lastLoginAt are LocalDateTime, and fmt:formatDate takes a
+    // java.util.Date, so the display strings are built here. Blank when never set —
+    // lastLoginAt in particular is null until the first login after this field existed.
+    private void addDateLabels(HttpServletRequest request, ProfileResponse profile) {
+        if (profile.getRegistrationDate() != null) {
+            request.setAttribute("registrationDateLabel", profile.getRegistrationDate().format(PROFILE_DATE));
+        }
+        if (profile.getLastLoginAt() != null) {
+            request.setAttribute("lastLoginLabel", profile.getLastLoginAt().format(PROFILE_DATE));
+        }
+    }
+
+    private static final DateTimeFormatter PROFILE_DATE =
+            DateTimeFormatter.ofPattern("d MMM yyyy, HH:mm", Locale.UK);
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -73,11 +91,16 @@ public class ProfileServlet extends AbstractServlet {
                 return;
             }
             request.setAttribute("error", "Unable to update your profile");
-            profileRestClient.getProfile().ifPresent(p -> request.setAttribute("profile", p));
+            profileRestClient.getProfile().ifPresent(p -> {
+                request.setAttribute("profile", p);
+                addDateLabels(request, p);
+            });
             request.getRequestDispatcher(PROFILE_VIEW).forward(request, response);
             return;
         }
 
+        refreshSessionIdentity(request, updated.get().getUsername(), updated.get().getEmail());
+        flashSuccess(request, "Profile updated");
         response.sendRedirect(request.getContextPath() + "/profile");
     }
 
@@ -91,6 +114,7 @@ public class ProfileServlet extends AbstractServlet {
 
         boolean success = profileRestClient.changePassword(changeRequest);
         if (success) {
+            flashSuccess(request, "Password changed");
             response.sendRedirect(request.getContextPath() + "/profile/change-password");
             return;
         }

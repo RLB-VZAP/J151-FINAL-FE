@@ -1,623 +1,437 @@
 /* ============================================================================
-   TryTons — Fantasy Rugby | Create Team screen (W2-T05B)
-   Vanilla CSS. Same approach as the auth screens (style.css): selectors
-   target the bare JSP markup, so the page stays as plain as login/register.
-   Shares the same palette, type, radii, spacing and motion tokens.
-   Also styles the shared top navigation (WEB-INF/jspf/nav.jspf).
+   TryTons — Create Team page (Green-Gold redesign)
+   Player pool on the left, sticky squad summary on the right. Loads on top of
+   theme.css (palette tokens, fonts, .brand-font, .btn-gold), sidebar.css (the
+   shared left nav) and catalog.css (main column, header, table shell, avatar).
    ========================================================================== */
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
-/* ---------- Design tokens (mirrors style.css) ------------------------------ */
-:root {
-  /* Palette */
-  --navy: #1f3864;
-  --navy-600: #1a2f54;
-  --navy-700: #142544;
-  --teal: #1d9e75;
-  --teal-600: #178a65;
-  --bg: #f0f2f5;
-  --surface: #ffffff;
-
-  /* Text */
-  --ink: #1f2a44;
-  --ink-muted: #64748b;
-  --ink-faint: #94a3b8;
-
-  /* Feedback */
-  --danger: #dc2626;
-  --danger-bg: #fef2f2;
-  --danger-border: #fca5a5;
-  --success: #15803d;
-  --success-bg: #f0fdf4;
-  --success-border: #86efac;
-
-  /* Lines & fields */
-  --border: #d8dee9;
-  --field-bg: #f8fafc;
-
-  /* Radii */
-  --radius-card: 12px;
-  --radius-field: 8px;
-
-  /* Spacing scale */
-  --sp-1: 4px;
-  --sp-2: 8px;
-  --sp-3: 12px;
-  --sp-4: 16px;
-  --sp-5: 20px;
-  --sp-6: 24px;
-  --sp-8: 32px;
-  --sp-10: 40px;
-
-  /* Elevation */
-  --shadow-card: 0 20px 45px -25px rgba(20, 37, 68, 0.35);
-  --shadow-btn: 0 12px 24px -12px rgba(31, 56, 100, 0.55);
-
-  /* Motion */
-  --ease: cubic-bezier(0.4, 0, 0.2, 1);
-
-  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-/* ---------- Reset (scoped, light-touch) ------------------------------------ */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html {
-  -webkit-text-size-adjust: 100%;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: var(--font);
-  color: var(--ink);
-  background: var(--bg);
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-/* ============================================================================
-   SHARED TOP NAVIGATION  (WEB-INF/jspf/nav.jspf)
-   ========================================================================== */
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: var(--navy);
-  box-shadow: 0 10px 24px -18px rgba(20, 37, 68, 0.9);
-}
-
-.site-nav {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 clamp(16px, 3vw, 32px);
-  height: 60px;
-  display: flex;
-  align-items: center;
-  gap: var(--sp-6);
-}
-
-.site-nav__brand {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-2);
-  text-decoration: none;
-  flex: none;
+.ct-page .catalog-backdrop {
+    background-image: linear-gradient(160deg, rgba(8, 18, 13, .96) 0%, rgba(8, 18, 13, .9) 45%, rgba(8, 18, 13, .97) 100%),
+                      url("../images/Stadium%20hero.jpg");
 }
 
-.site-nav__mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, var(--teal), var(--teal-600));
-  color: #fff;
+/* ---------- Two-column layout ---------------------------------------------------- */
+/* The search toolbar sits above this grid rather than inside the left column, so
+   both columns start on the same line and the summary lines up with the table.
+   The toolbar's own bottom margin provides the spacing, hence no margin-top. */
+.ct-layout {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    align-items: start;
 }
 
-.site-nav__name {
-  font-size: 1.05rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: #fff;
+@media (max-width: 1100px) {
+    .ct-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }
 
-.site-nav__name b {
-  color: #35d29c;
+/* ---------- Budget note beside the search box -------------------------------------- */
+/* Pushed to the far end of the toolbar, opposite the search field. */
+.ct-budget-note {
+    margin: 0 0 0 auto;
+    color: var(--silver-dim);
+    font-size: .85rem;
 }
 
-.site-nav__links {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-1);
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  flex: 1;
+.ct-budget-note strong {
+    color: var(--gold-bright);
+    font-weight: 600;
 }
 
-.site-nav__link {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 14px;
-  border-radius: var(--radius-field);
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.75);
-  text-decoration: none;
-  transition: color 0.15s var(--ease), background-color 0.15s var(--ease);
+/* ---------- Player pool ----------------------------------------------------------- */
+/* Select · Name · Club · Position · Value · Status */
+.ct-page .crow {
+    grid-template-columns: 34px minmax(0, 1.6fr) 1.1fr .9fr .8fr .9fr;
 }
 
-.site-nav__link:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.08);
+.ct-check {
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    padding: 0;
+    accent-color: var(--gold);
+    cursor: pointer;
 }
-
-.site-nav__link.is-active {
-  color: #fff;
-  background: rgba(29, 158, 117, 0.28);
-  box-shadow: inset 0 -2px 0 var(--teal);
-}
-
-.site-nav__user {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-}
-
-.site-nav__username {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
-  max-width: 160px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.site-nav__logout {
-  margin: 0;
-}
-
-.site-nav__logout button {
-  font: inherit;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
-  background: transparent;
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
-  border-radius: var(--radius-field);
-  padding: 6px 14px;
-  cursor: pointer;
-  transition: border-color 0.15s var(--ease), background-color 0.15s var(--ease);
-}
 
-.site-nav__logout button:hover {
-  border-color: rgba(255, 255, 255, 0.65);
-  background: rgba(255, 255, 255, 0.08);
+.ct-check:disabled {
+    cursor: not-allowed;
+    opacity: .4;
 }
 
-/* ============================================================================
-   PAGE SHELL  ( <main> )
-   ========================================================================== */
-main {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: clamp(20px, 4vw, 40px) clamp(16px, 3vw, 32px) var(--sp-10);
+/* A row whose player is picked, so the choice stays obvious while scrolling. */
+.cbody .crow.is-picked {
+    background: rgba(201, 162, 39, .08);
 }
 
-main h1 {
-  margin: 0 0 var(--sp-2);
-  font-size: clamp(1.6rem, 3vw, 2.1rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: var(--navy);
+.ct-value {
+    color: var(--silver-bright);
+    font-size: .92rem;
+    font-weight: 600;
 }
 
-main h1 + p {
-  margin: 0 0 var(--sp-6);
-  color: var(--ink-muted);
-  font-size: 0.975rem;
-  max-width: 640px;
-}
-
-/* Plain paragraphs directly in <main> (login gate, trailing browse link) —
-   mirrors the switch-link styling on the auth screens. */
-main > p:not([class]) {
-  margin: var(--sp-6) 0 0;
-  font-size: 0.9rem;
-  color: var(--ink-muted);
-}
-
-main > p:not([class]) a,
-main h1 + p a {
-  color: var(--teal);
-  font-weight: 600;
-  text-decoration: none;
+/* ---------- Squad summary ---------------------------------------------------------- */
+.ct-summary {
+    position: sticky;
+    top: 24px;
+    padding: 20px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #091810;
 }
 
-main > p:not([class]) a:hover,
-main h1 + p a:hover {
-  text-decoration: underline;
+.ct-summary h2 {
+    margin: 0 0 .25rem;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--silver-bright);
 }
-
-/* ---------- Feedback banners (same contract as auth screens) --------------- */
-.error-message {
-  margin: 0 0 var(--sp-5);
-  padding: var(--sp-3) var(--sp-4);
-  border: 1px solid var(--danger-border);
-  border-left-width: 4px;
-  border-radius: var(--radius-field);
-  background: var(--danger-bg);
-  color: var(--danger);
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.error-message ul {
-  margin: 0;
-  padding-left: var(--sp-5);
-}
-
-.error-message li + li {
-  margin-top: var(--sp-1);
-}
 
-.success-message {
-  margin: 0 0 var(--sp-5);
-  padding: var(--sp-3) var(--sp-4);
-  border: 1px solid var(--success-border);
-  border-left-width: 4px;
-  border-radius: var(--radius-field);
-  background: var(--success-bg);
-  color: var(--success);
-  font-size: 0.875rem;
-  font-weight: 500;
+/* The squad rule, sitting with the numbers it constrains rather than in the
+   page header. */
+.ct-summary-sub {
+    margin: 0 0 16px;
+    color: var(--silver-dim);
+    font-size: .78rem;
 }
 
-/* ============================================================================
-   FORM LAYOUT — two cards: player pool + squad summary
-   ========================================================================== */
-main form {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
-  gap: var(--sp-6);
-  align-items: start;
+.ct-stat {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 0;
+    border-top: 1px solid rgba(44, 68, 55, .55);
+    font-size: .85rem;
 }
 
-main form section {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
-  padding: clamp(20px, 3vw, 28px);
+.ct-stat:first-of-type {
+    border-top: none;
 }
 
-main form h2 {
-  margin: 0 0 var(--sp-4);
-  font-size: 1.15rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--navy);
+.ct-stat-label {
+    color: var(--silver-dim);
 }
 
-/* Kill layout <br> tags — spacing comes from CSS (same trick as style.css). */
-main form br {
-  display: none;
+.ct-stat-value {
+    color: var(--silver-bright);
+    font-weight: 600;
 }
 
-/* ============================================================================
-   PLAYER POOL  ( first <section> )
-   ========================================================================== */
-main form input[type="search"] {
-  width: 100%;
-  height: 44px;
-  margin-bottom: var(--sp-4);
-  padding: 0 var(--sp-4);
-  font: inherit;
-  font-size: 0.9rem;
-  color: var(--ink);
-  background: var(--field-bg);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-field);
-  transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+.ct-stat-value.is-gold {
+    color: var(--gold-bright);
 }
 
-main form input[type="search"]:focus {
-  outline: none;
-  background-color: var(--surface);
-  border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.15);
+/* Set by create-team.js when the picked squad costs more than the budget. */
+.ct-stat-value.over {
+    color: #c0524a;
 }
 
-/* Table (bare markup; the section scrolls sideways on small screens) */
-main form section:first-of-type {
-  overflow-x: auto;
+/* ---------- Selected list ---------------------------------------------------------- */
+.ct-selected {
+    list-style: none;
+    margin: 14px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-height: 260px;
+    overflow-y: auto;
 }
 
-main form table {
-  width: 100%;
-  min-width: 560px;
-  border-collapse: collapse;
-  font-size: 0.9rem;
+.ct-selected li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, .03);
+    color: var(--silver);
+    font-size: .82rem;
 }
 
-main form th {
-  background: var(--field-bg);
-  color: var(--ink-muted);
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  text-align: left;
-  padding: var(--sp-3) var(--sp-3);
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
+/* The remove button create-team.js appends to each chip. */
+.ct-selected li button {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: none;
+    border-radius: 5px;
+    background: none;
+    color: var(--silver-dim);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
 }
 
-main form td {
-  padding: var(--sp-3) var(--sp-3);
-  border-bottom: 1px solid var(--border);
-  vertical-align: middle;
+.ct-selected li button:hover {
+    background: rgba(192, 82, 74, .15);
+    color: #c0524a;
+    filter: none;
 }
 
-main form tbody tr {
-  transition: background-color 0.15s var(--ease);
+.ct-empty-pick {
+    margin: 14px 0 0;
+    color: var(--silver-dim);
+    font-size: .82rem;
 }
 
-main form tbody tr:hover {
-  background: rgba(29, 158, 117, 0.05);
+/* ---------- Team name + submit ------------------------------------------------------ */
+.ct-field {
+    margin-top: 18px;
 }
 
-/* Selected & unavailable rows, driven purely by the checkbox state */
-main form tbody tr:has(input:checked) {
-  background: rgba(29, 158, 117, 0.1);
+.ct-label {
+    display: block;
+    margin-bottom: .45rem;
+    color: var(--silver-dim);
+    font-size: .7rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
 }
 
-main form tbody tr:has(input:disabled) {
-  opacity: 0.55;
+.ct-input {
+    width: 100%;
+    height: 44px;
+    box-sizing: border-box;
+    padding: 0 .8rem;
+    background: #08120d;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    color: var(--silver-bright);
+    font-family: inherit;
+    font-size: .88rem;
 }
 
-/* Player name column stands out; value column reads as money */
-main form tbody td:nth-child(2) {
-  font-weight: 600;
+.ct-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: none;
 }
 
-main form tbody td:nth-child(5) {
-  font-weight: 600;
-  color: var(--navy);
-  white-space: nowrap;
+.ct-submit {
+    width: 100%;
+    margin-top: 14px;
+    padding: .8rem 1rem;
 }
 
-main form input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--teal);
-  cursor: pointer;
+.ct-footnote {
+    margin: 12px 0 0;
+    color: var(--silver-dim);
+    font-size: .75rem;
+    line-height: 1.5;
 }
 
-main form input[type="checkbox"]:disabled {
-  cursor: not-allowed;
+/* ---------- Feedback ---------------------------------------------------------------- */
+.ct-alert {
+    margin: 18px 0 0;
+    border: 1px solid var(--line);
+    border-left: 2px solid var(--gold);
+    padding: .65rem .9rem;
+    color: var(--silver-bright);
+    font-size: .85rem;
 }
 
-/* ============================================================================
-   SQUAD SUMMARY  ( last <section> )
-   ========================================================================== */
-main form section:last-of-type {
-  position: sticky;
-  top: calc(60px + var(--sp-5)); /* below the sticky site header */
-}
+.ct-alert-error { border-left-color: #c0524a; }
+.ct-alert-success { border-left-color: #5fae7a; }
 
-main form section:last-of-type p {
-  margin: 0 0 var(--sp-2);
-  font-size: 0.9rem;
-  color: var(--ink-muted);
-  display: flex;
-  justify-content: space-between;
-  gap: var(--sp-3);
+.ct-alert ul {
+    margin: .35rem 0 0;
+    padding-left: 1.1rem;
 }
 
-main form section:last-of-type p span {
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink);
+/* ---------- Already-has-a-team notice ----------------------------------------------- */
+.ct-notice {
+    margin-top: 8px;
+    padding: 44px 26px;
+    border: 1px dashed var(--line);
+    border-radius: 16px;
+    text-align: center;
 }
 
-#budgetRemaining {
-  color: var(--teal-600);
+.ct-notice-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 16px;
+    border-radius: 14px;
+    background: #0c1c13;
+    color: var(--gold);
 }
 
-#budgetRemaining.over {
-  color: var(--danger);
+.ct-notice h2 {
+    margin: 0 0 .5rem;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--silver-bright);
 }
 
-#selectedCount {
-  color: var(--navy);
+.ct-notice p {
+    margin: 0 auto 20px;
+    max-width: 420px;
+    color: var(--silver-dim);
+    font-size: .9rem;
+    line-height: 1.55;
 }
 
-/* The over-budget warning keeps the .error-message look; just space it. */
-main form section:last-of-type p.error-message {
-  margin: var(--sp-2) 0 var(--sp-3);
-  display: block;
+.ct-notice-cta {
+    display: inline-block;
+    width: auto;
+    text-decoration: none;
+    border-bottom: none;
 }
 
-/* Selected player chips (filled in by create-team.js) */
-#selectedList {
-  list-style: none;
-  margin: 0 0 var(--sp-4);
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-2);
-  max-height: 200px;
-  overflow-y: auto;
+/* ---------- Squad requirements helper ----------------------------------------------- */
+.ct-reqs-panel {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(44, 68, 55, .55);
 }
 
-#selectedList li {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-2);
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(31, 56, 100, 0.07);
-  border: 1px solid var(--border);
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--navy);
+.ct-reqs-title {
+    margin: 0 0 .5rem;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: .82rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    color: var(--silver-bright);
 }
 
-#selectedList li button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--ink-faint);
-  font-size: 0.9rem;
-  line-height: 1;
-  cursor: pointer;
-  transition: color 0.15s var(--ease), background-color 0.15s var(--ease);
+/* One-line status set by create-team.js: what's still needed, or the all-clear. */
+.ct-reqs-summary {
+    margin: 0 0 12px;
+    color: var(--silver-dim);
+    font-size: .78rem;
+    line-height: 1.45;
 }
 
-#selectedList li button:hover {
-  color: var(--danger);
-  background: var(--danger-bg);
+.ct-reqs-summary:empty {
+    display: none;
 }
 
-/* Team name field (bare <div> with <label> + <input>, like the auth forms) */
-main form section:last-of-type div {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
-  margin-bottom: var(--sp-4);
+.ct-reqs-summary.is-complete {
+    color: #8fd0a5;
+    font-weight: 600;
 }
 
-main form label {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--ink);
-  letter-spacing: 0.01em;
+.ct-reqs-group {
+    margin: 10px 0 4px;
+    color: var(--silver-dim);
+    font-size: .62rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
 }
 
-main form input[type="text"] {
-  width: 100%;
-  height: 46px;
-  padding: 0 var(--sp-4);
-  font: inherit;
-  font-size: 0.95rem;
-  color: var(--ink);
-  background: var(--field-bg);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-field);
-  transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease),
-    background-color 0.15s var(--ease);
+.ct-reqs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
-main form input[type="text"]:focus {
-  outline: none;
-  background-color: var(--surface);
-  border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.15);
+.ct-req {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 4px 2px;
+    font-size: .82rem;
 }
 
-/* Primary CTA — same treatment as the auth submit buttons */
-main form button[type="submit"] {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-2);
-  width: 100%;
-  height: 50px;
-  padding: 0 var(--sp-5);
-  font: inherit;
-  font-size: 0.975rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: #fff;
-  background: var(--navy);
-  border: 0;
-  border-radius: var(--radius-field);
-  cursor: pointer;
-  box-shadow: var(--shadow-btn);
-  transition: background-color 0.15s var(--ease), transform 0.08s var(--ease),
-    box-shadow 0.15s var(--ease);
+.ct-req-dot {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--silver-dim);
+    transition: background .15s ease;
 }
 
-main form button[type="submit"]:hover {
-  background: var(--navy-600);
-  box-shadow: 0 16px 30px -12px rgba(31, 56, 100, 0.7);
+.ct-req-name {
+    flex: 1;
+    min-width: 0;
+    color: var(--silver);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-main form button[type="submit"]:active {
-  background: var(--navy-700);
-  transform: scale(0.985);
+.ct-req-tally {
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
 }
 
-main form button[type="submit"]:focus-visible {
-  outline: 3px solid rgba(29, 158, 117, 0.5);
-  outline-offset: 2px;
+.ct-req-count {
+    font-weight: 600;
+    color: var(--silver-bright);
 }
 
-/* Disclaimer under the button */
-main form section:last-of-type button[type="submit"] ~ p {
-  margin: var(--sp-3) 0 0;
-  font-size: 0.78rem;
-  color: var(--ink-faint);
-  display: block;
+.ct-req-range {
+    color: var(--silver-dim);
 }
 
-/* ============================================================================
-   RESPONSIVE
-   ========================================================================== */
-@media (max-width: 960px) {
-  main form {
-    grid-template-columns: 1fr;
-  }
+/* States, driven by create-team.js: below minimum, satisfied, or over maximum. */
+.ct-req.is-under .ct-req-dot { background: #e0a54a; }
+.ct-req.is-ok   .ct-req-dot { background: #5fae7a; }
+.ct-req.is-ok   .ct-req-name { color: var(--silver-bright); }
+.ct-req.is-over .ct-req-dot { background: #c0524a; }
+.ct-req.is-over .ct-req-count { color: #e08279; }
 
-  main form section:last-of-type {
-    position: static;
-    order: -1; /* budget preview above the pool on small screens */
-  }
+/* ---------- Illegal-pick flash toast ------------------------------------------------ */
+.ct-flash {
+    position: fixed;
+    left: 50%;
+    bottom: 26px;
+    z-index: 60;
+    max-width: min(440px, calc(100vw - 32px));
+    transform: translateX(-50%) translateY(12px);
+    padding: .8rem 1.05rem;
+    border: 1px solid var(--line);
+    border-left: 3px solid #c0524a;
+    border-radius: 11px;
+    background: #0c1c13;
+    color: var(--silver-bright);
+    font-size: .85rem;
+    line-height: 1.4;
+    box-shadow: 0 16px 40px -16px rgba(0, 0, 0, .85);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .22s ease, transform .22s ease;
 }
-
-@media (max-width: 640px) {
-  .site-nav {
-    gap: var(--sp-3);
-    flex-wrap: wrap;
-    height: auto;
-    padding-top: var(--sp-2);
-    padding-bottom: var(--sp-2);
-  }
-
-  .site-nav__links {
-    order: 3;
-    flex-basis: 100%;
-    overflow-x: auto;
-  }
 
-  .site-nav__user {
-    margin-left: auto;
-  }
+.ct-flash.is-visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
 }
 
-/* Reduced-motion: honour user preference */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-  }
+    .ct-flash { transition: opacity .22s ease; transform: translateX(-50%); }
+    .ct-flash.is-visible { transform: translateX(-50%); }
+}
+
+/* ---------- Narrow screens ----------------------------------------------------------- */
+@media (max-width: 900px) {
+    .ct-summary {
+        position: static;
+    }
+
+    .ct-page .crow {
+        grid-template-columns: 34px minmax(0, 1.6fr) .9fr;
+    }
+
+    /* Club, value and status go; the pick and the name are what matter. */
+    .ct-page .crow > :nth-child(3),
+    .ct-page .crow > :nth-child(5) {
+        display: none;
+    }
 }

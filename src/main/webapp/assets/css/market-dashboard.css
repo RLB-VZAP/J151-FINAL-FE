@@ -1,0 +1,143 @@
+/* ============================================================================
+   TryTons — Fantasy Rugby | Market Demand Dashboard
+   Shares tokens with the other screens. Targets market-dashboard.jsp.
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+    --navy: #1f3864;
+    --navy-700: #142544;
+    --teal: #1d9e75;
+    --teal-600: #178a65;
+    --bg: #f0f2f5;
+    --surface: #ffffff;
+    --ink: #1f2a44;
+    --ink-muted: #64748b;
+    --danger: #dc2626;
+    --danger-bg: #fef2f2;
+    --danger-border: #fca5a5;
+    --pos: #15803d;
+    --neg: #dc2626;
+    --border: #d8dee9;
+    --field-bg: #f8fafc;
+    --radius-card: 12px;
+    --sp-2: 8px;
+    --sp-3: 12px;
+    --sp-4: 16px;
+    --sp-5: 20px;
+    --sp-6: 24px;
+    --sp-8: 32px;
+}
+
+body.market-dashboard {
+    margin: 0;
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+}
+
+#market {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-5);
+}
+
+#market h1 {
+    color: var(--navy-700);
+    margin-bottom: var(--sp-2);
+}
+
+.intro {
+    color: var(--ink-muted);
+    max-width: 72ch;
+    margin: 0 0 var(--sp-6);
+}
+
+.error-message {
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-border);
+    color: var(--danger);
+    padding: var(--sp-3) var(--sp-4);
+    border-radius: 8px;
+    margin-bottom: var(--sp-4);
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-5);
+}
+
+@media (max-width: 900px) {
+    .cards { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+    .cards { grid-template-columns: 1fr; }
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--sp-4) var(--sp-5) var(--sp-5);
+}
+
+.card h2 {
+    color: var(--navy-700);
+    font-size: 1.05rem;
+    margin: 0 0 2px;
+}
+
+.card-sub {
+    color: var(--ink-muted);
+    font-size: 0.8rem;
+    margin: 0 0 var(--sp-3);
+}
+
+.card table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.card th,
+.card td {
+    text-align: left;
+    padding: 6px var(--sp-2);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+}
+
+.card th {
+    color: var(--ink-muted);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.card td:not(:first-child),
+.card th:not(:first-child) {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.card a {
+    color: var(--navy);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.card a:hover {
+    text-decoration: underline;
+}
+
+.card .pos { color: var(--pos); font-weight: 700; }
+.card .neg { color: var(--neg); font-weight: 700; }
+
+.empty-state {
+    color: var(--ink-muted);
+    text-align: center;
+    padding: var(--sp-4);
+    font-size: 0.9rem;
+}

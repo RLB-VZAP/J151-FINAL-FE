@@ -20,6 +20,8 @@ import za.ac.vzap.trytons.frontend.client.transfer.TransferRequest;
 import za.ac.vzap.trytons.frontend.client.transfer.TransferRequestValidator;
 import za.ac.vzap.trytons.frontend.client.transfer.TransferResponse;
 import za.ac.vzap.trytons.frontend.client.transfer.TransferRestClient;
+import za.ac.vzap.trytons.frontend.client.round.RoundResponse;
+import za.ac.vzap.trytons.frontend.client.round.RoundRestClient;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +49,12 @@ public class TransferServlet extends AbstractServlet {
     @Inject
     private FantasyTeamRestClient fantasyTeamRestClient;
 
+    @Inject
+    private RoundRestClient roundRestClient;
+
+    /** Mirrors TransferServiceImpl.FREE_TRANSFERS_PER_ROUND. */
+    private static final int FREE_TRANSFERS_PER_ROUND = 1;
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if(!requireAuthenticated(request, response)) return;
@@ -62,6 +70,7 @@ public class TransferServlet extends AbstractServlet {
 
                     if (history.isPresent()) {
                         request.setAttribute("history", history.get());
+                        decorateHistory(request, history.get());
                     } else {
                         request.setAttribute("error", "Unable to load transfer history");
                         request.setAttribute("history", List.of());
@@ -104,6 +113,7 @@ public class TransferServlet extends AbstractServlet {
                 Optional<TransferResponse> transferResponse = transferRestClient.executeTransfer(transferRequest);
 
                 if (transferResponse.isPresent()) {
+                    flashSuccess(request, "Transfer completed");
                     String teamId = getTeamId(request);
                     String roundId = getRoundId(request);
                     String redirectUrl = request.getContextPath() + "/transfers?transferred=1"
@@ -123,6 +133,43 @@ public class TransferServlet extends AbstractServlet {
         }
     }
 
+    /**
+     * The summary stats and date labels the history page needs beyond the raw list.
+     * The net value change and penalty/confirmed totals are sums, which JSTL cannot do;
+     * transferDate/confirmationDate are LocalDateTime, which fmt:formatDate cannot take.
+     */
+    private void decorateHistory(HttpServletRequest request, List<TransferResponse> history) {
+        java.math.BigDecimal netValue = java.math.BigDecimal.ZERO;
+        int penaltyTotal = 0;
+        int confirmedCount = 0;
+        Map<String, String> dateLabels = new HashMap<>();
+
+        for (TransferResponse transfer : history) {
+            if (transfer == null) continue;
+            if (transfer.getValueDifference() != null) {
+                netValue = netValue.add(transfer.getValueDifference());
+            }
+            penaltyTotal += transfer.getPenaltyPoints();
+            if ("CONFIRMED".equalsIgnoreCase(transfer.getStatus())) {
+                confirmedCount++;
+            }
+            // transferDate, else confirmationDate; the page shows "Not recorded" when neither.
+            java.time.LocalDateTime when = transfer.getTransferDate() != null
+                    ? transfer.getTransferDate() : transfer.getConfirmationDate();
+            if (transfer.getTransferId() != null && when != null) {
+                dateLabels.put(transfer.getTransferId().toString(), when.format(HISTORY_DATE));
+            }
+        }
+
+        request.setAttribute("netValue", netValue);
+        request.setAttribute("penaltyTotal", penaltyTotal);
+        request.setAttribute("confirmedCount", confirmedCount);
+        request.setAttribute("historyDateLabels", dateLabels);
+    }
+
+    private static final java.time.format.DateTimeFormatter HISTORY_DATE =
+            java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy · HH:mm", java.util.Locale.UK);
+
     private void loadTransferPage(HttpServletRequest request) {
         String roundId = getRoundId(request);
 
@@ -139,6 +186,7 @@ public class TransferServlet extends AbstractServlet {
 
         request.setAttribute("clubNamesById", buildClubNameLookup());
         request.setAttribute("positionNamesById", buildPositionNameLookup());
+        request.setAttribute("positionCategoryByName", buildPositionCategoryByName());
 
         if (roundId != null && !roundId.isBlank()) {
             Optional<LockStatusResponse> lockStatus = transferRestClient.getLockStatus(roundId);
@@ -165,6 +213,8 @@ public class TransferServlet extends AbstractServlet {
 
         request.setAttribute("teamId", teamId);
         request.setAttribute("roundId", roundId);
+        request.setAttribute("freeTransfersLeft", freeTransfersLeft(teamId, roundId));
+        currentRound(request);
 
         loadSquad(request, teamId);
     }
@@ -193,6 +243,18 @@ public class TransferServlet extends AbstractServlet {
     private Map<UUID, String> buildClubNameLookup() {
         Map<UUID, String> lookup = new HashMap<>();
         clubRestClient.listClubs().ifPresent(clubs -> clubs.forEach(club -> lookup.put(club.getClubId(), club.getClubName())));
+        return lookup;
+    }
+
+    /**
+     * Position category keyed by NAME, not id: the squad rows come back as
+     * FantasyTeamPlayerSelectionResponse, which carries positionName only. Drives the
+     * forward/back tint on the position pills.
+     */
+    private Map<String, String> buildPositionCategoryByName() {
+        Map<String, String> lookup = new HashMap<>();
+        positionRestClient.getAllPositions().ifPresent(positions -> positions.forEach(
+                position -> lookup.put(position.getPositionName(), position.getPositionCategory())));
         return lookup;
     }
 
@@ -227,7 +289,15 @@ public class TransferServlet extends AbstractServlet {
         }
 
         Object sessionTeamId = session.getAttribute("teamId");
-        return sessionTeamId == null ? null : sessionTeamId.toString();
+        if (sessionTeamId != null) {
+            return sessionTeamId.toString();
+        }
+
+        // Nothing writes "teamId" to the session either, so a visit to /transfers without
+        // ?teamId= used to show a permanently empty squad. The team is the caller's own.
+        return fantasyTeamRestClient.getMyTeam()
+                .map(team -> team.getTeamId() == null ? null : team.getTeamId().toString())
+                .orElse(null);
     }
 
     private String getRoundId(HttpServletRequest request) {
@@ -243,7 +313,56 @@ public class TransferServlet extends AbstractServlet {
         }
 
         Object sessionRoundId = session.getAttribute("roundId");
-        return sessionRoundId == null ? null : sessionRoundId.toString();
+        if (sessionRoundId != null) {
+            return sessionRoundId.toString();
+        }
+
+        // Nothing writes "roundId" to the session, so without this the page never had a
+        // round: lock status, the deadline and the free-transfer count were all skipped.
+        return currentRound(request).map(RoundResponse::getRoundId).orElse(null);
+    }
+
+    /** The open round, fetched once per request and cached on it. */
+    private Optional<RoundResponse> currentRound(HttpServletRequest request) {
+        Object cached = request.getAttribute("round");
+        if (cached instanceof RoundResponse round) {
+            return Optional.of(round);
+        }
+        Optional<RoundResponse> round = roundRestClient.getCurrentOpenRound();
+        round.ifPresent(value -> {
+            request.setAttribute("round", value);
+            // lockDeadline is a LocalDateTime and fmt:formatDate takes java.util.Date,
+            // so the display string is built here rather than in the JSP.
+            if (value.getLockDeadline() != null) {
+                request.setAttribute("lockDeadlineLabel",
+                        value.getLockDeadline().format(DEADLINE_FORMAT));
+            }
+        });
+        return round;
+    }
+
+    private static final java.time.format.DateTimeFormatter DEADLINE_FORMAT =
+            java.time.format.DateTimeFormatter.ofPattern("d MMM, HH:mm", java.util.Locale.UK);
+
+    /**
+     * Free transfers left this round.
+     *
+     * The backend allows FREE_TRANSFERS_PER_ROUND (1) before a
+     * PENALTY_POINTS_PER_EXTRA_TRANSFER (-4) penalty applies, and decides that from
+     * countConfirmedTransfers(teamId, roundId). Nothing exposes that count, so it is
+     * recomputed here from the team's transfer history for the same round — the page
+     * needs it to know whether to ask for penalty confirmation.
+     */
+    private int freeTransfersLeft(String teamId, String roundId) {
+        if (teamId == null || teamId.isBlank() || roundId == null || roundId.isBlank()) {
+            return FREE_TRANSFERS_PER_ROUND;
+        }
+        long used = transferRestClient.getTransferHistory(teamId).orElse(List.of()).stream()
+                .filter(transfer -> transfer.getRoundId() != null
+                        && roundId.equals(transfer.getRoundId().toString())
+                        && !"REVERSED".equalsIgnoreCase(String.valueOf(transfer.getStatus())))
+                .count();
+        return (int) Math.max(0, FREE_TRANSFERS_PER_ROUND - used);
     }
 
     private boolean parseCheckbox(String value) {
