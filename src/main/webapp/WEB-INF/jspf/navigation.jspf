@@ -80,6 +80,7 @@
     <a href="${pageContext.request.contextPath}/players?submit=players" id="navPlayersLink">Players</a>
     <a href="${pageContext.request.contextPath}/clubs?submit=clubs" id="navClubsLink">Clubs</a>
     <a href="${pageContext.request.contextPath}/leagues" id="navLeaguesLink">Leagues</a>
+    <a href="${pageContext.request.contextPath}/market-dashboard" id="navMarketDashboardLink">Market</a>
     <a href="${pageContext.request.contextPath}/create-team" id="navCreateTeamLink">Create Team</a>
     <a href="${pageContext.request.contextPath}/transfers" id="navTransfersLink">Transfers</a>
     <a href="${pageContext.request.contextPath}/fixtures?submit=fixtures" id="navFixturesLink">Fixtures</a>
