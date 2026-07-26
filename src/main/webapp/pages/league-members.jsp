@@ -185,7 +185,7 @@
                         <section class="panel lm-table">
                             <div class="lm-row lm-thead">
                                 <span aria-hidden="true"></span>
-                                <span>Manager</span>
+                                <span>Member</span>
                                 <span>Team</span>
                                 <span>Joined</span>
                                 <span>Status</span>
