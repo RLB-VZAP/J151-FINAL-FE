@@ -1,0 +1,8 @@
+<%--
+    Hidden CSRF token field, included inside every <form method="post"> in the
+    app. The session-scoped token itself is minted/validated by CsrfFilter;
+    this fragment only renders it. Include immediately after the opening
+    <form> tag: <form ...>
+        <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
+--%>
+<input type="hidden" name="csrfToken" value="${sessionScope['csrf.token']}" />

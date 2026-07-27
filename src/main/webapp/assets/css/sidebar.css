@@ -17,6 +17,12 @@
     border-bottom: none;
 }
 
+/* Pinned to the viewport so the nav — and the Log out control at its foot —
+   stay reachable on long pages instead of scrolling away with the content.
+   `align-self` stops the flex row stretching the sidebar to the full page
+   height, which is what `position: sticky` needs to have anything to stick
+   against. `.sidebar-nav` already scrolls internally via `overflow-y: auto`,
+   so a nav taller than the viewport stays fully reachable. */
 .app-sidebar {
     width: 236px;
     flex-shrink: 0;
@@ -25,6 +31,14 @@
     padding: 20px 14px 16px;
     background: linear-gradient(180deg, #091810 0%, #091810 62%, rgba(201, 162, 39, .22) 100%);
     border-right: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100vh;
+    /* Without this the 36px of vertical padding is added to the 100vh, making
+       the sidebar taller than the viewport so it drifts upward and clips the
+       Log out control at its foot. */
+    box-sizing: border-box;
 }
 
 .sidebar-brand {
@@ -204,6 +218,11 @@
         box-sizing: border-box;
         border-right: none;
         border-bottom: 1px solid var(--line);
+        /* Undo the desktop viewport pin: stacked above the content here, a
+           full-height sticky bar would cover the whole screen. */
+        position: static;
+        height: auto;
+        align-self: auto;
     }
 
     .sidebar-nav {

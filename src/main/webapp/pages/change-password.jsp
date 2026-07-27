@@ -38,6 +38,7 @@
             <p class="cp-helper">Enter your current password, then choose a new one.</p>
 
             <form class="cp-form" method="post" action="${pageContext.request.contextPath}/profile/change-password" id="changePasswordForm">
+                <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                 <label class="field-label" for="currentPassword">Current password</label>
                 <div class="field-row">
                     <span class="field-icon" aria-hidden="true">

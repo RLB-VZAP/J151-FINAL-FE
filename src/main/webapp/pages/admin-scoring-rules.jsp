@@ -128,6 +128,7 @@
                 </h2>
 
                 <form method="post" action="${pageContext.request.contextPath}/admin/scoring-rules" id="scoringRuleForm">
+                    <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                     <c:if test="${not empty editingRule}">
                         <input type="hidden" name="ruleId" value="${editingRule.ruleId}">
                     </c:if>

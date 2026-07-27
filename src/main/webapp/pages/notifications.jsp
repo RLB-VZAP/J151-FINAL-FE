@@ -58,6 +58,7 @@
             </form>
 
             <form action="${pageContext.request.contextPath}/notifications" method="post">
+                <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                 <input type="hidden" name="action" value="markAllAsRead">
                 <button type="submit" class="nt-markall" ${unreadCount > 0 ? '' : 'disabled'}>Mark all as read</button>
             </form>
@@ -140,6 +141,7 @@
                                         <span class="n-time">${fn:escapeXml(relativeTimes[note.notificationId])}</span>
                                         <c:if test="${not note.read}">
                                             <form class="n-mark-form" action="${pageContext.request.contextPath}/notifications" method="post">
+                                                <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                                                 <input type="hidden" name="action" value="markAsRead">
                                                 <input type="hidden" name="notificationId" value="${note.notificationId}">
                                                 <button type="submit" class="n-mark">Mark as read</button>

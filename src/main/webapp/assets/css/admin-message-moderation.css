@@ -1,111 +1,79 @@
 /* ============================================================================
    TryTons — Fantasy Rugby | Admin: Message Moderation
-   Shares tokens with the other admin screens. Targets admin-message-moderation.jsp.
+   Loads on top of bootstrap.min.css and theme.css, consuming the Green-Gold
+   tokens rather than a separate palette. Targets only admin-message-moderation.jsp.
    ========================================================================== */
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
-:root {
-    --navy: #1f3864;
-    --navy-700: #142544;
-    --teal: #1d9e75;
-    --teal-600: #178a65;
-    --bg: #f0f2f5;
-    --surface: #ffffff;
-    --ink: #1f2a44;
-    --ink-muted: #64748b;
-    --danger: #dc2626;
-    --danger-bg: #fef2f2;
-    --danger-border: #fca5a5;
-    --success: #15803d;
-    --amber-bg: #fffbeb;
-    --amber-border: #fcd34d;
-    --amber-ink: #92400e;
-    --border: #d8dee9;
-    --field-bg: #f8fafc;
-    --radius-card: 12px;
-    --radius-field: 8px;
-    --sp-2: 8px;
-    --sp-3: 12px;
-    --sp-4: 16px;
-    --sp-5: 20px;
-    --sp-6: 24px;
-    --sp-8: 32px;
-}
-
 body.admin-message-moderation {
+    /* Sidebar.css requires host pages to own their own body layout so the
+       sidebar can sit beside the main column. */
+    display: flex;
+    min-height: 100vh;
     margin: 0;
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
-    color: var(--ink);
-    background: var(--bg);
+    /* Surfaces are lifted off the near-black page ground rather than being a
+       different hue, matching the pattern set by market-dashboard.css. */
+    --amm-surface: #12211a;
+    --amm-surface-hover: #1b3026;
+    --amm-sp-2: 8px;
+    --amm-sp-3: 12px;
+    --amm-sp-4: 16px;
 }
 
+/* Bootstrap's `.container` fights the fixed-width sidebar's flex sizing, so
+   the main column owns its own max-width and padding instead. */
 #messageModeration {
+    flex: 1;
+    /* Without this a flex child with wide content refuses to shrink and
+       pushes the sidebar off-screen. */
+    min-width: 0;
     max-width: 1080px;
     margin: 0 auto;
-    padding: var(--sp-8) var(--sp-5);
-}
-
-#messageModeration h1 {
-    color: var(--navy-700);
-    margin-bottom: var(--sp-6);
+    padding: 32px 40px 48px;
 }
 
 #messageModeration h2 {
-    color: var(--navy-700);
     font-size: 1.1rem;
-    margin: 0 0 var(--sp-4);
+    margin: 0 0 var(--amm-sp-4);
 }
 
+/* Bootstrap's stock alert-danger palette is light-mode; recolour it to stay
+   legible and on-brand against the dark ground. */
+.error-message {
+    --bs-alert-color: #f0a99f;
+    --bs-alert-bg: rgba(226, 117, 106, .09);
+    --bs-alert-border-color: rgba(226, 117, 106, .35);
+}
+
+/* The queue and blocklist panels ride on Bootstrap's .card for
+   background/border/radius; only the surface colour needs overriding so
+   they read as lifted material rather than the page ground. */
 #pendingQueue,
 #blocklistManager {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-card);
-    padding: var(--sp-5);
-    margin-bottom: var(--sp-6);
-}
-
-.error-message {
-    background: var(--danger-bg);
-    border: 1px solid var(--danger-border);
-    color: var(--danger);
-    padding: var(--sp-3) var(--sp-4);
-    border-radius: var(--radius-field);
-    margin-bottom: var(--sp-4);
-}
-
-.visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
+    --bs-card-bg: var(--amm-surface, #12211a);
+    --bs-card-border-color: var(--line, #2c4437);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
 }
 
 .empty-state {
-    color: var(--ink-muted);
-    padding: var(--sp-4);
+    color: var(--silver-dim, #7f9187);
+    padding: var(--amm-sp-4);
     text-align: center;
 }
 
-/* Pending queue table */
+/* ---------- Pending queue table ---------------------------------------------
+   Rides on Bootstrap's table-dark for readable contrast; recoloured to the
+   page's own surface tones instead of Bootstrap's generic dark-grey defaults.
+   ------------------------------------------------------------------------- */
 .moderation-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.moderation-table th,
-.moderation-table td {
-    text-align: left;
-    padding: var(--sp-3);
-    border-bottom: 1px solid var(--border);
-    vertical-align: top;
+    --bs-table-bg: var(--amm-surface, #12211a);
+    --bs-table-border-color: var(--line, #2c4437);
+    --bs-table-hover-bg: var(--amm-surface-hover, #1b3026);
+    --bs-table-color: var(--silver, #c7d1c9);
 }
 
 .moderation-table th {
-    color: var(--ink-muted);
+    color: var(--silver-dim, #7f9187);
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -115,80 +83,24 @@ body.admin-message-moderation {
     max-width: 360px;
     white-space: pre-wrap;
     word-wrap: break-word;
+    vertical-align: top;
 }
 
 .flag-reason {
-    display: inline-block;
-    background: var(--amber-bg);
-    border: 1px solid var(--amber-border);
-    color: var(--amber-ink);
+    /* A moderation-queue-specific state, not a generic Bootstrap badge
+       colour, so it keeps its own amber treatment. */
+    background: rgba(232, 199, 101, .14);
+    border: 1px solid rgba(232, 199, 101, .4);
+    color: var(--gold-bright, #e8c765);
     border-radius: 999px;
-    padding: 1px var(--sp-2);
-    font-size: 0.8rem;
     font-weight: 600;
-}
-
-.moderation-table .actions {
-    display: flex;
-    gap: var(--sp-2);
-}
-
-.moderation-table .actions button {
-    border: none;
-    border-radius: var(--radius-field);
-    padding: var(--sp-2) var(--sp-3);
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.moderation-table .approve {
-    background: var(--teal);
-    color: #fff;
-}
-
-.moderation-table .approve:hover {
-    background: var(--teal-600);
-}
-
-.moderation-table .reject {
-    background: transparent;
-    color: var(--danger);
-    border: 1px solid var(--danger-border);
-}
-
-.moderation-table .reject:hover {
-    background: var(--danger-bg);
 }
 
 /* Blocklist manager */
-.add-phrase-form {
-    display: flex;
-    gap: var(--sp-2);
-    margin-bottom: var(--sp-4);
-}
-
-.add-phrase-form input[type="text"] {
-    flex: 1;
+.add-phrase-form .form-control {
     max-width: 360px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-field);
-    padding: var(--sp-2) var(--sp-3);
-    background: var(--field-bg);
-    font-family: inherit;
-}
-
-.add-phrase-form button {
-    background: var(--teal);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius-field);
-    padding: 0 var(--sp-5);
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.add-phrase-form button:hover {
-    background: var(--teal-600);
+    border-color: var(--line, #2c4437);
+    background: #0f2118;
 }
 
 .blocklist {
@@ -197,32 +109,44 @@ body.admin-message-moderation {
     padding: 0;
     display: flex;
     flex-wrap: wrap;
-    gap: var(--sp-2);
+    gap: var(--amm-sp-2);
 }
 
 .blocklist li {
     display: flex;
     align-items: center;
-    gap: var(--sp-2);
-    background: var(--field-bg);
-    border: 1px solid var(--border);
+    gap: var(--amm-sp-2);
+    background: var(--amm-surface-hover);
+    border: 1px solid var(--line, #2c4437);
     border-radius: 999px;
-    padding: var(--sp-2) var(--sp-3);
+    padding: var(--amm-sp-2) var(--amm-sp-3);
 }
 
 .blocklist .phrase {
     font-weight: 600;
-    color: var(--navy);
+    color: var(--silver-bright, #eef3ef);
 }
 
 .blocklist .remove {
     background: transparent;
     border: none;
-    color: var(--danger);
+    color: #e2756a;
     cursor: pointer;
     font-size: 0.85rem;
 }
 
 .blocklist .remove:hover {
     text-decoration: underline;
+}
+
+/* ---------- Narrow screens: sidebar becomes a wrapping top strip, matching
+   sidebar.css's own 900px breakpoint ------------------------------------- */
+@media (max-width: 900px) {
+    body.admin-message-moderation {
+        flex-direction: column;
+    }
+
+    #messageModeration {
+        padding: 24px 16px 32px;
+    }
 }

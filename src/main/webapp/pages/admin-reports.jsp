@@ -124,6 +124,7 @@
             <section class="arep-panel" id="reportGeneration">
                 <h2 class="arep-panel-title">Generate report</h2>
                 <form action="${pageContext.request.contextPath}/admin/reports" method="post" id="generateReportForm">
+                    <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                     <div class="arep-field">
                         <label class="arep-label" for="reportType">Report type</label>
                         <div class="arep-select-wrap">

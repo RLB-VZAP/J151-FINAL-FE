@@ -1,169 +1,100 @@
 /* ============================================================================
    TryTons — Fantasy Rugby | Admin: Dynamic Player Pricing
-   Shares tokens with the other admin screens. Targets admin-pricing.jsp.
+   Loads on top of bootstrap.min.css and theme.css, consuming the Green-Gold
+   tokens rather than a separate palette. Targets only admin-pricing.jsp.
    ========================================================================== */
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
-:root {
-    --navy: #1f3864;
-    --navy-700: #142544;
-    --teal: #1d9e75;
-    --teal-600: #178a65;
-    --bg: #f0f2f5;
-    --surface: #ffffff;
-    --ink: #1f2a44;
-    --ink-muted: #64748b;
-    --danger: #dc2626;
-    --danger-bg: #fef2f2;
-    --danger-border: #fca5a5;
-    --success: #15803d;
-    --success-bg: #f0fdf4;
-    --success-border: #86efac;
-    --info: #1d4ed8;
-    --info-bg: #eff6ff;
-    --info-border: #bfdbfe;
-    --up: #15803d;
-    --up-bg: #f0fdf4;
-    --down: #dc2626;
-    --down-bg: #fef2f2;
-    --border: #d8dee9;
-    --field-bg: #f8fafc;
-    --radius-card: 12px;
-    --radius-field: 8px;
-    --sp-2: 8px;
-    --sp-3: 12px;
-    --sp-4: 16px;
-    --sp-5: 20px;
-    --sp-6: 24px;
-    --sp-8: 32px;
-}
-
 body.admin-pricing {
+    /* Sidebar.css requires host pages to own their own body layout so the
+       sidebar can sit beside the main column. */
+    display: flex;
+    min-height: 100vh;
     margin: 0;
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
-    color: var(--ink);
-    background: var(--bg);
+    /* Surfaces are lifted off the near-black page ground rather than being a
+       different hue, matching the pattern set by market-dashboard.css. */
+    --ap-surface: #12211a;
+    --ap-surface-hover: #1b3026;
+    --ap-sp-3: 12px;
+    --ap-sp-4: 16px;
 }
 
+/* Bootstrap's `.container` fights the fixed-width sidebar's flex sizing, so
+   the main column owns its own max-width and padding instead. */
 #pricing {
+    flex: 1;
+    /* Without this a flex child with wide content (e.g. the pricing table)
+       refuses to shrink and pushes the sidebar off-screen. */
+    min-width: 0;
     max-width: 1080px;
     margin: 0 auto;
-    padding: var(--sp-8) var(--sp-5);
-}
-
-#pricing h1 {
-    color: var(--navy-700);
-    margin-bottom: var(--sp-4);
+    padding: 32px 40px 48px;
 }
 
 #pricing h2 {
-    color: var(--navy-700);
     font-size: 1.1rem;
-    margin: 0 0 var(--sp-4);
+    margin: 0 0 var(--ap-sp-4);
 }
 
 .intro {
-    color: var(--ink-muted);
+    color: var(--silver-dim, #7f9187);
     max-width: 70ch;
-    margin-bottom: var(--sp-6);
+    margin-bottom: 1.5rem;
 }
 
-.error-message,
-.info-message,
+/* Bootstrap's stock alert palette is light-mode; recolour to stay legible
+   and on-brand against the dark ground. */
+.error-message {
+    --bs-alert-color: #f0a99f;
+    --bs-alert-bg: rgba(226, 117, 106, .09);
+    --bs-alert-border-color: rgba(226, 117, 106, .35);
+}
+
+.info-message {
+    --bs-alert-color: #9cc7ea;
+    --bs-alert-bg: rgba(90, 154, 201, .1);
+    --bs-alert-border-color: rgba(90, 154, 201, .35);
+}
+
 .success-message {
-    padding: var(--sp-3) var(--sp-4);
-    border-radius: var(--radius-field);
-    margin-bottom: var(--sp-4);
-    border: 1px solid transparent;
+    --bs-alert-color: #8fd9ae;
+    --bs-alert-bg: rgba(94, 201, 139, .09);
+    --bs-alert-border-color: rgba(94, 201, 139, .35);
 }
 
-.error-message { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger); }
-.info-message { background: var(--info-bg); border-color: var(--info-border); color: var(--info); }
-.success-message { background: var(--success-bg); border-color: var(--success-border); color: var(--success); }
-
+/* The settings and actions panels ride on Bootstrap's .card for
+   background/border/radius; only the surface colour needs overriding so
+   they read as lifted material rather than the page ground. */
 #pricingSettings,
 #pricingActions {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-card);
-    padding: var(--sp-5);
-    margin-bottom: var(--sp-6);
+    --bs-card-bg: var(--ap-surface, #12211a);
+    --bs-card-border-color: var(--line, #2c4437);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
 }
 
-.settings-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--sp-4);
-    margin-bottom: var(--sp-4);
+/* Bootstrap's default border colour (#dee2e6) is a light-theme leftover;
+   align form fields with the rest of the app's dark-surface borders. */
+.settings-form .form-control {
+    border-color: var(--line, #2c4437);
+    background: #0f2118;
 }
-
-@media (max-width: 720px) {
-    .settings-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-.settings-form label {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--ink);
-}
-
-.settings-form input {
-    border: 1px solid var(--border);
-    border-radius: var(--radius-field);
-    padding: var(--sp-2) var(--sp-3);
-    background: var(--field-bg);
-    font-family: inherit;
-    font-weight: 400;
-}
-
-.save-button,
-.preview-button,
-.run-button {
-    border: none;
-    border-radius: var(--radius-field);
-    padding: var(--sp-3) var(--sp-5);
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.save-button { background: var(--navy); color: #fff; }
-.save-button:hover { background: var(--navy-700); }
-
-.action-buttons {
-    display: flex;
-    gap: var(--sp-3);
-    margin-bottom: var(--sp-5);
-}
-
-.preview-button { background: var(--field-bg); color: var(--navy); border: 1px solid var(--border); }
-.preview-button:hover { background: #eef2f7; }
-.run-button { background: var(--teal); color: #fff; }
-.run-button:hover { background: var(--teal-600); }
 
 .run-summary p {
-    margin: 0 0 var(--sp-4);
+    margin: 0 0 var(--ap-sp-4);
 }
 
+/* The changes table rides on Bootstrap's table-dark for readable contrast;
+   recolour it to the page's own surface tones instead of Bootstrap's
+   generic dark-grey defaults. */
 .changes-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.changes-table th,
-.changes-table td {
-    text-align: left;
-    padding: var(--sp-2) var(--sp-3);
-    border-bottom: 1px solid var(--border);
+    --bs-table-bg: var(--ap-surface, #12211a);
+    --bs-table-border-color: var(--line, #2c4437);
+    --bs-table-hover-bg: var(--ap-surface-hover, #1b3026);
+    --bs-table-color: var(--silver, #c7d1c9);
 }
 
 .changes-table th {
-    color: var(--ink-muted);
+    color: var(--silver-dim, #7f9187);
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -173,11 +104,25 @@ body.admin-pricing {
     font-weight: 700;
 }
 
-.changes-table tr.up .delta { color: var(--up); }
-.changes-table tr.down .delta { color: var(--down); }
+/* Directional deltas keep colour as a secondary signal alongside the sign
+   already printed in the cell. */
+.changes-table tr.up .delta { color: #5ec98b; }
+.changes-table tr.down .delta { color: #e2756a; }
 
 .empty-state {
-    color: var(--ink-muted);
-    padding: var(--sp-4);
+    color: var(--silver-dim, #7f9187);
+    padding: var(--ap-sp-4);
     text-align: center;
+}
+
+/* ---------- Narrow screens: sidebar becomes a wrapping top strip, matching
+   sidebar.css's own 900px breakpoint ------------------------------------- */
+@media (max-width: 900px) {
+    body.admin-pricing {
+        flex-direction: column;
+    }
+
+    #pricing {
+        padding: 24px 16px 32px;
+    }
 }

@@ -8,7 +8,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TryTons - Register</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/register.css">
 </head>
@@ -31,6 +31,7 @@
                 </c:if>
 
                 <form method="post" action="${pageContext.request.contextPath}/register" id="registerForm">
+                    <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                     <div class="mb-4">
                         <label for="email" class="field-label">Email address</label>
                         <div class="field-row">

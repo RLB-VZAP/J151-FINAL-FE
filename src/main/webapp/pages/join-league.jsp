@@ -52,6 +52,7 @@
             </div>
 
             <form class="lg-code-form" method="post" action="${pageContext.request.contextPath}/league/join">
+                <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                 <input type="hidden" name="submit" value="league/join">
                 <label class="search-wrap" for="leagueCode">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
@@ -105,6 +106,7 @@
                                     <%-- Public leagues need no code; the league is chosen by clicking,
                                          so there is nothing for the user to type or look up. --%>
                                     <form class="lg-join-form" action="${pageContext.request.contextPath}/league/join" method="post">
+                                        <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                                         <input type="hidden" name="submit" value="league/join">
                                         <input type="hidden" name="leagueId" value="${fn:escapeXml(openLeague.leagueId)}">
                                         <button type="submit" class="btn-gold lg-join" ${spotsLeft <= 0 or not hasTeam ? "disabled" : ""}>Join</button>

@@ -102,6 +102,7 @@
                                                     </c:when>
                                                     <c:otherwise>
                                                         <form method="post" action="${pageContext.request.contextPath}/admin/fixtures" class="statusUpdateForm afx-update-form">
+                                                            <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                                                             <input type="hidden" name="fixtureId" value="${fixture.fixtureId}">
                                                             <div class="afx-select-wrap afx-update-select">
                                                                 <select class="afx-select afx-select-sm" name="status" aria-label="New status">
@@ -129,6 +130,7 @@
             <section class="afx-panel" id="createFixtureSection">
                 <h2 class="afx-panel-title">Create fixture</h2>
                 <form method="post" action="${pageContext.request.contextPath}/admin/fixtures" id="createFixtureForm">
+                    <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                     <input type="hidden" name="submit" value="create-fixture">
 
                     <div class="afx-field">

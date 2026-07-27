@@ -6,11 +6,16 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Market Dashboard - Fantasy TryTons</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/market-dashboard.css">
 </head>
 <body class="market-dashboard">
-<%@ include file="/WEB-INF/jspf/navigation.jspf" %>
+
+<c:set var="activeNav" value="market" scope="request" />
+<%@ include file="/WEB-INF/jspf/sidebar.jspf" %>
 
 <main id="market">
     <h1>Market Demand Dashboard</h1>

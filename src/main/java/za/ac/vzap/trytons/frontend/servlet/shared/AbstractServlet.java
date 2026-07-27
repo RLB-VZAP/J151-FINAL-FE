@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import za.ac.vzap.trytons.frontend.client.auth.LoginResponse;
 import za.ac.vzap.trytons.frontend.client.shared.ApiCallStatus;
+import za.ac.vzap.trytons.frontend.filter.CsrfFilter;
+import za.ac.vzap.trytons.frontend.util.FlashUtil;
 import za.ac.vzap.trytons.frontend.util.SessionAuthContext;
 
 import java.io.IOException;
@@ -65,6 +67,11 @@ public class AbstractServlet extends HttpServlet {
     protected void establishAuthenticatedSession(HttpServletRequest req, LoginResponse loginResponse){
         HttpSession session = req.getSession(true);
         req.changeSessionId();
+        // A fresh session id after login must carry a fresh CSRF token too,
+        // otherwise a token minted before authentication (and potentially
+        // observable to an attacker on a shared/public machine) would still
+        // validate afterwards.
+        CsrfFilter.rotateToken(session);
         authContext.signIn(loginResponse);
         session.setAttribute(SessionAuthContext.SESSION_USER_ID, String.valueOf(loginResponse.getUserId()));
         session.setAttribute(SessionAuthContext.SESSION_USERNAME, loginResponse.getUsername());
@@ -124,25 +131,19 @@ public class AbstractServlet extends HttpServlet {
     // /WEB-INF/jspf/toast.jspf on the next page load and then cleared. Pair these
     // with redirectTo() so a successful POST follows the POST-redirect-GET pattern:
     // the toast survives the redirect and a refresh cannot re-submit the form.
-    protected static final String FLASH_MESSAGE = "flash.message";
-    protected static final String FLASH_TYPE = "flash.type";
+    protected static final String FLASH_MESSAGE = FlashUtil.FLASH_MESSAGE;
+    protected static final String FLASH_TYPE = FlashUtil.FLASH_TYPE;
 
     protected void flashSuccess(HttpServletRequest req, String message) {
-        setFlash(req, "success", message);
+        FlashUtil.flashSuccess(req, message);
     }
 
     protected void flashError(HttpServletRequest req, String message) {
-        setFlash(req, "error", message);
+        FlashUtil.flashError(req, message);
     }
 
     protected void flashInfo(HttpServletRequest req, String message) {
-        setFlash(req, "info", message);
-    }
-
-    private void setFlash(HttpServletRequest req, String type, String message) {
-        HttpSession session = req.getSession(true);
-        session.setAttribute(FLASH_MESSAGE, message);
-        session.setAttribute(FLASH_TYPE, type);
+        FlashUtil.flashInfo(req, message);
     }
 
     // Request-scoped toast, for handlers that forward to a view instead of

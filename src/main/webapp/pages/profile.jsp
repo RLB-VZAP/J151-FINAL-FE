@@ -130,6 +130,7 @@
                             <%-- Every input is pre-filled: the backend treats a null field as
                                  "leave unchanged", so a no-op save must resend current values. --%>
                             <form class="pf-form" action="${pageContext.request.contextPath}/profile" method="post" id="profileForm">
+                                <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                                 <label class="field-label" for="username">Username</label>
                                 <div class="field-row">
                                     <span class="field-icon">

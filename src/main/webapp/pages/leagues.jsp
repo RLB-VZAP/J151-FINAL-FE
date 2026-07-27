@@ -311,6 +311,7 @@
                                         <div class="lg-card-footer">
                                             <span class="lg-spots">${spotsLeft} of ${openLeague.maxMembers} spots left</span>
                                             <form class="lg-join-form" action="${pageContext.request.contextPath}/league/join" method="post">
+                                                <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                                                 <input type="hidden" name="submit" value="league/join">
                                                 <input type="hidden" name="leagueId" value="${fn:escapeXml(openLeague.leagueId)}">
                                                 <%-- Disabled without a team: the join would be rejected anyway. --%>

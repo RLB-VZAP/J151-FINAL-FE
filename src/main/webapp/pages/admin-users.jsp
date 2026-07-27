@@ -88,6 +88,7 @@
                                     </span>
                                     <span class="utbl-action">
                                         <form action="${pageContext.request.contextPath}/admin/users" method="post">
+                                            <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                                             <input type="hidden" name="searchTerm" value="${fn:escapeXml(searchTerm)}">
                                             <input type="hidden" name="userId" value="${user.userId}">
                                             <c:choose>

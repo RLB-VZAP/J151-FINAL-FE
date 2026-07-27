@@ -120,6 +120,7 @@
         <form method="post" action="${pageContext.request.contextPath}/create-team" id="createTeamForm"
               data-budget="${fn:escapeXml(budget)}"
               data-squad-size="${fn:escapeXml(squadSize)}">
+            <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
             <c:if test="${editMode}">
                 <input type="hidden" name="teamId" value="${fn:escapeXml(teamId)}">
             </c:if>

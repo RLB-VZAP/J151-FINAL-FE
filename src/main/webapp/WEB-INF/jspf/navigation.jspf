@@ -1,5 +1,8 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%-- Exposes the session's CSRF token to client-side JS (e.g. future POST
+     fetch calls), which cannot read the session-scoped hidden form field. --%>
+<meta name="csrf-token" content="${sessionScope['csrf.token']}">
 <style>
     /* Page transition, paired with page-transitions.js below. Lives here
        (rather than only in theme.css) so it works on every page that
@@ -19,6 +22,9 @@
         transition: opacity 0.15s ease;
     }
 
+    /* Pinned to the top so the nav and its Log out control stay reachable on
+       long pages. The background is opaque and the z-index keeps page content
+       scrolling underneath rather than through it. */
     #mainNav {
         display: flex;
         flex-wrap: wrap;
@@ -29,6 +35,9 @@
         padding: 14px 24px;
         font-family: "Inter", system-ui, -apple-system, sans-serif;
         font-size: 0.85rem;
+        position: sticky;
+        top: 0;
+        z-index: 100;
     }
 
     #mainNav a {
@@ -102,6 +111,7 @@
         <c:when test="${not empty sessionScope.username}">
             <span id="navWelcome">Welcome, ${fn:escapeXml(sessionScope.username)}</span>
             <form action="${pageContext.request.contextPath}/logout" method="post" id="navLogoutForm">
+                <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                 <button type="submit" name="submit" value="logout">Log out</button>
             </form>
         </c:when>

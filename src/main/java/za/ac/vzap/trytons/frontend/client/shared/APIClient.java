@@ -7,9 +7,8 @@ import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.glassfish.jersey.jackson.JacksonFeature;
 import za.ac.vzap.trytons.frontend.util.APIConfig;
-import za.ac.vzap.trytons.frontend.util.ObjectMapperProvider;
+import za.ac.vzap.trytons.frontend.util.ManagedRestClient;
 import za.ac.vzap.trytons.frontend.util.SessionAuthContext;
 
 import java.util.Optional;
@@ -25,6 +24,9 @@ public class APIClient {
 
     @Inject
     private ApiCallStatus apiCallStatus;
+
+    @Inject
+    private ManagedRestClient managedRestClient;
 
     public<T> Optional<T> handle(Response response, Class<T> responseType) {
         int status = response.getStatus();
@@ -49,8 +51,8 @@ public class APIClient {
     }
 
     public <T> Optional<T> post(String path, Object body, Class<T> responseType) {
-        try (Client client = ClientBuilder.newClient().register(JacksonFeature.class).register(ObjectMapperProvider.class)) {
-            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
+        try {
+            WebTarget target = managedRestClient.getClient().target(APIConfig.getBaseUrl() + path);
             try (Response response = request(target).post(Entity.json(body))) {
                 return handle(response, responseType);
             }
@@ -63,8 +65,8 @@ public class APIClient {
     }
 
     public <T>Optional<T> get(String path, Class<T> responseType) {
-        try (Client client = ClientBuilder.newClient().register(JacksonFeature.class).register(ObjectMapperProvider.class)) {
-            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
+        try {
+            WebTarget target = managedRestClient.getClient().target(APIConfig.getBaseUrl() + path);
             try (Response response = request(target).get()) {
                 return handle(response, responseType);
             }
@@ -76,8 +78,8 @@ public class APIClient {
     }
 
     public<T> Optional<T> put(String path, Object body, Class<T> responseType) {
-        try (Client client = ClientBuilder.newClient().register(JacksonFeature.class).register(ObjectMapperProvider.class)) {
-            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
+        try {
+            WebTarget target = managedRestClient.getClient().target(APIConfig.getBaseUrl() + path);
             // JAX-RS rejects a null entity on PUT ("Entity must not be null for http
             // method PUT"). Some endpoints carry everything in the path/query and take
             // no body, so a null body is legitimate — send an empty JSON entity for them.
@@ -93,8 +95,8 @@ public class APIClient {
     }
 
     public<T> Optional<T> delete(String path, Class<T> responseType) {
-        try (Client client = ClientBuilder.newClient().register(JacksonFeature.class).register(ObjectMapperProvider.class)) {
-            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
+        try {
+            WebTarget target = managedRestClient.getClient().target(APIConfig.getBaseUrl() + path);
             try (Response response = request(target).delete()) {
                 return handle(response, responseType);
             }
@@ -125,8 +127,8 @@ public class APIClient {
 
     //Added method that accepts a GenericType (overloads the existing get() method).
     public <T>Optional<T> getList(String path, GenericType<T> responseGenericType) {
-        try (Client client = ClientBuilder.newClient().register(JacksonFeature.class).register(ObjectMapperProvider.class)) {
-            WebTarget target = client.target(APIConfig.getBaseUrl() + path);
+        try {
+            WebTarget target = managedRestClient.getClient().target(APIConfig.getBaseUrl() + path);
             try (Response response = request(target).get()) {
                 return handleList(response, responseGenericType);
             }
