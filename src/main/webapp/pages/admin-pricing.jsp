@@ -9,23 +9,29 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dynamic Pricing - Fantasy TryTons</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin-pricing.css">
 </head>
 <body class="admin-pricing">
-<%@ include file="/WEB-INF/jspf/navigation.jspf" %>
+
+<c:set var="activeNav" value="admin-pricing" scope="request" />
+<%@ include file="/WEB-INF/jspf/sidebar.jspf" %>
 
 <main id="pricing">
     <h1>Dynamic Player Pricing</h1>
 
     <c:if test="${not empty error}">
-        <p class="error-message" role="alert"><c:out value="${error}"/></p>
+        <p class="error-message alert alert-danger" role="alert"><c:out value="${error}"/></p>
     </c:if>
     <c:if test="${not empty info}">
-        <p class="info-message" role="status"><c:out value="${info}"/></p>
+        <p class="info-message alert alert-info" role="status"><c:out value="${info}"/></p>
     </c:if>
     <c:if test="${not empty success}">
-        <p class="success-message" role="status"><c:out value="${success}"/></p>
+        <p class="success-message alert alert-success" role="status"><c:out value="${success}"/></p>
     </c:if>
 
     <p class="intro">
@@ -34,54 +40,66 @@
         apply a run manually below. Existing team budgets are never changed retroactively.
     </p>
 
-    <section id="pricingSettings">
+    <section id="pricingSettings" class="card">
         <h2>Weighting &amp; bounds</h2>
         <form method="post" action="${pageContext.request.contextPath}/admin/pricing" class="settings-form">
+            <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
             <input type="hidden" name="action" value="saveSettings">
-            <div class="settings-grid">
-                <label>Form weight
-                    <input type="number" step="0.0001" min="0" name="weightForm" value="${settings.weightForm}">
-                </label>
-                <label>Popularity weight
-                    <input type="number" step="0.0001" min="0" name="weightPopularity" value="${settings.weightPopularity}">
-                </label>
-                <label>Fantasy points weight
-                    <input type="number" step="0.0001" min="0" name="weightPoints" value="${settings.weightPoints}">
-                </label>
-                <label>Injury weight
-                    <input type="number" step="0.0001" min="0" name="weightInjury" value="${settings.weightInjury}">
-                </label>
-                <label>Transfer demand weight
-                    <input type="number" step="0.0001" min="0" name="weightDemand" value="${settings.weightDemand}">
-                </label>
-                <label>Availability weight
-                    <input type="number" step="0.0001" min="0" name="weightAvailability" value="${settings.weightAvailability}">
-                </label>
-                <label>Max change per run (fraction)
-                    <input type="number" step="0.0001" min="0" name="maxDeltaPct" value="${settings.maxDeltaPct}">
-                </label>
-                <label>Minimum value
-                    <input type="number" step="0.01" min="0" name="minValue" value="${settings.minValue}">
-                </label>
-                <label>Maximum value
-                    <input type="number" step="0.01" min="0" name="maxValue" value="${settings.maxValue}">
-                </label>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="weightForm" class="form-label">Form weight</label>
+                    <input type="number" step="0.0001" min="0" id="weightForm" name="weightForm" value="${settings.weightForm}" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label for="weightPopularity" class="form-label">Popularity weight</label>
+                    <input type="number" step="0.0001" min="0" id="weightPopularity" name="weightPopularity" value="${settings.weightPopularity}" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label for="weightPoints" class="form-label">Fantasy points weight</label>
+                    <input type="number" step="0.0001" min="0" id="weightPoints" name="weightPoints" value="${settings.weightPoints}" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label for="weightInjury" class="form-label">Injury weight</label>
+                    <input type="number" step="0.0001" min="0" id="weightInjury" name="weightInjury" value="${settings.weightInjury}" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label for="weightDemand" class="form-label">Transfer demand weight</label>
+                    <input type="number" step="0.0001" min="0" id="weightDemand" name="weightDemand" value="${settings.weightDemand}" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label for="weightAvailability" class="form-label">Availability weight</label>
+                    <input type="number" step="0.0001" min="0" id="weightAvailability" name="weightAvailability" value="${settings.weightAvailability}" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label for="maxDeltaPct" class="form-label">Max change per run (fraction)</label>
+                    <input type="number" step="0.0001" min="0" id="maxDeltaPct" name="maxDeltaPct" value="${settings.maxDeltaPct}" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label for="minValue" class="form-label">Minimum value</label>
+                    <input type="number" step="0.01" min="0" id="minValue" name="minValue" value="${settings.minValue}" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label for="maxValue" class="form-label">Maximum value</label>
+                    <input type="number" step="0.01" min="0" id="maxValue" name="maxValue" value="${settings.maxValue}" class="form-control">
+                </div>
             </div>
-            <button type="submit" class="save-button">Save settings</button>
+            <button type="submit" class="btn btn-gold mt-4">Save settings</button>
         </form>
     </section>
 
-    <section id="pricingActions">
+    <section id="pricingActions" class="card">
         <h2>Run pricing</h2>
-        <div class="action-buttons">
+        <div class="d-flex gap-3 mb-4">
             <form method="post" action="${pageContext.request.contextPath}/admin/pricing">
+                <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                 <input type="hidden" name="action" value="preview">
-                <button type="submit" class="preview-button">Preview changes</button>
+                <button type="submit" class="btn btn-gold">Preview changes</button>
             </form>
             <form method="post" action="${pageContext.request.contextPath}/admin/pricing"
                   onsubmit="return confirm('Apply these price changes to all players now?');">
+                <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                 <input type="hidden" name="action" value="run">
-                <button type="submit" class="run-button">Apply now</button>
+                <button type="submit" class="btn btn-outline-danger">Apply now</button>
             </form>
         </div>
 
@@ -104,7 +122,7 @@
                     List<PriceChangeResponse> changes = summary.getChanges();
                     if (changes != null && !changes.isEmpty()) {
                 %>
-                <table class="changes-table">
+                <table class="changes-table table table-dark table-hover">
                     <thead>
                     <tr><th>Player</th><th>Old</th><th>New</th><th>Change</th></tr>
                     </thead>

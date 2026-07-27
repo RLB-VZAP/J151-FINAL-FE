@@ -84,6 +84,7 @@
               data-budget="${budgetValue}"
               data-free-transfers="${freeLeft}"
               data-locked="${isLocked}">
+            <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
             <input type="hidden" name="submit" value="transfer">
             <input type="hidden" name="teamId" value="${fn:escapeXml(teamId)}">
             <input type="hidden" name="roundId" value="${fn:escapeXml(roundId)}">

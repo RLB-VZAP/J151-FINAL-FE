@@ -117,6 +117,7 @@
                             <h2 class="amr-panel-title">Match result</h2>
 
                             <form action="${pageContext.request.contextPath}/admin/match-results" method="post" id="matchResultForm">
+                                <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                                 <input type="hidden" name="action" value="matchResult">
                                 <input type="hidden" name="fixtureId" value="${fn:escapeXml(selectedFixtureId)}">
 
@@ -163,6 +164,7 @@
                             </c:if>
 
                             <form action="${pageContext.request.contextPath}/admin/match-results" method="post" id="playerStatisticsForm">
+                                <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                                 <input type="hidden" name="action" value="playerStatistics">
                                 <input type="hidden" name="fixtureId" value="${fn:escapeXml(selectedFixtureId)}">
                                 <input type="hidden" name="resultId" value="${not empty matchResult ? matchResult.resultId : ''}">

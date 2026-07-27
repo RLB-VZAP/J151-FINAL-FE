@@ -41,6 +41,7 @@
                     <form method="post"
                           action="${pageContext.request.contextPath}/player/import"
                           class="feed-refresh" data-feed-refresh>
+                        <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                         <button type="submit" name="submit" value="player/import" class="btn-gold feed-refresh-btn">
                             <span class="btn-spinner" aria-hidden="true"></span>
                             <span class="feed-refresh-label">Refresh from live feed</span>

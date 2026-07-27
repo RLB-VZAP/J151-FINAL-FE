@@ -54,6 +54,7 @@
                 <%-- A successful create redirects straight to /league?leagueId=... (PRG), so
                      this page only ever renders the form (with an error on failure). --%>
                 <form class="cl-card" method="post" action="${pageContext.request.contextPath}/league/create" id="createLeagueForm">
+                    <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                     <input type="hidden" name="submit" value="league/create" />
 
                     <div class="cl-field">

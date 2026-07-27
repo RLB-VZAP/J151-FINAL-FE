@@ -9,21 +9,27 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Messages - Fantasy TryTons</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/theme.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/messages.css">
 </head>
 <body class="messages">
-<%@ include file="/WEB-INF/jspf/navigation.jspf" %>
+
+<c:set var="activeNav" value="messages" scope="request" />
+<%@ include file="/WEB-INF/jspf/sidebar.jspf" %>
 
 <main id="messages">
     <h1>Messages</h1>
 
     <c:if test="${not empty error}">
-        <p class="error-message" role="alert"><c:out value="${error}"/></p>
+        <p class="error-message alert alert-danger" role="alert"><c:out value="${error}"/></p>
     </c:if>
 
-    <div class="messages-layout">
-        <section class="thread-list" aria-label="Conversations">
+    <div class="row g-3">
+        <section class="thread-list card col-md-4" aria-label="Conversations">
             <h2>Conversations</h2>
             <%
                 List<ConversationThreadResponse> threads =
@@ -42,14 +48,14 @@
                    href="${pageContext.request.contextPath}/messages?with=${thread.counterpartUserId}&name=${fn:escapeXml(thread.counterpartUsername)}">
                     <span class="thread-name"><c:out value="${thread.counterpartUsername}"/></span>
                     <c:if test="${thread.unreadCount > 0}">
-                        <span class="unread-badge">${thread.unreadCount}</span>
+                        <span class="unread-badge badge">${thread.unreadCount}</span>
                     </c:if>
                     <span class="thread-preview"><c:out value="${thread.lastMessageBody}"/></span>
                 </a>
             <%  } } %>
         </section>
 
-        <section class="conversation" aria-label="Conversation">
+        <section class="conversation card col-md-8" aria-label="Conversation">
             <% if (activeId == null) { %>
                 <p class="empty-state">Select a conversation to start messaging.</p>
             <% } else {
@@ -61,9 +67,10 @@
                     <h2><c:out value="${activeCounterpartName}"/></h2>
                     <form method="post" action="${pageContext.request.contextPath}/messages"
                           onsubmit="return confirm('Block this user? You will no longer be able to message each other.');">
+                        <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                         <input type="hidden" name="action" value="block">
                         <input type="hidden" name="userId" value="<%= activeId %>">
-                        <button type="submit" class="block-button">Block</button>
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Block</button>
                     </form>
                 </header>
 
@@ -86,12 +93,13 @@
                     %>
                 </div>
 
-                <form id="sendForm" method="post" action="${pageContext.request.contextPath}/messages" class="send-form">
+                <form id="sendForm" method="post" action="${pageContext.request.contextPath}/messages" class="d-flex gap-2 mt-3">
+                    <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                     <input type="hidden" name="action" value="send">
                     <input type="hidden" name="recipientUserId" value="<%= activeId %>">
                     <label for="messageBody" class="visually-hidden">Message</label>
-                    <textarea id="messageBody" name="body" rows="2" placeholder="Type a message…" required></textarea>
-                    <button type="submit">Send</button>
+                    <textarea id="messageBody" name="body" rows="2" placeholder="Type a message…" required class="form-control"></textarea>
+                    <button type="submit" class="btn btn-gold">Send</button>
                 </form>
             <% } %>
         </section>

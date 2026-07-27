@@ -50,6 +50,16 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- Provides ClientBuilder/ClientProperties for the shared JAX-RS client.
+             The runtime implementation ships with the Jakarta EE server, so this
+             is provided scope like the rest of the platform API. -->
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>3.1.10</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- OpenPDF: pure-Java PDF generation for downloadable system reports.
              LGPL/MPL, no native dependencies. Package root: com.lowagie.text. -->
         <dependency>

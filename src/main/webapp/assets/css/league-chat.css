@@ -1,124 +1,89 @@
 /* ============================================================================
    TryTons — Fantasy Rugby | League Chat
-   Shares tokens with notifications.css / messages.css. Targets league-chat.jsp.
+   Loads on top of bootstrap.min.css and theme.css, consuming the Green-Gold
+   tokens rather than a separate palette. Targets only league-chat.jsp.
    ========================================================================== */
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
-:root {
-    --navy: #1f3864;
-    --navy-700: #142544;
-    --teal: #1d9e75;
-    --teal-600: #178a65;
-    --bg: #f0f2f5;
-    --surface: #ffffff;
-    --ink: #1f2a44;
-    --ink-muted: #64748b;
-    --danger: #dc2626;
-    --danger-bg: #fef2f2;
-    --danger-border: #fca5a5;
-    --success: #15803d;
-    --success-bg: #f0fdf4;
-    --success-border: #86efac;
-    --info: #1d4ed8;
-    --info-bg: #eff6ff;
-    --info-border: #bfdbfe;
-    --border: #d8dee9;
-    --field-bg: #f8fafc;
-    --radius-card: 12px;
-    --radius-field: 8px;
-    --sp-2: 8px;
-    --sp-3: 12px;
-    --sp-4: 16px;
-    --sp-5: 20px;
-    --sp-6: 24px;
-    --sp-8: 32px;
-}
-
 body.league-chat {
+    /* Sidebar.css requires host pages to own their own body layout so the
+       sidebar can sit beside the main column. */
+    display: flex;
+    min-height: 100vh;
     margin: 0;
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
-    color: var(--ink);
-    background: var(--bg);
+    /* Surfaces are lifted off the near-black page ground rather than being a
+       different hue, matching the pattern set by market-dashboard.css. */
+    --lc-surface: #12211a;
+    --lc-surface-hover: #1b3026;
+    --lc-sp-2: 8px;
+    --lc-sp-3: 12px;
+    --lc-sp-4: 16px;
 }
 
+/* Bootstrap's `.container` fights the fixed-width sidebar's flex sizing, so
+   the main column owns its own max-width and padding instead. */
 #leagueChat {
+    flex: 1;
+    /* Without this a flex child with wide content refuses to shrink and
+       pushes the sidebar off-screen. */
+    min-width: 0;
     max-width: 820px;
     margin: 0 auto;
-    padding: var(--sp-8) var(--sp-5);
+    padding: 32px 40px 48px;
 }
 
-#leagueChat h1 {
-    color: var(--navy-700);
-    margin-bottom: var(--sp-5);
-}
-
-.visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-}
-
-.error-message,
-.info-message,
-.success-message {
-    padding: var(--sp-3) var(--sp-4);
-    border-radius: var(--radius-field);
-    margin-bottom: var(--sp-4);
-    border: 1px solid transparent;
-}
-
+/* Bootstrap's stock alert palette is light-mode; recolour to stay legible
+   and on-brand against the dark ground. */
 .error-message {
-    background: var(--danger-bg);
-    border-color: var(--danger-border);
-    color: var(--danger);
+    --bs-alert-color: #f0a99f;
+    --bs-alert-bg: rgba(226, 117, 106, .09);
+    --bs-alert-border-color: rgba(226, 117, 106, .35);
 }
 
 .info-message {
-    background: var(--info-bg);
-    border-color: var(--info-border);
-    color: var(--info);
+    --bs-alert-color: #9cc7ea;
+    --bs-alert-bg: rgba(90, 154, 201, .1);
+    --bs-alert-border-color: rgba(90, 154, 201, .35);
 }
 
 .success-message {
-    background: var(--success-bg);
-    border-color: var(--success-border);
-    color: var(--success);
+    --bs-alert-color: #8fd9ae;
+    --bs-alert-bg: rgba(94, 201, 139, .09);
+    --bs-alert-border-color: rgba(94, 201, 139, .35);
 }
 
+/* The feed rides on Bootstrap's .card for background/border/radius; only the
+   surface colour needs overriding so it reads as lifted material rather than
+   the page ground. */
 #leagueFeed {
+    --bs-card-bg: var(--lc-surface, #12211a);
+    --bs-card-border-color: var(--line, #2c4437);
     display: flex;
     flex-direction: column;
-    gap: var(--sp-2);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-card);
-    padding: var(--sp-4);
+    gap: var(--lc-sp-2);
+    padding: var(--lc-sp-4);
     max-height: 60vh;
     overflow-y: auto;
 }
 
 .empty-state {
-    color: var(--ink-muted);
+    color: var(--silver-dim, #7f9187);
     text-align: center;
-    padding: var(--sp-4);
+    padding: var(--lc-sp-4);
 }
 
 .bubble {
     max-width: 74%;
-    padding: var(--sp-2) var(--sp-3);
+    padding: var(--lc-sp-2) var(--lc-sp-3);
     border-radius: 14px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--line, #2c4437);
+    color: var(--silver-bright, #eef3ef);
 }
 
 .bubble-author {
     display: block;
     font-size: 0.75rem;
     font-weight: 700;
-    color: var(--teal-600);
+    color: var(--gold-bright, #e8c765);
     margin-bottom: 2px;
 }
 
@@ -132,55 +97,41 @@ body.league-chat {
     display: block;
     margin-top: 2px;
     font-size: 0.72rem;
-    color: var(--ink-muted);
+    color: var(--silver-dim, #7f9187);
 }
 
 .bubble.mine {
     align-self: flex-end;
-    background: var(--navy);
-    color: #fff;
-    border-color: var(--navy);
+    background: var(--lc-surface-hover);
+    /* Gold stays an accent — a border tag distinguishes "mine" bubbles
+       instead of an inverted gold fill. */
+    border-color: var(--gold-deep, #8a6a15);
 }
 
 .bubble.mine .bubble-author {
-    color: #7dd3b0;
-}
-
-.bubble.mine .bubble-time {
-    color: #cbd5e1;
+    color: var(--gold-bright, #e8c765);
 }
 
 .bubble.theirs {
     align-self: flex-start;
-    background: var(--field-bg);
+    background: var(--lc-surface, #12211a);
 }
 
-.send-form {
-    display: flex;
-    gap: var(--sp-2);
-    margin-top: var(--sp-3);
+/* Send form: layout comes from Bootstrap's d-flex/gap utilities in the JSP;
+   only the input's border needs realigning with the app's dark surfaces. */
+#leagueSendForm .form-control {
+    border-color: var(--line, #2c4437);
+    background: #0f2118;
 }
 
-.send-form textarea {
-    flex: 1;
-    resize: vertical;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-field);
-    padding: var(--sp-2) var(--sp-3);
-    font-family: inherit;
-    background: var(--field-bg);
-}
+/* ---------- Narrow screens: sidebar becomes a wrapping top strip, matching
+   sidebar.css's own 900px breakpoint ------------------------------------- */
+@media (max-width: 900px) {
+    body.league-chat {
+        flex-direction: column;
+    }
 
-.send-form button {
-    background: var(--teal);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius-field);
-    padding: 0 var(--sp-5);
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.send-form button:hover {
-    background: var(--teal-600);
+    #leagueChat {
+        padding: 24px 16px 32px;
+    }
 }

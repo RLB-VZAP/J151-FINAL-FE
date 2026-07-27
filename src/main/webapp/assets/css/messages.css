@@ -1,137 +1,101 @@
 /* ============================================================================
    TryTons — Fantasy Rugby | Private Messages
-   Shares the palette/type/radii/spacing tokens used by the other screens
-   (see notifications.css). Targets only the markup in messages.jsp.
+   Loads on top of bootstrap.min.css and theme.css, consuming the Green-Gold
+   tokens (--bg, --line, --silver, --gold) rather than a separate palette.
+   Targets only the markup in messages.jsp.
    ========================================================================== */
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
-:root {
-    --navy: #1f3864;
-    --navy-700: #142544;
-    --teal: #1d9e75;
-    --teal-600: #178a65;
-    --bg: #f0f2f5;
-    --surface: #ffffff;
-    --ink: #1f2a44;
-    --ink-muted: #64748b;
-    --danger: #dc2626;
-    --danger-bg: #fef2f2;
-    --danger-border: #fca5a5;
-    --border: #d8dee9;
-    --field-bg: #f8fafc;
-    --radius-card: 12px;
-    --radius-field: 8px;
-    --sp-2: 8px;
-    --sp-3: 12px;
-    --sp-4: 16px;
-    --sp-5: 20px;
-    --sp-6: 24px;
-    --sp-8: 32px;
-}
-
 body.messages {
+    /* Sidebar.css requires host pages to own their own body layout so the
+       sidebar can sit beside the main column. */
+    display: flex;
+    min-height: 100vh;
     margin: 0;
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
-    color: var(--ink);
-    background: var(--bg);
+    /* Surfaces are lifted off the near-black page ground rather than being a
+       different hue, matching the pattern set by market-dashboard.css. */
+    --msg-surface: #12211a;
+    --msg-surface-hover: #1b3026;
+    --msg-radius-field: 8px;
+    --msg-sp-2: 8px;
+    --msg-sp-3: 12px;
+    --msg-sp-4: 16px;
 }
 
+/* Bootstrap's `.container` fights the fixed-width sidebar's flex sizing, so
+   the main column owns its own max-width and padding instead. */
 #messages {
+    flex: 1;
+    /* Without this a flex child with wide content refuses to shrink and
+       pushes the sidebar off-screen. */
+    min-width: 0;
     max-width: 1080px;
     margin: 0 auto;
-    padding: var(--sp-8) var(--sp-5);
-}
-
-#messages h1 {
-    color: var(--navy-700);
-    margin-bottom: var(--sp-6);
+    padding: 32px 40px 48px;
 }
 
 .error-message {
-    background: var(--danger-bg);
-    border: 1px solid var(--danger-border);
-    color: var(--danger);
-    padding: var(--sp-3) var(--sp-4);
-    border-radius: var(--radius-field);
-    margin-bottom: var(--sp-4);
+    /* Bootstrap's stock alert-danger palette is light-mode; recolour it to
+       stay legible and on-brand against the dark ground. */
+    --bs-alert-color: #f0a99f;
+    --bs-alert-bg: rgba(226, 117, 106, .09);
+    --bs-alert-border-color: rgba(226, 117, 106, .35);
 }
 
-.visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-}
-
-/* Two-pane layout: thread list + conversation */
-.messages-layout {
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: var(--sp-5);
-    align-items: start;
-}
-
-@media (max-width: 760px) {
-    .messages-layout {
-        grid-template-columns: 1fr;
-    }
-}
-
+/* Thread list and conversation panels ride on Bootstrap's .card for
+   background/border/radius; only the surface colour needs overriding so the
+   panel reads as lifted material rather than the page ground. */
 .thread-list,
 .conversation {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-card);
-    padding: var(--sp-4);
+    --bs-card-bg: var(--msg-surface, #12211a);
+    --bs-card-border-color: var(--line, #2c4437);
+    padding: var(--msg-sp-4);
 }
 
 .thread-list h2,
 .conversation-header h2 {
-    color: var(--navy-700);
+    color: var(--silver-bright, #eef3ef);
     font-size: 1.05rem;
-    margin: 0 0 var(--sp-3);
+    margin: 0 0 var(--msg-sp-3);
 }
 
 .empty-state {
-    color: var(--ink-muted);
-    padding: var(--sp-4);
+    color: var(--silver-dim, #7f9187);
+    padding: var(--msg-sp-4);
     text-align: center;
 }
 
-/* Thread list */
+/* ---------- Thread list ----------------------------------------------------- */
 .thread {
     display: grid;
     grid-template-columns: 1fr auto;
     grid-template-areas: "name badge" "preview preview";
-    gap: 2px var(--sp-2);
-    padding: var(--sp-3);
-    border-radius: var(--radius-field);
+    gap: 2px var(--msg-sp-2);
+    padding: var(--msg-sp-3);
+    border-radius: var(--msg-radius-field);
     text-decoration: none;
-    color: var(--ink);
+    color: var(--silver, #c7d1c9);
     border: 1px solid transparent;
+    transition: background-color .14s ease;
 }
 
 .thread:hover {
-    background: var(--field-bg);
+    background: var(--msg-surface-hover);
 }
 
 .thread.is-active {
-    background: var(--field-bg);
-    border-color: var(--border);
+    background: var(--msg-surface-hover);
+    border-color: var(--line, #2c4437);
 }
 
 .thread-name {
     grid-area: name;
     font-weight: 600;
-    color: var(--navy);
+    color: var(--silver-bright, #eef3ef);
 }
 
 .thread-preview {
     grid-area: preview;
-    color: var(--ink-muted);
+    color: var(--silver-dim, #7f9187);
     font-size: 0.85rem;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -140,53 +104,37 @@ body.messages {
 
 .unread-badge {
     grid-area: badge;
-    background: var(--teal);
-    color: #fff;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 1px var(--sp-2);
-    min-width: 20px;
-    text-align: center;
+    /* Gold stays an accent: dark text on gold reads far better here than
+       Bootstrap's white-on-primary default. */
+    background: var(--gold, #c9a227);
+    color: #141f0e;
 }
 
-/* Conversation */
+/* ---------- Conversation ----------------------------------------------------- */
 .conversation-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: var(--sp-3);
-    margin-bottom: var(--sp-3);
-}
-
-.block-button {
-    background: transparent;
-    color: var(--danger);
-    border: 1px solid var(--danger-border);
-    border-radius: var(--radius-field);
-    padding: var(--sp-2) var(--sp-3);
-    cursor: pointer;
-}
-
-.block-button:hover {
-    background: var(--danger-bg);
+    border-bottom: 1px solid var(--line, #2c4437);
+    padding-bottom: var(--msg-sp-3);
+    margin-bottom: var(--msg-sp-3);
 }
 
 #conversationMessages {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-2);
+    gap: var(--msg-sp-2);
     max-height: 52vh;
     overflow-y: auto;
-    padding: var(--sp-2);
+    padding: var(--msg-sp-2);
 }
 
 .bubble {
     max-width: 72%;
-    padding: var(--sp-2) var(--sp-3);
+    padding: var(--msg-sp-2) var(--msg-sp-3);
     border-radius: 14px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--line, #2c4437);
+    color: var(--silver-bright, #eef3ef);
 }
 
 .bubble .bubble-body {
@@ -199,52 +147,37 @@ body.messages {
     display: block;
     margin-top: 2px;
     font-size: 0.72rem;
-    color: var(--ink-muted);
+    color: var(--silver-dim, #7f9187);
 }
 
 .bubble.mine {
     align-self: flex-end;
-    background: var(--navy);
-    color: #fff;
-    border-color: var(--navy);
-}
-
-.bubble.mine .bubble-time {
-    color: #cbd5e1;
+    background: var(--msg-surface-hover);
+    /* Gold stays an accent — a border tag distinguishes "mine" bubbles
+       instead of an inverted gold fill. */
+    border-color: var(--gold-deep, #8a6a15);
 }
 
 .bubble.theirs {
     align-self: flex-start;
-    background: var(--field-bg);
+    background: var(--msg-surface, #12211a);
 }
 
-/* Send form */
-.send-form {
-    display: flex;
-    gap: var(--sp-2);
-    margin-top: var(--sp-3);
+/* Send form: layout comes from Bootstrap's d-flex/gap utilities in the JSP;
+   only the input's border needs realigning with the app's dark surfaces. */
+#sendForm .form-control {
+    border-color: var(--line, #2c4437);
+    background: #0f2118;
 }
 
-.send-form textarea {
-    flex: 1;
-    resize: vertical;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-field);
-    padding: var(--sp-2) var(--sp-3);
-    font-family: inherit;
-    background: var(--field-bg);
-}
+/* ---------- Narrow screens: sidebar becomes a wrapping top strip, matching
+   sidebar.css's own 900px breakpoint ------------------------------------- */
+@media (max-width: 900px) {
+    body.messages {
+        flex-direction: column;
+    }
 
-.send-form button {
-    background: var(--teal);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius-field);
-    padding: 0 var(--sp-5);
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.send-form button:hover {
-    background: var(--teal-600);
+    #messages {
+        padding: 24px 16px 32px;
+    }
 }

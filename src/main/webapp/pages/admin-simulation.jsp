@@ -148,6 +148,7 @@
                 </div>
 
                 <form method="post" action="${pageContext.request.contextPath}/admin/simulation" id="simulationSettingsForm">
+                    <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                     <input type="hidden" name="action" value="saveSettings">
                     <input type="hidden" id="settingsId" name="settingsId" value="">
 
@@ -268,6 +269,7 @@
                     <h3 class="asim-panel-title">Trigger resimulation</h3>
 
                     <form method="post" action="${pageContext.request.contextPath}/admin/simulation#resimulationSection" id="resimulationTriggerForm">
+                        <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
                         <input type="hidden" name="action" value="resimulate">
 
                         <div class="asim-field">
