@@ -96,6 +96,100 @@ body.admin-message-moderation {
     font-weight: 600;
 }
 
+/* ---------- Reported direct message context (Rule E) ---------------------------
+   Manual message-id lookup — no queue exists for reported direct messages, so
+   this is a search box rather than a table row. --------------------------------- */
+.dmc-intro {
+    color: var(--silver-dim, #7f9187);
+    margin: 0 0 var(--amm-sp-3);
+}
+
+.dmc-lookup-form input[type="text"] {
+    max-width: 360px;
+    border-color: var(--line, #2c4437);
+    background: #0f2118;
+}
+
+.dmc-denied {
+    color: #f0a99f;
+}
+
+/* Calls out the 10-message bound explicitly so the privacy limit reads as a
+   deliberate design choice rather than a silent truncation. */
+.dmc-bound-note {
+    color: var(--gold-bright, #e8c765);
+    font-size: 0.85rem;
+    margin: 0 0 var(--amm-sp-3);
+}
+
+.dmc-window {
+    display: flex;
+    flex-direction: column;
+    gap: var(--amm-sp-2);
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.dmc-message {
+    border: 1px solid var(--line, #2c4437);
+    border-radius: 8px;
+    padding: var(--amm-sp-2) var(--amm-sp-3);
+    background: var(--amm-surface-hover);
+}
+
+.dmc-message.is-anchor {
+    border-color: var(--gold, #c9a227);
+}
+
+.dmc-message.is-rejected {
+    border-style: dashed;
+}
+
+.dmc-message-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--amm-sp-2);
+    margin-bottom: 4px;
+    font-size: 0.78rem;
+}
+
+.dmc-sender {
+    font-weight: 600;
+    color: var(--silver-bright, #eef3ef);
+}
+
+.dmc-time {
+    color: var(--silver-dim, #7f9187);
+}
+
+.dmc-tag {
+    border-radius: 999px;
+    padding: 1px 8px;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.dmc-tag-anchor {
+    background: rgba(232, 199, 101, .14);
+    border: 1px solid rgba(232, 199, 101, .4);
+    color: var(--gold-bright, #e8c765);
+}
+
+.dmc-tag-rejected {
+    background: rgba(226, 117, 106, .1);
+    border: 1px solid rgba(226, 117, 106, .35);
+    color: #f0a99f;
+}
+
+.dmc-message-body {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: var(--silver, #c7d1c9);
+}
+
 /* Blocklist manager */
 .add-phrase-form .form-control {
     max-width: 360px;

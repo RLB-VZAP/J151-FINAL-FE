@@ -45,6 +45,15 @@ public class LeagueServlet extends AbstractServlet {
         return authContext.isAuthenticated() && fantasyTeamRestClient.getMyTeam().isPresent();
     }
 
+    /**
+     * Administrators create unmanaged leagues and never own a fantasy team, so the
+     * team requirement below does not apply to them. Used to unlock the "Create
+     * league" action and the create form for admins regardless of {@link #currentUserHasTeam()}.
+     */
+    private boolean canCreateLeague() {
+        return authContext.isAdmin() || currentUserHasTeam();
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String path = request.getServletPath();
@@ -61,6 +70,7 @@ public class LeagueServlet extends AbstractServlet {
 
                 request.setAttribute("myLeagues", loadMyLeagues());
                 request.setAttribute("hasTeam", currentUserHasTeam());
+                request.setAttribute("canCreateLeague", canCreateLeague());
                 populateLeaguesView(request, publicLeagues.orElseGet(List::of));
                 yield "/pages/leagues.jsp";
             }
@@ -80,10 +90,13 @@ public class LeagueServlet extends AbstractServlet {
 
             case "/league/create" -> {
                 // Creating a league enrols the creator as its first member, which needs a
-                // team. The button on the leagues page is disabled without one, but this
-                // URL is reachable directly, so the form is withheld here too rather than
-                // letting a filled-in form fail on submit.
+                // team - unless the creator is an administrator, who creates an unmanaged
+                // league instead. The button on the leagues page is disabled without one,
+                // but this URL is reachable directly, so the form is withheld here too
+                // rather than letting a filled-in form fail on submit.
                 request.setAttribute("hasTeam", currentUserHasTeam());
+                request.setAttribute("canCreateLeague", canCreateLeague());
+                request.setAttribute("isAdmin", authContext.isAdmin());
                 yield "/pages/create-league.jsp";
             }
 
@@ -142,6 +155,9 @@ public class LeagueServlet extends AbstractServlet {
                     return;
                 }
                 if (handleApiFailure(request, response, "Unable to create league. Check your details and try again.")) return;
+                request.setAttribute("hasTeam", currentUserHasTeam());
+                request.setAttribute("canCreateLeague", canCreateLeague());
+                request.setAttribute("isAdmin", authContext.isAdmin());
                 request.getRequestDispatcher("/pages/create-league.jsp").forward(request, response);
             }
 
@@ -186,11 +202,20 @@ public class LeagueServlet extends AbstractServlet {
         }
     }
 
+    private static final String PUBLIC_LEAGUE_TYPE = "PUBLIC";
+
+    /**
+     * Administrators can only create public leagues (they can never be a league
+     * manager, and a private league needs one to hand out the join code). The
+     * backend enforces this; forcing it here too means a tampered form field
+     * cannot even reach the backend with a PRIVATE request for an admin.
+     */
     private LeagueRequest buildLeagueRequest(HttpServletRequest request) {
+        String leagueType = authContext.isAdmin() ? PUBLIC_LEAGUE_TYPE : request.getParameter("leagueType");
         return new LeagueRequest(
                 request.getParameter("leagueName"),
                 request.getParameter("description"),
-                request.getParameter("leagueType"),
+                leagueType,
                 parseIntOrZero(request.getParameter("maxMembers")));
     }
 
@@ -289,6 +314,10 @@ public class LeagueServlet extends AbstractServlet {
                 memberLeagues.add(league);
                 parseUuid(leagueId).ifPresent(id -> leaderboardRestClient.getLeaderboardForLeague(id)
                         .ifPresent(standings -> leagueStandings.put(leagueId, standings)));
+            } else if (authContext.isAdmin()) {
+                // Admins do not join leagues, but they need every league - public or
+                // private - listed here so Discover can offer a chat-monitoring route.
+                discoverLeagues.add(league);
             } else if ("PUBLIC".equalsIgnoreCase(league.getLeagueType())) {
                 discoverLeagues.add(league);
             }

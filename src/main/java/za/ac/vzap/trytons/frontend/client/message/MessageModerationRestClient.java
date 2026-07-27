@@ -21,6 +21,7 @@ public class MessageModerationRestClient {
     private static final String BASE_PATH = "/admin/message-moderation";
     private static final String PENDING_PATH = BASE_PATH + "/pending";
     private static final String BLOCKLIST_PATH = BASE_PATH + "/blocklist";
+    private static final String DIRECT_PATH = BASE_PATH + "/direct";
 
     private static final Logger LOG = Logger.getLogger(MessageModerationRestClient.class.getName());
 
@@ -53,6 +54,21 @@ public class MessageModerationRestClient {
         }
         apiClient.put(BASE_PATH + "/" + encode(messageId.toString()) + "/reject", null, Void.class);
         return apiCallStatus.isSuccess();
+    }
+
+    // Rule F: bounded to the reported message plus up to 10 preceding ones. The backend
+    // returns 403 when the message id carries no report — the caller is expected to
+    // check apiCallStatus.isForbidden() and render an explicit denied state for that case.
+    public Optional<List<DirectMessageResponse>> getDirectMessageWindow(UUID messageId) {
+        if (messageId == null) {
+            return Optional.empty();
+        }
+        Optional<DirectMessageResponse[]> response =
+                apiClient.get(DIRECT_PATH + "/" + encode(messageId.toString()), DirectMessageResponse[].class);
+        if (response.isEmpty()) {
+            LOG.log(Level.WARNING, "Unable to load admin direct message window.");
+        }
+        return response.map(messages -> new ArrayList<>(Arrays.asList(messages)));
     }
 
     public Optional<List<BlockedPhraseResponse>> listBlocklist() {

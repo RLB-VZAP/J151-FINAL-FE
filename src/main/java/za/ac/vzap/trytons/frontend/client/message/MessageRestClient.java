@@ -24,6 +24,10 @@ public class MessageRestClient {
     private static final String UNREAD_COUNT_PATH = "/messages/unread-count";
     private static final String BLOCK_PATH = "/messages/block";
     private static final String BLOCKED_PATH = "/messages/blocked";
+    private static final String REQUESTS_PATH = "/messages/requests";
+    private static final String REPORT_SUFFIX = "/report";
+    private static final String APPROVE_SUFFIX = "/approve";
+    private static final String REJECT_SUFFIX = "/reject";
 
     private static final Logger LOG = Logger.getLogger(MessageRestClient.class.getName());
 
@@ -108,6 +112,53 @@ public class MessageRestClient {
             LOG.log(Level.WARNING, "Unable to load blocked users.");
         }
         return response.map(users -> new ArrayList<>(Arrays.asList(users)));
+    }
+
+    public Optional<MessageRequestResponse> createMessageRequest(UUID targetUserId) {
+        if (targetUserId == null) {
+            LOG.log(Level.WARNING, "A target user is required to send a message request.");
+            return Optional.empty();
+        }
+        Optional<MessageRequestResponse> response = apiClient.post(
+                REQUESTS_PATH, new CreateMessageRequestRequest(targetUserId), MessageRequestResponse.class);
+        if (response.isEmpty()) {
+            LOG.log(Level.WARNING, "Unable to create message request.");
+        }
+        return response;
+    }
+
+    public Optional<MessageRequestOverviewResponse> getMessageRequests() {
+        Optional<MessageRequestOverviewResponse> response =
+                apiClient.get(REQUESTS_PATH, MessageRequestOverviewResponse.class);
+        if (response.isEmpty()) {
+            LOG.log(Level.WARNING, "Unable to load message requests.");
+        }
+        return response;
+    }
+
+    public boolean approveMessageRequest(UUID requestId) {
+        if (requestId == null) {
+            return false;
+        }
+        apiClient.put(REQUESTS_PATH + "/" + encode(requestId.toString()) + APPROVE_SUFFIX, null, MessageRequestResponse.class);
+        return apiCallStatus.isSuccess();
+    }
+
+    public boolean rejectMessageRequest(UUID requestId) {
+        if (requestId == null) {
+            return false;
+        }
+        apiClient.put(REQUESTS_PATH + "/" + encode(requestId.toString()) + REJECT_SUFFIX, null, MessageRequestResponse.class);
+        return apiCallStatus.isSuccess();
+    }
+
+    public boolean reportDirectMessage(UUID messageId, String reason) {
+        if (messageId == null) {
+            return false;
+        }
+        apiClient.post(DIRECT_PATH + "/" + encode(messageId.toString()) + REPORT_SUFFIX,
+                new ReportMessageRequest(reason), Void.class);
+        return apiCallStatus.isSuccess();
     }
 
     private String encode(String value) {

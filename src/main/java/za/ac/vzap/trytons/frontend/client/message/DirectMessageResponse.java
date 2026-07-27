@@ -19,4 +19,8 @@ public class DirectMessageResponse {
     private boolean isRead;
     @JsonProperty("mine")
     private boolean mine;
+    // APPROVED | REJECTED. A normal conversation only ever contains APPROVED
+    // messages (the backend filters REJECTED ones out); REJECTED entries only
+    // ever appear in the admin's bounded moderation window.
+    private String status;
 }

@@ -35,33 +35,42 @@
             <p class="catalog-error" role="alert"><c:out value="${error}" /></p>
         </c:if>
 
-        <%@ include file="/WEB-INF/jspf/no-team-notice.jspf" %>
+        <c:choose>
+            <c:when test="${sessionScope.role == 'ADMINISTRATOR'}">
+                <%-- Administrators monitor leagues but never join one; keep the browse
+                     list below visible for them without any join affordance. --%>
+                <p class="catalog-empty">Administrators cannot join leagues. Browse public leagues below.</p>
+            </c:when>
+            <c:otherwise>
+                <%@ include file="/WEB-INF/jspf/no-team-notice.jspf" %>
 
-        <%-- ---------- Private league: code only ---------- --%>
-        <%-- The code is enough to identify the league, so there is no id to enter.
-             Never pre-filled from a URL, and this form always posts. --%>
-        <section class="lg-card lg-code-card">
-            <div class="lg-card-head">
-                <span class="lg-card-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-                </span>
-                <div class="lg-card-heading">
-                    <p class="lg-card-name">Have a join code?</p>
-                    <p class="lg-card-sub">Private leagues are joined with the code your league manager shared.</p>
-                </div>
-            </div>
+                <%-- ---------- Private league: code only ---------- --%>
+                <%-- The code is enough to identify the league, so there is no id to enter.
+                     Never pre-filled from a URL, and this form always posts. --%>
+                <section class="lg-card lg-code-card">
+                    <div class="lg-card-head">
+                        <span class="lg-card-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                        </span>
+                        <div class="lg-card-heading">
+                            <p class="lg-card-name">Have a join code?</p>
+                            <p class="lg-card-sub">Private leagues are joined with the code your league manager shared.</p>
+                        </div>
+                    </div>
 
-            <form class="lg-code-form" method="post" action="${pageContext.request.contextPath}/league/join">
-                <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
-                <input type="hidden" name="submit" value="league/join">
-                <label class="search-wrap" for="leagueCode">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-                    <input type="text" id="leagueCode" name="leagueCode" placeholder="Enter join code"
-                           autocomplete="off" aria-label="League join code" required ${not hasTeam ? "disabled" : ""}>
-                </label>
-                <button type="submit" class="btn-gold lg-join" ${not hasTeam ? "disabled" : ""}>Join</button>
-            </form>
-        </section>
+                    <form class="lg-code-form" method="post" action="${pageContext.request.contextPath}/league/join">
+                        <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
+                        <input type="hidden" name="submit" value="league/join">
+                        <label class="search-wrap" for="leagueCode">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                            <input type="text" id="leagueCode" name="leagueCode" placeholder="Enter join code"
+                                   autocomplete="off" aria-label="League join code" required ${not hasTeam ? "disabled" : ""}>
+                        </label>
+                        <button type="submit" class="btn-gold lg-join" ${not hasTeam ? "disabled" : ""}>Join</button>
+                    </form>
+                </section>
+            </c:otherwise>
+        </c:choose>
 
         <%-- ---------- Public leagues: search by name ---------- --%>
         <div class="lg-tabs" role="presentation">
@@ -103,14 +112,17 @@
 
                                 <div class="lg-card-footer">
                                     <span class="lg-spots">${spotsLeft} of ${openLeague.maxMembers} spots left</span>
-                                    <%-- Public leagues need no code; the league is chosen by clicking,
-                                         so there is nothing for the user to type or look up. --%>
-                                    <form class="lg-join-form" action="${pageContext.request.contextPath}/league/join" method="post">
-                                        <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
-                                        <input type="hidden" name="submit" value="league/join">
-                                        <input type="hidden" name="leagueId" value="${fn:escapeXml(openLeague.leagueId)}">
-                                        <button type="submit" class="btn-gold lg-join" ${spotsLeft <= 0 or not hasTeam ? "disabled" : ""}>Join</button>
-                                    </form>
+                                    <%-- Administrators monitor leagues but never join one. --%>
+                                    <c:if test="${sessionScope.role != 'ADMINISTRATOR'}">
+                                        <%-- Public leagues need no code; the league is chosen by clicking,
+                                             so there is nothing for the user to type or look up. --%>
+                                        <form class="lg-join-form" action="${pageContext.request.contextPath}/league/join" method="post">
+                                            <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
+                                            <input type="hidden" name="submit" value="league/join">
+                                            <input type="hidden" name="leagueId" value="${fn:escapeXml(openLeague.leagueId)}">
+                                            <button type="submit" class="btn-gold lg-join" ${spotsLeft <= 0 or not hasTeam ? "disabled" : ""}>Join</button>
+                                        </form>
+                                    </c:if>
                                 </div>
                             </article>
                         </c:forEach>

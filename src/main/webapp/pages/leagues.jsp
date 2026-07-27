@@ -70,6 +70,7 @@
 
                         <div class="lg-card-footer">
                             <a class="lg-link" href="${pageContext.request.contextPath}/league/members?leagueId=${league.leagueId}">View members &rarr;</a>
+                            <a class="lg-link" href="${pageContext.request.contextPath}/league-chat?leagueId=${league.leagueId}">Chat &rarr;</a>
                         </div>
                     </section>
                 </div>
@@ -83,11 +84,15 @@
                         <h1 class="brand-font">Leagues</h1>
                     </div>
                     <div class="lg-actions">
-                        <a class="btn-outline" href="${pageContext.request.contextPath}/league/join">Join league</a>
+                        <%-- Administrators monitor leagues but never join one. --%>
+                        <c:if test="${sessionScope.role != 'ADMINISTRATOR'}">
+                            <a class="btn-outline" href="${pageContext.request.contextPath}/league/join">Join league</a>
+                        </c:if>
                         <%-- Creating a league enrols you as its first member and manager, which
-                             needs a team just as joining does, so it is gated the same way. --%>
+                             needs a team just as joining does, so it is gated the same way.
+                             Administrators are exempt: they create an unmanaged public league. --%>
                         <c:choose>
-                            <c:when test="${hasTeam}">
+                            <c:when test="${canCreateLeague}">
                                 <a class="btn-gold" href="${pageContext.request.contextPath}/league/create">
                                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
                                     Create league
@@ -274,6 +279,7 @@
 
                                         <div class="lg-card-footer">
                                             <a class="lg-link" href="${pageContext.request.contextPath}/leaderboard?leagueId=${myLeague.leagueId}">View standings &rarr;</a>
+                                            <a class="lg-link" href="${pageContext.request.contextPath}/league-chat?leagueId=${myLeague.leagueId}">Chat &rarr;</a>
                                         </div>
                                     </article>
                                 </c:forEach>
@@ -303,22 +309,33 @@
                                                 <p class="lg-card-name" title="${fn:escapeXml(openLeague.leagueName)}">${fn:escapeXml(openLeague.leagueName)}</p>
                                                 <p class="lg-card-sub">${memberCount} / ${openLeague.maxMembers} teams</p>
                                             </div>
-                                            <span class="lg-type lg-type-public">Public</span>
+                                            <span class="lg-type ${openLeague.leagueType == 'PRIVATE' ? 'lg-type-private' : 'lg-type-public'}">
+                                                ${openLeague.leagueType == 'PRIVATE' ? 'Private' : 'Public'}
+                                            </span>
                                         </div>
 
                                         <p class="lg-desc">${fn:escapeXml(openLeague.description)}</p>
 
                                         <div class="lg-card-footer">
                                             <span class="lg-spots">${spotsLeft} of ${openLeague.maxMembers} spots left</span>
-                                            <form class="lg-join-form" action="${pageContext.request.contextPath}/league/join" method="post">
-                                                <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
-                                                <input type="hidden" name="submit" value="league/join">
-                                                <input type="hidden" name="leagueId" value="${fn:escapeXml(openLeague.leagueId)}">
-                                                <%-- Disabled without a team: the join would be rejected anyway. --%>
-                                                <button type="submit" class="btn-gold lg-join"
-                                                        ${spotsLeft <= 0 or not hasTeam ? 'disabled' : ''}
-                                                        title="${not hasTeam ? 'Create a team before joining a league' : ''}">Join</button>
-                                            </form>
+                                            <%-- Administrators monitor leagues rather than joining them, so they get
+                                                 a read-only route into the chat instead of a join form. --%>
+                                            <c:choose>
+                                                <c:when test="${sessionScope.role == 'ADMINISTRATOR'}">
+                                                    <a class="lg-link" href="${pageContext.request.contextPath}/league-chat?leagueId=${openLeague.leagueId}">Monitor chat &rarr;</a>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <form class="lg-join-form" action="${pageContext.request.contextPath}/league/join" method="post">
+                                                        <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
+                                                        <input type="hidden" name="submit" value="league/join">
+                                                        <input type="hidden" name="leagueId" value="${fn:escapeXml(openLeague.leagueId)}">
+                                                        <%-- Disabled without a team: the join would be rejected anyway. --%>
+                                                        <button type="submit" class="btn-gold lg-join"
+                                                                ${spotsLeft <= 0 or not hasTeam ? 'disabled' : ''}
+                                                                title="${not hasTeam ? 'Create a team before joining a league' : ''}">Join</button>
+                                                    </form>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </div>
                                     </article>
                                 </c:forEach>

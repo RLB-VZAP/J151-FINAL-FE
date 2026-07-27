@@ -116,6 +116,57 @@
     text-transform: uppercase;
 }
 
+/* ---------- Collapsible Administration section --------------------------------
+   The label doubles as a <button> toggle (sidebar.jspf), so browser default
+   button chrome is stripped here to keep the original label's look. */
+.sidebar-section-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font: inherit;
+}
+
+.sidebar-section-chevron {
+    flex-shrink: 0;
+    transition: transform .18s ease;
+}
+
+.sidebar-admin-group.is-collapsed .sidebar-section-chevron {
+    transform: rotate(-90deg);
+}
+
+/* Grid-rows collapse trick: animating 1fr -> 0fr needs no measured pixel
+   height, so it works for a links list of any length without JS layout
+   reads. The inner wrapper supplies the overflow clip the outer grid track
+   needs in order to visually hide its content as the track shrinks. */
+.sidebar-admin-links {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows .18s ease;
+}
+
+.sidebar-admin-links-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    overflow: hidden;
+}
+
+.sidebar-admin-group.is-collapsed .sidebar-admin-links {
+    grid-template-rows: 0fr;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sidebar-section-chevron,
+    .sidebar-admin-links {
+        transition: none;
+    }
+}
+
 /* ---------- Footer / user cluster -------------------------------------------- */
 .sidebar-footer {
     margin-top: 16px;
@@ -234,6 +285,19 @@
     .sidebar-section-label {
         width: 100%;
         margin-top: 10px;
+    }
+
+    /* The group itself must take the full row width for the label to sit on
+       its own line above the (wrapping) links, matching the desktop layout's
+       intent inside the horizontal strip. */
+    .sidebar-admin-group {
+        width: 100%;
+    }
+
+    .sidebar-admin-links-inner {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 4px;
     }
 }
 

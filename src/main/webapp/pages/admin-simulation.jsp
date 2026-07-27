@@ -27,8 +27,9 @@
                 <p class="catalog-eyebrow">Administration</p>
                 <h1 class="brand-font">Simulation Settings</h1>
                 <p class="asim-intro">
-                    Control the weighting used when generating per-player match statistics, and trigger admin-controlled
-                    resimulations for individual fixtures.
+                    Control the weighting used when generating per-player match statistics. To trigger an admin-controlled
+                    resimulation for a fixture or review resimulation history, see the
+                    <a class="asim-inline-link" href="${pageContext.request.contextPath}/admin/resimulation">Resimulation</a> page.
                 </p>
             </div>
         </header>
@@ -201,100 +202,6 @@
             </section>
 
         </div>
-
-        <%-- ---------- Controlled resimulation ---------- --%>
-        <section id="resimulationSection">
-            <div class="asim-section-head">
-                <h2 class="asim-section-title">Controlled resimulation</h2>
-                <span class="asim-rule-line"></span>
-            </div>
-
-            <%-- No static disclaimer here: the backend (ControlledResimulationServiceImpl) is
-                 fully implemented, and a rejected trigger already surfaces its specific
-                 reason (e.g. "The round has not reached its lock deadline.") through the
-                 ${error} alert above — that is the only explanation an admin needs, and
-                 only appears when something actually goes wrong. --%>
-            <div class="asim-grid asim-grid-even">
-
-                <section class="asim-panel">
-                    <h3 class="asim-panel-title">Resimulation history</h3>
-
-                    <form method="get" action="${pageContext.request.contextPath}/admin/simulation#resimulationSection" id="resimulationHistoryForm" class="asim-inline-form">
-                        <div class="asim-field asim-field-grow">
-                            <label class="asim-label" for="historyFixtureId">Fixture</label>
-                            <select class="asim-input" id="historyFixtureId" name="fixtureId" required>
-                                <option value="">&mdash; Select fixture &mdash;</option>
-                                <c:forEach var="fixture" items="${fixtures}">
-                                    <option value="${fixture.fixtureId}" ${fixture.fixtureId eq selectedFixtureId ? 'selected' : ''}>
-                                        <c:out value="${fixture.teamAName}" /> vs <c:out value="${fixture.teamBName}" /> &mdash; ${fixture.fixtureDate}
-                                    </option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                        <button type="submit" class="asim-ghost">View history</button>
-                    </form>
-
-                    <c:if test="${not empty selectedFixtureId}">
-                        <c:choose>
-                            <c:when test="${empty resimulations}">
-                                <p class="asim-empty asim-empty-sm" id="resimulationsEmptyState">No resimulations recorded for this fixture yet.</p>
-                            </c:when>
-                            <c:otherwise>
-                                <div class="rtbl" id="resimulationsTable">
-                                    <div class="rtbl-scroll">
-                                        <div class="rtbl-head">
-                                            <span class="rtbl-c">Run #</span>
-                                            <span>Reason</span>
-                                            <span class="rtbl-c">Current</span>
-                                            <span class="rtbl-c">Approved</span>
-                                            <span>Resimulated at</span>
-                                        </div>
-                                        <c:forEach var="resimulation" items="${resimulations}">
-                                            <div class="rtbl-row">
-                                                <span class="rtbl-c rtbl-run"><c:out value="${resimulation.simulationRunNumber}" /></span>
-                                                <span class="rtbl-reason" title="${fn:escapeXml(resimulation.resimulationReason)}"><c:out value="${resimulation.resimulationReason}" /></span>
-                                                <span class="rtbl-c"><span class="asim-flag ${resimulation.current ? 'is-yes' : 'is-no'}">${resimulation.current ? 'Yes' : 'No'}</span></span>
-                                                <span class="rtbl-c"><span class="asim-flag ${resimulation.approved ? 'is-yes' : 'is-no'}">${resimulation.approved ? 'Yes' : 'No'}</span></span>
-                                                <span class="rtbl-when">${fn:substring(fn:replace(resimulation.resimulatedAt, 'T', ' '), 0, 16)}</span>
-                                            </div>
-                                        </c:forEach>
-                                    </div>
-                                </div>
-                            </c:otherwise>
-                        </c:choose>
-                    </c:if>
-                </section>
-
-                <section class="asim-panel">
-                    <h3 class="asim-panel-title">Trigger resimulation</h3>
-
-                    <form method="post" action="${pageContext.request.contextPath}/admin/simulation#resimulationSection" id="resimulationTriggerForm">
-                        <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
-                        <input type="hidden" name="action" value="resimulate">
-
-                        <div class="asim-field">
-                            <label class="asim-label" for="resimulateFixtureId">Fixture</label>
-                            <select class="asim-input" id="resimulateFixtureId" name="fixtureId" required>
-                                <option value="">&mdash; Select fixture &mdash;</option>
-                                <c:forEach var="fixture" items="${fixtures}">
-                                    <option value="${fixture.fixtureId}" ${fixture.fixtureId eq selectedFixtureId ? 'selected' : ''}>
-                                        <c:out value="${fixture.teamAName}" /> vs <c:out value="${fixture.teamBName}" /> &mdash; ${fixture.fixtureDate}
-                                    </option>
-                                </c:forEach>
-                            </select>
-                        </div>
-
-                        <div class="asim-field">
-                            <label class="asim-label" for="resimulationReason">Reason</label>
-                            <input class="asim-input" type="text" id="resimulationReason" name="resimulationReason" placeholder="e.g. correction after review" required>
-                        </div>
-
-                        <button type="submit" class="btn-gold asim-submit">Trigger resimulation</button>
-                    </form>
-                </section>
-
-            </div>
-        </section>
 
     </div>
 </main>

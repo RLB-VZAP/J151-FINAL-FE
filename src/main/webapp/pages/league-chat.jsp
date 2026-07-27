@@ -56,21 +56,38 @@
                 <div class="bubble <%= mine ? "mine" : "theirs" %>" data-created-at="<%= message.getCreatedAt() %>">
                     <span class="bubble-author"><c:out value="${message.senderUsername}"/></span>
                     <p class="bubble-body"><c:out value="${message.body}"/></p>
-                    <span class="bubble-time"><c:out value="${message.createdAt}"/></span>
+                    <div class="bubble-footer">
+                        <span class="bubble-time"><c:out value="${message.createdAt}"/></span>
+                        <%-- Rule C: report a single message. Reporting cannot be undone, so the
+                             browser confirms before this ever submits. --%>
+                        <form method="post" action="${pageContext.request.contextPath}/league-chat" class="report-form"
+                              onsubmit="return confirm('Report this message to an administrator? This cannot be undone.');">
+                            <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
+                            <input type="hidden" name="action" value="report">
+                            <input type="hidden" name="leagueId" value="${fn:escapeXml(leagueId)}">
+                            <input type="hidden" name="messageId" value="${message.messageId}">
+                            <input type="text" name="reason" maxlength="200" placeholder="Reason (optional)" class="report-reason">
+                            <button type="submit" class="report-btn">Report</button>
+                        </form>
+                    </div>
                 </div>
             <%      }
                 }
             %>
         </div>
 
-        <form id="leagueSendForm" method="post" action="${pageContext.request.contextPath}/league-chat" class="d-flex gap-2 mt-3">
-            <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
-            <input type="hidden" name="action" value="send">
-            <input type="hidden" name="leagueId" value="${fn:escapeXml(leagueId)}">
-            <label for="leagueMessageBody" class="visually-hidden">Message</label>
-            <textarea id="leagueMessageBody" name="body" rows="2" placeholder="Message the league…" required class="form-control"></textarea>
-            <button type="submit" class="btn btn-gold">Send</button>
-        </form>
+        <%-- Administrators can monitor any league's chat but are not members, so the
+             backend rejects a post from them; the send box is withheld to match. --%>
+        <c:if test="${sessionScope.role != 'ADMINISTRATOR'}">
+            <form id="leagueSendForm" method="post" action="${pageContext.request.contextPath}/league-chat" class="d-flex gap-2 mt-3">
+                <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
+                <input type="hidden" name="action" value="send">
+                <input type="hidden" name="leagueId" value="${fn:escapeXml(leagueId)}">
+                <label for="leagueMessageBody" class="visually-hidden">Message</label>
+                <textarea id="leagueMessageBody" name="body" rows="2" placeholder="Message the league…" required class="form-control"></textarea>
+                <button type="submit" class="btn btn-gold">Send</button>
+            </form>
+        </c:if>
     </c:if>
 </main>
 

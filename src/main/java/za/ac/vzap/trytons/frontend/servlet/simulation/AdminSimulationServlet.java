@@ -5,11 +5,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import za.ac.vzap.trytons.frontend.client.fixture.FixtureRestClient;
-import za.ac.vzap.trytons.frontend.client.fixture.FixtureResponse;
-import za.ac.vzap.trytons.frontend.client.simulation.ResimulationRequest;
-import za.ac.vzap.trytons.frontend.client.simulation.ResimulationResponse;
-import za.ac.vzap.trytons.frontend.client.simulation.ResimulationRestClient;
 import za.ac.vzap.trytons.frontend.client.simulation.SimulationSettingRequest;
 import za.ac.vzap.trytons.frontend.client.simulation.SimulationSettingResponse;
 import za.ac.vzap.trytons.frontend.client.simulation.SimulationSettingRestClient;
@@ -17,8 +12,6 @@ import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,12 +24,6 @@ public class AdminSimulationServlet extends AbstractServlet {
     @Inject
     private SimulationSettingRestClient simulationSettingRestClient;
 
-    @Inject
-    private ResimulationRestClient resimulationRestClient;
-
-    @Inject
-    private FixtureRestClient fixtureRestClient;
-
     private enum Outcome { SUCCESS, FAILURE, HANDLED }
 
     @Override
@@ -44,7 +31,7 @@ public class AdminSimulationServlet extends AbstractServlet {
         if (!requireAdmin(request, response)) {
             return;
         }
-        loadPage(request, request.getParameter("fixtureId"));
+        loadPage(request);
         request.getRequestDispatcher(VIEW).forward(request, response);
     }
 
@@ -58,14 +45,9 @@ public class AdminSimulationServlet extends AbstractServlet {
             action = "";
         }
 
-        String fixtureIdForReload = request.getParameter("fixtureId");
         Outcome outcome;
         switch (action) {
             case "saveSettings" -> outcome = saveSettings(request, response);
-            case "resimulate" -> {
-                outcome = resimulate(request, response);
-                fixtureIdForReload = request.getParameter("fixtureId");
-            }
             default -> {
                 request.setAttribute("error", "Unknown simulation action requested");
                 outcome = Outcome.FAILURE;
@@ -77,19 +59,12 @@ public class AdminSimulationServlet extends AbstractServlet {
         }
 
         if (outcome == Outcome.SUCCESS) {
-            flashSuccess(request, "resimulate".equals(action) ? "Resimulation triggered" : "Simulation settings saved");
-            String redirect = request.getContextPath() + "/admin/simulation";
-            if (fixtureIdForReload != null && !fixtureIdForReload.isBlank()) {
-                redirect += "?fixtureId=" + URLEncoder.encode(fixtureIdForReload, StandardCharsets.UTF_8);
-            }
-            if ("resimulate".equals(action)) {
-                redirect += "#resimulationSection";
-            }
-            response.sendRedirect(redirect);
+            flashSuccess(request, "Simulation settings saved");
+            response.sendRedirect(request.getContextPath() + "/admin/simulation");
             return;
         }
 
-        loadPage(request, fixtureIdForReload);
+        loadPage(request);
         request.getRequestDispatcher(VIEW).forward(request, response);
     }
 
@@ -134,27 +109,7 @@ public class AdminSimulationServlet extends AbstractServlet {
         return handleApiFailure(request, response, "Simulation settings could not be saved") ? Outcome.HANDLED : Outcome.FAILURE;
     }
 
-    private Outcome resimulate(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Optional<UUID> fixtureId = parseUuid(request.getParameter("fixtureId"));
-        String reason = request.getParameter("resimulationReason");
-
-        if (fixtureId.isEmpty()) {
-            request.setAttribute("error", "A valid fixture is required to trigger a resimulation");
-            return Outcome.FAILURE;
-        }
-
-        ResimulationRequest resimulationRequest = new ResimulationRequest();
-        resimulationRequest.setFixtureId(fixtureId.get());
-        resimulationRequest.setResimulationReason(reason);
-
-        Optional<ResimulationResponse> result = resimulationRestClient.resimulateFixture(resimulationRequest);
-        if (result.isPresent()) {
-            return Outcome.SUCCESS;
-        }
-        return handleApiFailure(request, response, "Resimulation could not be triggered") ? Outcome.HANDLED : Outcome.FAILURE;
-    }
-
-    private void loadPage(HttpServletRequest request, String fixtureIdParam) {
+    private void loadPage(HttpServletRequest request) {
         Optional<SimulationSettingResponse> active = simulationSettingRestClient.getActiveSimulationSetting();
         if (active.isPresent()) {
             request.setAttribute("activeSetting", active.get());
@@ -164,19 +119,6 @@ public class AdminSimulationServlet extends AbstractServlet {
 
         Optional<List<SimulationSettingResponse>> settings = simulationSettingRestClient.listSimulationSettings();
         request.setAttribute("simulationSettings", settings.orElse(List.of()));
-
-        Optional<List<FixtureResponse>> fixtures = fixtureRestClient.listFixtures(null);
-        request.setAttribute("fixtures", fixtures.orElse(List.of()));
-
-        request.setAttribute("selectedFixtureId", fixtureIdParam);
-        if (fixtureIdParam != null && !fixtureIdParam.isBlank()) {
-            Optional<UUID> fixtureId = parseUuid(fixtureIdParam);
-            if (fixtureId.isPresent()) {
-                Optional<List<ResimulationResponse>> resimulations =
-                        resimulationRestClient.listResimulationsForFixture(fixtureId.get());
-                request.setAttribute("resimulations", resimulations.orElse(List.of()));
-            }
-        }
     }
 
     private BigDecimal parseDecimal(String value) {
@@ -203,6 +145,6 @@ public class AdminSimulationServlet extends AbstractServlet {
 
     @Override
     public String getServletInfo() {
-        return "Admin Simulation Servlet, handles simulation settings capture and controlled resimulation requests";
+        return "Admin Simulation Servlet, handles simulation settings capture";
     }
 }

@@ -120,6 +120,7 @@
                                 <span>Joined</span>
                                 <span>Status</span>
                                 <span aria-hidden="true"></span>
+                                <span aria-hidden="true"></span>
                             </div>
                             <div class="lm-body">
                                 <c:forEach var="member" items="${members}">
@@ -158,6 +159,13 @@
                                             </c:when>
                                             <c:otherwise><span aria-hidden="true"></span></c:otherwise>
                                         </c:choose>
+
+                                        <span class="lm-message-cell">
+                                            <c:if test="${member.userId ne sessionScope.userId}">
+                                                <a class="lm-message"
+                                                   href="${pageContext.request.contextPath}/messages?recipientUserId=${member.userId}&name=${fn:escapeXml(mname)}">Message</a>
+                                            </c:if>
+                                        </span>
                                     </div>
                                 </c:forEach>
                             </div>

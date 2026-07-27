@@ -6,11 +6,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import za.ac.vzap.trytons.frontend.client.message.BlockedPhraseResponse;
+import za.ac.vzap.trytons.frontend.client.message.DirectMessageResponse;
 import za.ac.vzap.trytons.frontend.client.message.MessageModerationRestClient;
 import za.ac.vzap.trytons.frontend.client.message.PendingLeagueMessageResponse;
 import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -80,7 +82,46 @@ public class MessageModerationServlet extends AbstractServlet {
             request.setAttribute("error", "Unable to load moderation data right now");
         }
 
+        loadDirectMessageWindow(request);
+
         request.getRequestDispatcher(VIEW).forward(request, response);
+    }
+
+    // Rule E: admins have no listing of reported direct messages today (no such
+    // endpoint exists), so the entry point is a manual message id lookup rather
+    // than a queue row. A blank id means the lookup form was never submitted, so
+    // nothing is set and the section renders its default (empty) state.
+    private void loadDirectMessageWindow(HttpServletRequest request) {
+        String rawMessageId = request.getParameter("directMessageId");
+        if (rawMessageId == null || rawMessageId.isBlank()) {
+            return;
+        }
+        request.setAttribute("directMessageIdQuery", rawMessageId);
+
+        Optional<UUID> messageId = parseUuid(rawMessageId);
+        if (messageId.isEmpty()) {
+            request.setAttribute("directMessageWindowError", "That is not a valid message id.");
+            return;
+        }
+
+        Optional<List<DirectMessageResponse>> window = moderationRestClient.getDirectMessageWindow(messageId.get());
+        if (window.isEmpty()) {
+            if (apiCallStatus.isForbidden()) {
+                // Contract: 403 means the message carries no report — an explicit
+                // denied state, not a generic failure.
+                request.setAttribute("directMessageWindowDenied", true);
+            } else {
+                request.setAttribute("directMessageWindowError", apiCallStatus.getMessage("Unable to load that conversation"));
+            }
+            return;
+        }
+
+        // The backend returns newest-first (the reported message, then each
+        // preceding one); reverse so the page reads top-to-bottom like a chat.
+        List<DirectMessageResponse> orderedWindow = window.get();
+        Collections.reverse(orderedWindow);
+        request.setAttribute("directMessageWindow", orderedWindow);
+        request.setAttribute("directMessageAnchorId", rawMessageId);
     }
 
     @Override

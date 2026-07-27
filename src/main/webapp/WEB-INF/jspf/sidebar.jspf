@@ -82,6 +82,13 @@
         <a class="sidebar-link ${activeNav == 'messages' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/messages">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.3 9 9 0 0 1-3.9-.9L3 21l1.9-4.1A8.4 8.4 0 0 1 4 11.5a8.5 8.5 0 0 1 17 0z"/></svg>
             <span>Messages</span>
+            <%-- Shown when the page supplies a "sidebarMessageRequestCount" request
+                 attribute — set by MessagesServlet on every load, mirroring the
+                 notifications badge above. Count of pending incoming message
+                 requests (Rule A). --%>
+            <c:if test="${sidebarMessageRequestCount > 0}">
+                <span class="sidebar-badge">${sidebarMessageRequestCount}</span>
+            </c:if>
         </a>
         <a class="sidebar-link ${activeNav == 'market' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/market-dashboard">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
@@ -92,40 +99,65 @@
             <span>Profile</span>
         </a>
 
+        <%-- The Administration nav is long enough to overflow the sidebar on its
+             own, so it collapses behind a toggle. sidebar-admin.js prevents a
+             flash of the wrong open/closed state: it runs synchronously right
+             after this markup (before the browser gets a chance to paint), so
+             any stored localStorage preference is applied before first paint
+             rather than after. See sidebar-admin.js for the full explanation. --%>
+        <c:set var="isAdminSectionActive" value="${activeNav == 'admin-match-results' or activeNav == 'admin-scoring-rules' or activeNav == 'admin-simulation' or activeNav == 'admin-resimulation' or activeNav == 'admin-users' or activeNav == 'admin-reports' or activeNav == 'admin-fixtures' or activeNav == 'admin-pricing' or activeNav == 'admin-message-moderation'}" scope="page" />
         <c:if test="${sessionScope.role == 'ADMINISTRATOR'}">
-            <p class="sidebar-section-label">Administration</p>
-            <a class="sidebar-link ${activeNav == 'admin-match-results' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/admin/match-results">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/><circle cx="9" cy="5" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="7" cy="19" r="1.6"/></svg>
-                <span>Match Results</span>
-            </a>
-            <a class="sidebar-link ${activeNav == 'admin-scoring-rules' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/admin/scoring-rules">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M5 7l7-4 7 4"/><path d="M3 11l2-4 2 4a2 2 0 0 1-4 0z"/><path d="M17 11l2-4 2 4a2 2 0 0 1-4 0z"/></svg>
-                <span>Scoring Rules</span>
-            </a>
-            <a class="sidebar-link ${activeNav == 'admin-simulation' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/admin/simulation">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l6 3.5-6 3.5z"/></svg>
-                <span>Simulation</span>
-            </a>
-            <a class="sidebar-link ${activeNav == 'admin-users' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/admin/users">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                <span>Users</span>
-            </a>
-            <a class="sidebar-link ${activeNav == 'admin-reports' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/admin/reports">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 17v-4"/><path d="M12 17v-6"/><path d="M15 17v-2"/></svg>
-                <span>Reports</span>
-            </a>
-            <a class="sidebar-link ${activeNav == 'admin-fixtures' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/admin/fixtures">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="M9 15l2 2 4-4"/></svg>
-                <span>Fixtures</span>
-            </a>
-            <a class="sidebar-link ${activeNav == 'admin-pricing' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/admin/pricing">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 6.5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                <span>Pricing</span>
-            </a>
-            <a class="sidebar-link ${activeNav == 'admin-message-moderation' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/admin/message-moderation">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
-                <span>Message Moderation</span>
-            </a>
+            <div class="sidebar-admin-group" id="sidebarAdminGroup" data-force-open="${isAdminSectionActive}">
+                <button type="button" class="sidebar-section-label sidebar-section-toggle" id="sidebarAdminToggle"
+                        aria-expanded="true" aria-controls="sidebarAdminLinks">
+                    <span>Administration</span>
+                    <svg class="sidebar-section-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="sidebar-admin-links" id="sidebarAdminLinks">
+                <div class="sidebar-admin-links-inner">
+                <a class="sidebar-link ${activeNav == 'admin-match-results' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/admin/match-results">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/><circle cx="9" cy="5" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="7" cy="19" r="1.6"/></svg>
+                    <span>Match Results</span>
+                </a>
+                <a class="sidebar-link ${activeNav == 'admin-scoring-rules' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/admin/scoring-rules">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M5 7l7-4 7 4"/><path d="M3 11l2-4 2 4a2 2 0 0 1-4 0z"/><path d="M17 11l2-4 2 4a2 2 0 0 1-4 0z"/></svg>
+                    <span>Scoring Rules</span>
+                </a>
+                <a class="sidebar-link ${activeNav == 'admin-simulation' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/admin/simulation">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l6 3.5-6 3.5z"/></svg>
+                    <span>Simulation</span>
+                </a>
+                <a class="sidebar-link ${activeNav == 'admin-resimulation' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/admin/resimulation">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+                    <span>Resimulation</span>
+                </a>
+                <a class="sidebar-link ${activeNav == 'admin-users' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/admin/users">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span>Users</span>
+                </a>
+                <a class="sidebar-link ${activeNav == 'admin-reports' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/admin/reports">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 17v-4"/><path d="M12 17v-6"/><path d="M15 17v-2"/></svg>
+                    <span>Reports</span>
+                </a>
+                <a class="sidebar-link ${activeNav == 'admin-fixtures' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/admin/fixtures">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="M9 15l2 2 4-4"/></svg>
+                    <span>Fixtures</span>
+                </a>
+                <a class="sidebar-link ${activeNav == 'admin-pricing' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/admin/pricing">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 6.5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <span>Pricing</span>
+                </a>
+                <a class="sidebar-link ${activeNav == 'admin-message-moderation' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/admin/message-moderation">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+                    <span>Message Moderation</span>
+                </a>
+                </div>
+                </div>
+            </div>
+            <%-- Not deferred: this must run synchronously, right here in the
+                 markup flow, so the collapsed/expanded state is applied before
+                 the browser's first paint. See the file for details. --%>
+            <script src="${pageContext.request.contextPath}/assets/js/sidebar-admin.js"></script>
         </c:if>
     </nav>
 

@@ -23,6 +23,14 @@
     line-height: 1.6;
 }
 
+.asim-inline-link {
+    color: var(--gold-bright);
+    font-weight: 600;
+    border-bottom: none;
+}
+
+.asim-inline-link:hover { text-decoration: underline; }
+
 /* ---------- Feedback ---------------------------------------------------------------- */
 .asim-alert {
     margin: 18px 0 0;
@@ -39,7 +47,8 @@
 
 /* ---------- Section headers ---------------------------------------------------------- */
 #activeSettingSection { margin-top: 24px; }
-#resimulationSection { margin-top: 30px; }
+#resimulationTriggerSection { margin-top: 24px; }
+#resimulationHistorySection { margin-top: 22px; }
 
 .asim-section-head {
     display: flex;
@@ -138,11 +147,6 @@
     gap: 22px;
     align-items: start;
     margin-top: 26px;
-}
-
-.asim-grid-even {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    margin-top: 18px;
 }
 
 /* ---------- Panels --------------------------------------------------------------------- */
@@ -368,6 +372,10 @@
 }
 
 /* ---------- Resimulation history table ------------------------------------------------------ */
+/* Column widths are tuned for the resimulation page's full-width layout (not
+   the old half-width asim-grid-even column it used to sit in) — Reason gets
+   the most room, and Resimulated at is wide enough to show the full
+   timestamp without clipping. */
 .rtbl {
     margin-top: 16px;
     border: 1px solid var(--line);
@@ -380,11 +388,11 @@
 .rtbl-head,
 .rtbl-row {
     display: grid;
-    grid-template-columns: 62px minmax(0, 1.3fr) 78px 84px minmax(0, 1fr);
+    grid-template-columns: 74px minmax(220px, 1.6fr) 100px 100px minmax(190px, .8fr);
     align-items: center;
-    gap: 10px;
-    min-width: 480px;
-    padding: 10px 14px;
+    gap: 14px;
+    min-width: 720px;
+    padding: 12px 18px;
 }
 
 .rtbl-head {
@@ -413,20 +421,24 @@
     font-variant-numeric: tabular-nums;
 }
 
-.rtbl-reason,
-.rtbl-when {
+.rtbl-reason {
     color: var(--silver);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.rtbl-when { color: var(--silver-dim); }
+/* Unlike Reason, the timestamp must never clip — that was the whole point
+   of giving this table a page of its own — so it wraps instead of ellipsizing. */
+.rtbl-when {
+    color: var(--silver-dim);
+    white-space: normal;
+    font-variant-numeric: tabular-nums;
+}
 
 /* ---------- Narrow screens ------------------------------------------------------------------- */
 @media (max-width: 1000px) {
-    .asim-grid,
-    .asim-grid-even { grid-template-columns: minmax(0, 1fr); }
+    .asim-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 640px) {

@@ -243,7 +243,7 @@
 
 .lm-row {
     display: grid;
-    grid-template-columns: 44px minmax(0, 2fr) minmax(0, 1.7fr) 104px 92px 84px;
+    grid-template-columns: 44px minmax(0, 2fr) minmax(0, 1.7fr) 104px 92px 84px 92px;
     align-items: center;
     gap: 14px;
     padding: 11px 16px;
@@ -369,6 +369,28 @@
     filter: none;
 }
 
+/* ---------- Message action ---------------------------------------------------------- */
+.lm-message-cell { justify-self: end; }
+
+.lm-message {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: .35rem .7rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--silver);
+    font-size: .76rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: border-color .15s ease, color .15s ease;
+}
+
+.lm-message:hover {
+    border-color: var(--gold);
+    color: var(--gold-bright);
+}
+
 /* ---------- Empty / no-league states ----------------------------------------------- */
 .lm-empty {
     padding: 40px 24px;
@@ -403,10 +425,11 @@
     }
 
     .lm-row {
-        grid-template-columns: 44px minmax(0, 1.6fr) 84px;
+        grid-template-columns: 44px minmax(0, 1.4fr) 84px 84px;
     }
 
-    /* Team, joined and status fold away; manager + action are what matter on a phone. */
+    /* Team, joined and status fold away; manager + remove + message are what
+       matter on a phone. */
     .lm-row > :nth-child(3),
     .lm-row > :nth-child(4),
     .lm-row > :nth-child(5) {

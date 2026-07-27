@@ -2,6 +2,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="za.ac.vzap.trytons.frontend.client.message.PendingLeagueMessageResponse" %>
 <%@ page import="za.ac.vzap.trytons.frontend.client.message.BlockedPhraseResponse" %>
+<%@ page import="za.ac.vzap.trytons.frontend.client.message.DirectMessageResponse" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
@@ -80,6 +81,68 @@
                 </tbody>
             </table>
         <% } %>
+    </section>
+
+    <%-- Rule E: no queue of reported direct messages exists yet (no such listing
+         endpoint is in the backend contract), so the entry point here is a manual
+         message id lookup rather than a row to click. The 10-message bound is
+         called out explicitly so the privacy limit reads as a deliberate design
+         choice, not a bug. --%>
+    <section id="directMessageContext" class="card">
+        <h2>Reported direct message context</h2>
+        <p class="dmc-intro">
+            Look up a reported direct message by id to see its bounded conversation context.
+        </p>
+
+        <form method="get" action="${pageContext.request.contextPath}/admin/message-moderation" class="dmc-lookup-form d-flex gap-2 mb-3">
+            <label for="directMessageId" class="visually-hidden">Message id</label>
+            <input type="text" id="directMessageId" name="directMessageId"
+                   value="${fn:escapeXml(directMessageIdQuery)}"
+                   placeholder="Message id (UUID)" class="form-control">
+            <button type="submit" class="btn btn-gold btn-sm">View</button>
+        </form>
+
+        <c:if test="${directMessageWindowDenied}">
+            <p class="empty-state dmc-denied">
+                This message has no report on file, so admin access to its conversation is denied.
+            </p>
+        </c:if>
+
+        <c:if test="${not empty directMessageWindowError}">
+            <p class="error-message alert alert-danger" role="alert"><c:out value="${directMessageWindowError}"/></p>
+        </c:if>
+
+        <c:if test="${not empty directMessageWindow}">
+            <p class="dmc-bound-note">
+                Showing the reported message and up to 10 preceding — admins cannot view more.
+            </p>
+            <div class="dmc-window">
+                <%
+                    List<DirectMessageResponse> directMessageWindow =
+                            (List<DirectMessageResponse>) request.getAttribute("directMessageWindow");
+                    String anchorId = (String) request.getAttribute("directMessageAnchorId");
+                    for (DirectMessageResponse dm : directMessageWindow) {
+                        if (dm == null) { continue; }
+                        pageContext.setAttribute("dm", dm);
+                        boolean isAnchor = anchorId != null && anchorId.equals(String.valueOf(dm.getMessageId()));
+                        boolean isRejected = "REJECTED".equals(dm.getStatus());
+                %>
+                <div class="dmc-message <%= isAnchor ? "is-anchor" : "" %> <%= isRejected ? "is-rejected" : "" %>">
+                    <div class="dmc-message-meta">
+                        <span class="dmc-sender">Sender: <c:out value="${dm.senderUserId}"/></span>
+                        <span class="dmc-time"><c:out value="${dm.createdAt}"/></span>
+                        <% if (isAnchor) { %>
+                            <span class="dmc-tag dmc-tag-anchor">Reported message</span>
+                        <% } %>
+                        <% if (isRejected) { %>
+                            <span class="dmc-tag dmc-tag-rejected">Blocked content — not delivered</span>
+                        <% } %>
+                    </div>
+                    <p class="dmc-message-body"><c:out value="${dm.body}"/></p>
+                </div>
+                <% } %>
+            </div>
+        </c:if>
     </section>
 
     <section id="blocklistManager" class="card">

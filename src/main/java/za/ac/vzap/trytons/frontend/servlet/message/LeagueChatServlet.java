@@ -18,6 +18,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @WebServlet(name = "LeagueChatServlet", urlPatterns = {"/league-chat"})
 public class LeagueChatServlet extends AbstractServlet {
@@ -57,6 +58,14 @@ public class LeagueChatServlet extends AbstractServlet {
             return;
         }
 
+        // The original send form predates action dispatch and still posts with no
+        // "action" field at all, so a blank/missing action keeps meaning "send"
+        // rather than being rejected as unknown.
+        if ("report".equals(request.getParameter("action"))) {
+            reportMessage(request, response);
+            return;
+        }
+
         String leagueId = request.getParameter("leagueId");
         String body = request.getParameter("body");
         if (leagueId == null || leagueId.isBlank() || body == null || body.isBlank()) {
@@ -81,6 +90,34 @@ public class LeagueChatServlet extends AbstractServlet {
                 : "sent";
         response.sendRedirect(request.getContextPath() + "/league-chat?leagueId="
                 + encode(leagueId) + "&flash=" + flash);
+    }
+
+    // Rule C: reporting a single league chat message. Confirmation happens client
+    // side (the report cannot be undone), the reason is optional.
+    private void reportMessage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String leagueId = request.getParameter("leagueId");
+        Optional<UUID> messageId = parseUuid(request.getParameter("messageId"));
+        if (leagueId == null || leagueId.isBlank() || messageId.isEmpty()) {
+            request.setAttribute("error", "A valid message is required to report it");
+            renderPage(request, response, leagueId);
+            return;
+        }
+
+        boolean ok = leagueMessageRestClient.report(leagueId, messageId.get(), blankToNull(request.getParameter("reason")));
+        if (!ok) {
+            if (sessionExpiredRedirect(request, response)) {
+                return;
+            }
+            request.setAttribute("error", apiCallStatus.getMessage("Unable to report that message"));
+            renderPage(request, response, leagueId);
+            return;
+        }
+
+        response.sendRedirect(request.getContextPath() + "/league-chat?leagueId=" + encode(leagueId) + "&flash=reported");
+    }
+
+    private String blankToNull(String value) {
+        return (value == null || value.isBlank()) ? null : value.trim();
     }
 
     private void handlePoll(HttpServletRequest request, HttpServletResponse response, String leagueId) throws IOException {
@@ -123,6 +160,8 @@ public class LeagueChatServlet extends AbstractServlet {
             request.setAttribute("info", "Your message was flagged and is awaiting review by an administrator.");
         } else if ("sent".equals(flash)) {
             request.setAttribute("success", "Message posted.");
+        } else if ("reported".equals(flash)) {
+            request.setAttribute("success", "Message reported. An administrator will review it.");
         }
 
         request.getRequestDispatcher(VIEW).forward(request, response);

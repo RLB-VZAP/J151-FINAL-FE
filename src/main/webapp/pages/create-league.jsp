@@ -38,8 +38,9 @@
             <%-- Creating a league enrols the creator as its first member and manager, and a
                  membership needs a team (leagueMembership.teamId is NOT NULL). The backend
                  rejects the attempt outright, so the form is withheld rather than letting it
-                 be filled in and fail on submit. --%>
-            <c:when test="${not hasTeam}">
+                 be filled in and fail on submit. Administrators are exempt: they create an
+                 unmanaged public league and never need a team. --%>
+            <c:when test="${not canCreateLeague}">
                 <div class="cl-notice">
                     <span class="cl-notice-icon" aria-hidden="true">
                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -74,13 +75,30 @@
                         <div class="cl-field">
                             <label class="cl-label" for="leagueType">Visibility</label>
                             <div class="cl-select-wrap">
-                                <select class="cl-select" id="leagueType" name="leagueType" required>
-                                    <option value="PUBLIC" ${param.leagueType == 'PUBLIC' ? 'selected' : ''}>Public</option>
-                                    <option value="PRIVATE" ${param.leagueType == 'PRIVATE' ? 'selected' : ''}>Private</option>
-                                </select>
+                                <%-- Administrators can only create public leagues: they can never be a
+                                     league manager, and a private league needs one to hand out its code. --%>
+                                <c:choose>
+                                    <c:when test="${isAdmin}">
+                                        <select class="cl-select" id="leagueType" name="leagueType" required disabled>
+                                            <option value="PUBLIC" selected>Public</option>
+                                        </select>
+                                        <input type="hidden" name="leagueType" value="PUBLIC">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <select class="cl-select" id="leagueType" name="leagueType" required>
+                                            <option value="PUBLIC" ${param.leagueType == 'PUBLIC' ? 'selected' : ''}>Public</option>
+                                            <option value="PRIVATE" ${param.leagueType == 'PRIVATE' ? 'selected' : ''}>Private</option>
+                                        </select>
+                                    </c:otherwise>
+                                </c:choose>
                                 <svg class="cl-select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
                             </div>
-                            <p class="cl-help">Public leagues anyone can find and join. Private leagues need an invite code.</p>
+                            <p class="cl-help">
+                                <c:choose>
+                                    <c:when test="${isAdmin}">Administrators can only create public leagues.</c:when>
+                                    <c:otherwise>Public leagues anyone can find and join. Private leagues need an invite code.</c:otherwise>
+                                </c:choose>
+                            </p>
                         </div>
 
                         <div class="cl-field">

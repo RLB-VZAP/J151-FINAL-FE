@@ -95,9 +95,49 @@ body.league-chat {
 
 .bubble-time {
     display: block;
-    margin-top: 2px;
     font-size: 0.72rem;
     color: var(--silver-dim, #7f9187);
+}
+
+/* ---------- Report control (Rule C) -------------------------------------------
+   Sits on every bubble alongside the timestamp. Kept small and muted so it
+   does not compete with the message itself. ------------------------------------ */
+.bubble-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--lc-sp-2);
+    margin-top: 2px;
+}
+
+.report-form {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.report-reason {
+    width: 120px;
+    font-size: 0.72rem;
+    padding: 1px 6px;
+    border: 1px solid var(--line, #2c4437);
+    border-radius: 4px;
+    background: #0f2118;
+    color: var(--silver, #c7d1c9);
+}
+
+.report-btn {
+    background: transparent;
+    border: none;
+    color: var(--silver-dim, #7f9187);
+    font-size: 0.72rem;
+    cursor: pointer;
+    padding: 0;
+}
+
+.report-btn:hover {
+    color: #f0a99f;
+    text-decoration: underline;
 }
 
 .bubble.mine {

@@ -121,7 +121,10 @@
                                         <p class="n-message">${fn:escapeXml(note.body)}</p>
 
                                         <%-- Deep link, when the notification points at something.
-                                             FIXTURE, LEAGUE and PLAYER are the types the backend sets. --%>
+                                             FIXTURE, LEAGUE and PLAYER are the types the backend sets.
+                                             MESSAGE_REQUEST covers both "you got a request" and "your
+                                             request was approved" — both just need the request inbox,
+                                             which lives on the Messages page rather than its own route. --%>
                                         <c:if test="${not empty note.relatedEntityId}">
                                             <c:choose>
                                                 <c:when test="${note.relatedEntityType == 'FIXTURE'}">
@@ -132,6 +135,12 @@
                                                 </c:when>
                                                 <c:when test="${note.relatedEntityType == 'PLAYER'}">
                                                     <a class="n-link" href="${pageContext.request.contextPath}/player?submit=player&amp;playerId=${note.relatedEntityId}">View player &rarr;</a>
+                                                </c:when>
+                                                <c:when test="${note.relatedEntityType == 'MESSAGE_REQUEST'}">
+                                                    <a class="n-link" href="${pageContext.request.contextPath}/messages">View request &rarr;</a>
+                                                </c:when>
+                                                <c:when test="${note.relatedEntityType == 'DIRECT_MESSAGE'}">
+                                                    <a class="n-link" href="${pageContext.request.contextPath}/messages">View conversation &rarr;</a>
                                                 </c:when>
                                             </c:choose>
                                         </c:if>

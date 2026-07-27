@@ -68,6 +68,7 @@
                                 <span>Role</span>
                                 <span>Status</span>
                                 <span aria-hidden="true"></span>
+                                <span aria-hidden="true"></span>
                             </div>
 
                             <c:forEach var="user" items="${users}">
@@ -102,6 +103,12 @@
                                                 </c:otherwise>
                                             </c:choose>
                                         </form>
+                                    </span>
+                                    <span class="utbl-message-cell">
+                                        <c:if test="${user.userId ne sessionScope.userId}">
+                                            <a class="utbl-message"
+                                               href="${pageContext.request.contextPath}/messages?recipientUserId=${user.userId}&name=${fn:escapeXml(user.username)}">Message</a>
+                                        </c:if>
                                     </span>
                                 </div>
                             </c:forEach>

@@ -52,10 +52,23 @@ body.messages {
 }
 
 .thread-list h2,
-.conversation-header h2 {
+.conversation-header h2,
+.compose-panel h2 {
     color: var(--silver-bright, #eef3ef);
     font-size: 1.05rem;
     margin: 0 0 var(--msg-sp-3);
+}
+
+.thread-list-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--msg-sp-2);
+    margin-bottom: var(--msg-sp-3);
+}
+
+.thread-list-head h2 {
+    margin: 0;
 }
 
 .empty-state {
@@ -108,6 +121,180 @@ body.messages {
        Bootstrap's white-on-primary default. */
     background: var(--gold, #c9a227);
     color: #141f0e;
+}
+
+/* ---------- Requests panel ---------------------------------------------------
+   A <details> element sitting under the thread list in the same sidebar
+   column; collapsed by default, opened server-side (via the "open" attribute)
+   only when there is a pending incoming request to act on. ------------------- */
+.requests-panel {
+    --bs-card-bg: var(--msg-surface, #12211a);
+    --bs-card-border-color: var(--line, #2c4437);
+    padding: var(--msg-sp-4);
+}
+
+.requests-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--msg-sp-2);
+    cursor: pointer;
+    list-style: none;
+}
+
+.requests-summary::-webkit-details-marker {
+    display: none;
+}
+
+.requests-summary h2 {
+    margin: 0;
+}
+
+.requests-panel .requests-body {
+    margin-top: var(--msg-sp-3);
+}
+
+.requests-subhead {
+    color: var(--silver-dim, #7f9187);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin: var(--msg-sp-3) 0 var(--msg-sp-2);
+}
+
+.requests-subhead:first-child {
+    margin-top: 0;
+}
+
+.request-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--msg-sp-2);
+    padding: var(--msg-sp-2) 0;
+    border-bottom: 1px solid var(--line, #2c4437);
+}
+
+.request-item:last-child {
+    border-bottom: none;
+}
+
+.request-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.request-name {
+    font-weight: 600;
+    color: var(--silver-bright, #eef3ef);
+}
+
+.request-status {
+    align-self: flex-start;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    border-radius: 999px;
+    padding: 1px 8px;
+}
+
+.request-status.status-pending {
+    background: rgba(232, 199, 101, .14);
+    border: 1px solid rgba(232, 199, 101, .4);
+    color: var(--gold-bright, #e8c765);
+}
+
+.request-status.status-approved {
+    background: rgba(94, 201, 139, .12);
+    border: 1px solid rgba(94, 201, 139, .35);
+    color: #8fd9ae;
+}
+
+.request-status.status-rejected {
+    background: rgba(226, 117, 106, .1);
+    border: 1px solid rgba(226, 117, 106, .35);
+    color: #f0a99f;
+}
+
+.request-actions {
+    display: flex;
+    gap: var(--msg-sp-2);
+    flex-shrink: 0;
+}
+
+/* ---------- Messaging-state notices (Rule B) ----------------------------------
+   Shown in the conversation pane instead of the Send box when the selected
+   counterpart has no approved relationship yet. -------------------------------- */
+.messaging-state-notice {
+    margin-top: var(--msg-sp-3);
+    padding: var(--msg-sp-3);
+    border: 1px solid var(--line, #2c4437);
+    border-radius: var(--msg-radius-field);
+    background: var(--msg-surface-hover);
+    color: var(--silver, #c7d1c9);
+}
+
+.messaging-state-notice p {
+    margin: 0 0 var(--msg-sp-2);
+}
+
+.messaging-state-notice .request-actions {
+    margin-top: var(--msg-sp-2);
+}
+
+.request-send-form {
+    margin-top: var(--msg-sp-3);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--msg-sp-2);
+}
+
+.messaging-state-hint {
+    color: var(--silver-dim, #7f9187);
+    margin: 0;
+}
+
+/* ---------- Report control (Rule C) -------------------------------------------
+   Sits on every bubble alongside the timestamp. Kept small and muted so it
+   does not compete with the message itself. ------------------------------------ */
+.bubble-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--msg-sp-2);
+    margin-top: 2px;
+}
+
+.report-form {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.report-reason {
+    width: 120px;
+    font-size: 0.72rem;
+    padding: 1px 6px;
+    border: 1px solid var(--line, #2c4437);
+    border-radius: 4px;
+    background: #0f2118;
+    color: var(--silver, #c7d1c9);
+}
+
+.report-btn {
+    background: transparent;
+    border: none;
+    color: var(--silver-dim, #7f9187);
+    font-size: 0.72rem;
+    cursor: pointer;
+    padding: 0;
+}
+
+.report-btn:hover {
+    color: #f0a99f;
+    text-decoration: underline;
 }
 
 /* ---------- Conversation ----------------------------------------------------- */
@@ -170,6 +357,47 @@ body.messages {
     background: #0f2118;
 }
 
+/* ---------- Compose (new message) panel --------------------------------------- */
+.compose-search-form {
+    display: flex;
+    gap: var(--msg-sp-2);
+    margin-bottom: var(--msg-sp-3);
+}
+
+.compose-search-form .form-control {
+    border-color: var(--line, #2c4437);
+    background: #0f2118;
+}
+
+.compose-results {
+    display: flex;
+    flex-direction: column;
+    gap: var(--msg-sp-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.compose-result {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: var(--msg-sp-3);
+    padding: var(--msg-sp-2) var(--msg-sp-3);
+    border: 1px solid var(--line, #2c4437);
+    border-radius: var(--msg-radius-field);
+}
+
+.compose-result-name {
+    /* Username is the only identifier shown — email addresses are deliberately
+       not surfaced here, since compose is reachable by any admin. */
+    font-weight: 600;
+    color: var(--silver-bright, #eef3ef);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* ---------- Narrow screens: sidebar becomes a wrapping top strip, matching
    sidebar.css's own 900px breakpoint ------------------------------------- */
 @media (max-width: 900px) {
@@ -179,5 +407,9 @@ body.messages {
 
     #messages {
         padding: 24px 16px 32px;
+    }
+
+    .compose-result {
+        grid-template-columns: 1fr auto;
     }
 }
