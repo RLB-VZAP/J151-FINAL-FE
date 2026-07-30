@@ -27,6 +27,62 @@
     }
 }
 
+/* ---------- Position filter & sort, beside the search box -------------------------- */
+/* Matched to .search-wrap in catalog.css so the three toolbar controls read as
+   one row: same height, same well colour, same border treatment on focus. */
+.ct-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    box-sizing: border-box;
+    padding: 0 .7rem 0 .85rem;
+    background: #091810;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    transition: border-color .15s ease;
+}
+
+.ct-filter:focus-within {
+    border-color: var(--gold-dim, #8a7433);
+}
+
+.ct-filter-label {
+    color: var(--silver-dim);
+    font-size: .72rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.ct-select {
+    height: 100%;
+    padding-right: 2px;
+    border: 0;
+    background: transparent;
+    color: var(--silver-bright);
+    font: inherit;
+    font-size: .85rem;
+    cursor: pointer;
+}
+
+.ct-select:focus {
+    outline: none;
+}
+
+/* The native dropdown list is drawn by the OS, so it needs its own colours —
+   without these it renders as white-on-white in some browsers. */
+.ct-select option,
+.ct-select optgroup {
+    background: #0c1f15;
+    color: var(--silver-bright);
+}
+
+.ct-no-matches {
+    margin: 0;
+    padding: 22px 16px;
+}
+
 /* ---------- Budget note beside the search box -------------------------------------- */
 /* Pushed to the far end of the toolbar, opposite the search field. */
 .ct-budget-note {
@@ -41,9 +97,36 @@
 }
 
 /* ---------- Player pool ----------------------------------------------------------- */
-/* Select · Name · Club · Position · Value · Status */
+/* Select · Name · Club · Position · Value · Form · Availability — the Players
+   catalogue's columns (players.css) with a checkbox gutter in front, so the two
+   screens read as the same table. The squad summary takes 320px of the width,
+   hence the slightly tighter tracks. */
 .ct-page .crow {
-    grid-template-columns: 34px minmax(0, 1.6fr) 1.1fr .9fr .8fr .9fr;
+    grid-template-columns: 34px minmax(0, 1.6fr) 1.1fr .9fr .8fr .8fr .9fr;
+}
+
+/* Narrow screens drop the same columns as the Players page, in the same order:
+   availability first, then club and form. Column 1 is the checkbox here, so
+   every nth-child is one further along than in players.css. */
+@media (max-width: 1280px) {
+    .ct-page .crow {
+        grid-template-columns: 34px minmax(0, 1.6fr) 1.1fr .9fr .8fr .8fr;
+    }
+
+    .ct-page .crow > :nth-child(7) {
+        display: none;
+    }
+}
+
+@media (max-width: 1040px) {
+    .ct-page .crow {
+        grid-template-columns: 34px minmax(0, 1.6fr) .9fr .9fr;
+    }
+
+    .ct-page .crow > :nth-child(3),
+    .ct-page .crow > :nth-child(6) {
+        display: none;
+    }
 }
 
 .ct-check {
@@ -63,12 +146,6 @@
 /* A row whose player is picked, so the choice stays obvious while scrolling. */
 .cbody .crow.is-picked {
     background: rgba(201, 162, 39, .08);
-}
-
-.ct-value {
-    color: var(--silver-bright);
-    font-size: .92rem;
-    font-weight: 600;
 }
 
 /* ---------- Squad summary ---------------------------------------------------------- */
@@ -378,6 +455,27 @@
 
 .ct-req-range {
     color: var(--silver-dim);
+}
+
+/* Each row filters the pool to its own position (wired up in create-team.js). */
+.ct-req.is-clickable {
+    border-radius: 6px;
+    margin: 0 -6px;
+    padding-left: 8px;
+    padding-right: 8px;
+    cursor: pointer;
+    transition: background .15s ease;
+}
+
+.ct-req.is-clickable:hover,
+.ct-req.is-clickable:focus-visible {
+    background: rgba(224, 184, 90, .09);
+    outline: none;
+}
+
+.ct-req.is-clickable:hover .ct-req-name,
+.ct-req.is-clickable:focus-visible .ct-req-name {
+    color: var(--gold-bright);
 }
 
 /* States, driven by create-team.js: below minimum, satisfied, or over maximum. */

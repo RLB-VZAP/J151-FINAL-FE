@@ -38,7 +38,10 @@ public class LeagueChatServlet extends AbstractServlet {
 
         String leagueId = request.getParameter("leagueId");
         if (leagueId == null || leagueId.isBlank()) {
-            request.setAttribute("error", "A league is required to open chat");
+            // Landing here with no league is the normal case — the sidebar links
+            // to /league-chat with no parameter. Offer the user's leagues to pick
+            // from rather than reporting an error they cannot act on.
+            loadMyLeagues(request);
             request.getRequestDispatcher(VIEW).forward(request, response);
             return;
         }
@@ -97,13 +100,29 @@ public class LeagueChatServlet extends AbstractServlet {
         JsonSupport.writeJson(response, feed.get());
     }
 
+    /**
+     * The leagues this user belongs to, for the chat picker. Every league the
+     * user is a member of gets a group chat — public and private alike —
+     * because membership is itself the permission to post. That is the whole
+     * difference from direct messages, which need the other person's consent.
+     */
+    private void loadMyLeagues(HttpServletRequest request) {
+        Optional<List<LeagueResponse>> myLeagues = leagueRestClient.listMyLeagues();
+        if (myLeagues.isEmpty() && request.getAttribute("error") == null) {
+            request.setAttribute("error", "Unable to load your leagues right now");
+        }
+        request.setAttribute("myLeagues", myLeagues.orElse(List.of()));
+    }
+
     private void renderPage(HttpServletRequest request, HttpServletResponse response, String leagueId) throws ServletException, IOException {
         Optional<LeagueResponse> league = leagueRestClient.getLeague(leagueId);
         if (league.isEmpty() && sessionExpiredRedirect(request, response)) {
             return;
         }
+        loadMyLeagues(request);
         request.setAttribute("leagueId", leagueId);
         request.setAttribute("leagueName", league.map(LeagueResponse::getLeagueName).orElse("League chat"));
+        request.setAttribute("leagueType", league.map(LeagueResponse::getLeagueType).orElse(null));
 
         Optional<List<LeagueMessageResponse>> feed = leagueMessageRestClient.getFeed(leagueId, null);
         if (feed.isEmpty()) {

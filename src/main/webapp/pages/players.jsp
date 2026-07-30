@@ -33,22 +33,6 @@
             <div class="catalog-header-side">
                 <%-- catalog-filter.js keeps this in step with the filtered list. --%>
                 <p class="catalog-count" data-catalog-count>${fn:length(players)} players &middot; season 2025/26</p>
-
-                <%-- Admins can pull the live squad feed into the catalog on demand. The
-                     backend re-scrapes its source each call (~1 min), so this is a single
-                     deliberate refresh, never a poll. --%>
-                <c:if test="${sessionScope.role == 'ADMINISTRATOR'}">
-                    <form method="post"
-                          action="${pageContext.request.contextPath}/player/import"
-                          class="feed-refresh" data-feed-refresh>
-                        <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
-                        <button type="submit" name="submit" value="player/import" class="btn-gold feed-refresh-btn">
-                            <span class="btn-spinner" aria-hidden="true"></span>
-                            <span class="feed-refresh-label">Refresh from live feed</span>
-                        </button>
-                        <span class="feed-refresh-hint">Pulls the latest squads from the live source &middot; takes about a minute.</span>
-                    </form>
-                </c:if>
             </div>
         </header>
 
@@ -154,12 +138,18 @@
                             </c:choose>
                         </span>
 
-                        <%-- The list endpoint only exposes isActive, so this is a two-state
-                             read of the three availability treatments the design defines. --%>
+                        <%-- isActive says the player is still on a roster; availabilityStatus
+                             says whether anything currently rules them out. Both have to be
+                             true for "Available", and the status names the reason when not. --%>
+                        <c:set var="isAvailable"
+                               value="${player.active and (empty player.availabilityStatus or player.availabilityStatus == 'ACTIVE')}" />
                         <span>
                             <c:choose>
-                                <c:when test="${player.active}">
+                                <c:when test="${isAvailable}">
                                     <span class="avail avail-ok"><span class="avail-label">Available</span></span>
+                                </c:when>
+                                <c:when test="${player.active and not empty player.availabilityStatus}">
+                                    <span class="avail avail-out"><span class="avail-label">${fn:escapeXml(fn:substring(player.availabilityStatus, 0, 1))}${fn:escapeXml(fn:toLowerCase(fn:substring(player.availabilityStatus, 1, -1)))}</span></span>
                                 </c:when>
                                 <c:otherwise>
                                     <span class="avail avail-out"><span class="avail-label">Unavailable</span></span>
@@ -177,22 +167,5 @@
 </main>
 
 <script src="${pageContext.request.contextPath}/assets/js/catalog-filter.js"></script>
-<script>
-    // The live-feed refresh is a slow (~1 min) server round trip. On submit, lock the
-    // button and show the spinner so the admin gets feedback and cannot double-submit.
-    (function () {
-        var form = document.querySelector('[data-feed-refresh]');
-        if (!form) { return; }
-        form.addEventListener('submit', function () {
-            var button = form.querySelector('.feed-refresh-btn');
-            var label = form.querySelector('.feed-refresh-label');
-            if (button) {
-                button.classList.add('is-loading');
-                button.disabled = true;
-            }
-            if (label) { label.textContent = 'Refreshing…'; }
-        });
-    })();
-</script>
 </body>
 </html>

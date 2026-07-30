@@ -6,13 +6,18 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import za.ac.vzap.trytons.frontend.client.message.ConversationThreadResponse;
+import za.ac.vzap.trytons.frontend.client.message.CreateMessageRequestRequest;
 import za.ac.vzap.trytons.frontend.client.message.DirectMessageResponse;
+import za.ac.vzap.trytons.frontend.client.message.MessageContactResponse;
+import za.ac.vzap.trytons.frontend.client.message.MessageRequestResponse;
 import za.ac.vzap.trytons.frontend.client.message.MessageRestClient;
 import za.ac.vzap.trytons.frontend.client.message.SendDirectMessageRequest;
 import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
 import za.ac.vzap.trytons.frontend.util.JsonSupport;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -54,6 +59,9 @@ public class MessagesServlet extends AbstractServlet {
             case "send" -> sendMessage(request, response);
             case "block" -> toggleBlock(request, response, true);
             case "unblock" -> toggleBlock(request, response, false);
+            case "requestAccess" -> createRequest(request, response);
+            case "acceptRequest" -> respondToRequest(request, response, true);
+            case "declineRequest" -> respondToRequest(request, response, false);
             default -> {
                 request.setAttribute("error", "Unknown message action requested");
                 renderPage(request, response);
@@ -61,7 +69,81 @@ public class MessagesServlet extends AbstractServlet {
         }
     }
 
+    private void createRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Optional<UUID> addresseeId = parseUuid(request.getParameter("addresseeUserId"));
+        if (addresseeId.isEmpty()) {
+            request.setAttribute("error", "A valid user is required to send a message request");
+            renderPage(request, response);
+            return;
+        }
+
+        Optional<MessageRequestResponse> created = messageRestClient.createRequest(
+                new CreateMessageRequestRequest(addresseeId.get(), request.getParameter("introMessage")));
+        if (created.isEmpty()) {
+            if (sessionExpiredRedirect(request, response)) {
+                return;
+            }
+            // The backend's own wording is more useful than a generic failure
+            // here: it distinguishes "already asked", "they asked you first" and
+            // "you can already message this user".
+            request.setAttribute("error", apiCallStatus.getMessage("Unable to send your message request"));
+            renderPage(request, response);
+            return;
+        }
+
+        flashSuccess(request, "Message request sent to " + created.get().getAddresseeUsername());
+        redirectTo(response, request, "/messages?tab=requests");
+    }
+
+    private void respondToRequest(HttpServletRequest request, HttpServletResponse response, boolean accept) throws ServletException, IOException {
+        Optional<UUID> requestId = parseUuid(request.getParameter("requestId"));
+        if (requestId.isEmpty()) {
+            request.setAttribute("error", "A valid message request is required");
+            renderPage(request, response);
+            return;
+        }
+
+        Optional<MessageRequestResponse> answered = accept
+                ? messageRestClient.acceptRequest(requestId.get())
+                : messageRestClient.declineRequest(requestId.get());
+        if (answered.isEmpty()) {
+            if (sessionExpiredRedirect(request, response)) {
+                return;
+            }
+            request.setAttribute("error", apiCallStatus.getMessage("Unable to answer that message request"));
+            renderPage(request, response);
+            return;
+        }
+
+        String counterpart = answered.get().getRequesterUsername();
+        if (accept) {
+            // Accepting opens the conversation, so land straight in it rather
+            // than back on a requests list the request has just left. The name
+            // rides along because a just-accepted conversation has no messages
+            // yet and so no thread for resolveCounterpartName to read it from.
+            flashSuccess(request, "You can now message " + counterpart);
+            redirectTo(response, request, "/messages?with=" + answered.get().getRequesterUserId()
+                    + "&name=" + URLEncoder.encode(counterpart, StandardCharsets.UTF_8));
+            return;
+        }
+        flashInfo(request, "Declined the request from " + counterpart);
+        redirectTo(response, request, "/messages?tab=requests");
+    }
+
     private void handlePoll(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Type-ahead on the New message tab. The term is required: an empty one
+        // would ask the backend for every user, which is exactly what the
+        // type-ahead exists to avoid.
+        if (request.getParameter("contacts") != null) {
+            String searchTerm = request.getParameter("q");
+            if (searchTerm == null || searchTerm.isBlank()) {
+                JsonSupport.writeJson(response, List.of());
+                return;
+            }
+            writePollResult(response, messageRestClient.listContacts(searchTerm).orElse(null));
+            return;
+        }
+
         String with = request.getParameter("with");
         if (with != null && !with.isBlank()) {
             Optional<UUID> counterpart = parseUuid(with);
@@ -104,6 +186,27 @@ public class MessagesServlet extends AbstractServlet {
         } else {
             request.setAttribute("threads", threads.get());
         }
+
+        // Requests are always loaded: the badge on the Requests tab has to be
+        // right whichever tab is showing, and the count is small.
+        request.setAttribute("incomingRequests", messageRestClient.listIncomingRequests().orElse(List.of()));
+        request.setAttribute("outgoingRequests", messageRestClient.listOutgoingRequests().orElse(List.of()));
+
+        // The directory grows with the user table, so the New message tab starts
+        // empty and only fetches once the user has typed something. With
+        // JavaScript that happens per keystroke against the JSON branch above;
+        // without it, the Search button posts the term back here.
+        String tab = request.getParameter("tab");
+        if ("new".equals(tab)) {
+            String searchTerm = request.getParameter("q");
+            if (searchTerm != null && !searchTerm.isBlank()) {
+                request.setAttribute("contacts", messageRestClient.listContacts(searchTerm).orElse(List.of()));
+            } else {
+                request.setAttribute("contacts", List.of());
+            }
+            request.setAttribute("contactSearch", searchTerm);
+        }
+        request.setAttribute("activeTab", tab == null || tab.isBlank() ? "threads" : tab);
 
         String with = request.getParameter("with");
         Optional<UUID> counterpart = parseUuid(with);

@@ -133,6 +133,41 @@
                     <input type="search" id="playerSearch" placeholder="Search players"
                            autocomplete="off" aria-label="Search players">
                 </label>
+
+                <%-- Position filter and sort. Both are previews over the pool the
+                     server already sent, so they never touch the posted fields:
+                     a hidden row keeps its checkbox and still submits. Options
+                     come from the same backend catalogue as the requirements
+                     panel, so the names always match a player's data-position. --%>
+                <c:if test="${not empty positions}">
+                    <label class="ct-filter" for="positionFilter">
+                        <span class="ct-filter-label">Position</span>
+                        <select class="ct-select" id="positionFilter">
+                            <option value="">All positions</option>
+                            <c:forEach var="cat" items="${['FORWARD','BACK']}">
+                                <optgroup label="${cat == 'FORWARD' ? 'Forwards' : 'Backs'}">
+                                    <c:forEach var="pos" items="${positions}">
+                                        <c:if test="${fn:toUpperCase(pos.positionCategory) == cat}">
+                                            <option value="${fn:escapeXml(pos.positionName)}">${fn:escapeXml(pos.positionName)}</option>
+                                        </c:if>
+                                    </c:forEach>
+                                </optgroup>
+                            </c:forEach>
+                        </select>
+                    </label>
+                </c:if>
+
+                <label class="ct-filter" for="playerSort">
+                    <span class="ct-filter-label">Sort</span>
+                    <select class="ct-select" id="playerSort">
+                        <option value="name">Player name</option>
+                        <option value="position">Position</option>
+                        <option value="club">Club</option>
+                        <option value="value-desc">Value: high to low</option>
+                        <option value="value-asc">Value: low to high</option>
+                    </select>
+                </label>
+
                 <p class="ct-budget-note">Your budget: <strong><t:money value="${budget}" /></strong></p>
             </div>
 
@@ -148,11 +183,12 @@
                         <div class="ctable">
                             <div class="crow chead">
                                 <span aria-hidden="true"></span>
-                                <span>Player</span>
+                                <span>Name</span>
                                 <span>Club</span>
                                 <span>Position</span>
                                 <span>Value</span>
-                                <span>Status</span>
+                                <span>Form</span>
+                                <span>Availability</span>
                             </div>
                             <div class="cbody">
                                 <%
@@ -164,10 +200,35 @@
                                         }
                                         String clubName = (clubNamesById == null) ? "-" : clubNamesById.getOrDefault(p.getClubId(), "-");
                                         String positionName = (positionNamesById == null) ? "-" : positionNamesById.getOrDefault(p.getPositionId(), "-");
+                                        // A player is pickable only if still on a roster AND not
+                                        // currently injured or suspended. The backend sends ACTIVE
+                                        // when it has nothing on file, so a null here means fit.
+                                        String availability = p.getAvailabilityStatus();
+                                        boolean available = availability == null || "ACTIVE".equals(availability);
+                                        boolean selectable = p.isActive() && available;
                                         pageContext.setAttribute("player", p);
                                         pageContext.setAttribute("clubName", clubName);
                                         pageContext.setAttribute("positionName", positionName);
+                                        pageContext.setAttribute("selectable", selectable);
+                                        pageContext.setAttribute("availabilityLabel",
+                                                selectable ? "Available"
+                                                        : (!p.isActive() || availability == null
+                                                                ? "Unavailable"
+                                                                : availability.charAt(0) + availability.substring(1).toLowerCase()));
                                 %>
+                                <%-- Same row anatomy as the Players catalogue (pages/players.jsp):
+                                     initials avatar, forward/back position pill, form chip and
+                                     availability dot. The one difference is the leading checkbox,
+                                     because here a row is a pick rather than a link. --%>
+                                <c:set var="isForward" value="${false}" />
+                                <c:forEach var="pos" items="${positions}">
+                                    <c:if test="${pos.positionId == player.positionId}">
+                                        <c:set var="isForward" value="${pos.positionCategory == 'FORWARD'}" />
+                                    </c:if>
+                                </c:forEach>
+                                <c:set var="formScore" value="${player.currentForm / 10}" />
+                                <c:set var="playerName" value="${empty player.playerName ? '' : player.playerName}" />
+                                <c:set var="nameParts" value="${fn:split(playerName, ' ')}" />
                                 <label class="crow" data-team-row>
                                     <span>
                                         <input class="ct-check"
@@ -176,23 +237,40 @@
                                                value="<%= p.getPlayerId() %>"
                                                data-player-name="${fn:escapeXml(player.playerName)}"
                                                data-position="${fn:escapeXml(positionName)}"
+                                               data-club="${fn:escapeXml(clubName)}"
                                                data-value="<%= p.getValue() %>"
                                                <%= selectedPlayerIds.contains(p.getPlayerId().toString()) ? "checked" : "" %>
-                                               <%= p.isActive() ? "" : "disabled" %>>
+                                               <%= selectable ? "" : "disabled" %>>
                                     </span>
                                     <span class="c-name">
-                                        <span class="c-name-text" title="${fn:escapeXml(player.playerName)}">${fn:escapeXml(player.playerName)}</span>
+                                        <span class="c-avatar" aria-hidden="true"><c:if test="${fn:length(nameParts) > 0}">${fn:toUpperCase(fn:substring(nameParts[0], 0, 1))}<c:if test="${fn:length(nameParts) > 1}">${fn:toUpperCase(fn:substring(nameParts[fn:length(nameParts) - 1], 0, 1))}</c:if></c:if></span>
+                                        <span class="c-name-text" title="${fn:escapeXml(playerName)}">${fn:escapeXml(playerName)}</span>
                                     </span>
                                     <span class="c-text" title="${fn:escapeXml(clubName)}">${fn:escapeXml(clubName)}</span>
-                                    <span class="c-text">${fn:escapeXml(positionName)}</span>
-                                    <span class="ct-value"><t:money value="${player.value}" /></span>
+                                    <span>
+                                        <span class="pos-pill ${isForward ? 'pos-fwd' : 'pos-back'}">${fn:escapeXml(positionName)}</span>
+                                    </span>
+                                    <span class="p-value"><t:money value="${player.value}" /></span>
                                     <span>
                                         <c:choose>
-                                            <c:when test="${player.active}">
+                                            <c:when test="${formScore >= 7}">
+                                                <span class="form-chip form-up"><span aria-hidden="true">&uarr;</span><t:rating value="${player.currentForm}" /></span>
+                                            </c:when>
+                                            <c:when test="${formScore < 5}">
+                                                <span class="form-chip form-down"><span aria-hidden="true">&darr;</span><t:rating value="${player.currentForm}" /></span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="form-chip"><span aria-hidden="true">&ndash;</span><t:rating value="${player.currentForm}" /></span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </span>
+                                    <span>
+                                        <c:choose>
+                                            <c:when test="${selectable}">
                                                 <span class="avail avail-ok"><span class="avail-label">Available</span></span>
                                             </c:when>
                                             <c:otherwise>
-                                                <span class="avail avail-out"><span class="avail-label">Unavailable</span></span>
+                                                <span class="avail avail-out"><span class="avail-label">${fn:escapeXml(availabilityLabel)}</span></span>
                                             </c:otherwise>
                                         </c:choose>
                                     </span>
@@ -201,6 +279,9 @@
                                     }
                                 %>
                             </div>
+                            <p class="catalog-empty ct-no-matches" id="ctNoMatches" hidden>
+                                No players match the current filters.
+                            </p>
                         </div>
                     <% } %>
                 </section>
