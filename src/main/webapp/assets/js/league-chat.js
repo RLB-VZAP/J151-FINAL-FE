@@ -12,7 +12,7 @@
     var POLL_INTERVAL_MS = 4000;
 
     function lastCreatedAt() {
-        var bubbles = container.querySelectorAll(".bubble");
+        var bubbles = container.querySelectorAll(".msg-bubble");
         if (!bubbles.length) {
             return null;
         }
@@ -30,23 +30,32 @@
         }
     }
 
+    function clearPlaceholder() {
+        var placeholder = container.querySelector("#leagueFeedEmptyState");
+        if (placeholder) {
+            placeholder.remove();
+        }
+    }
+
     function appendMessage(message) {
         var mine = currentUser && currentUser === String(message.senderUserId);
+        clearPlaceholder();
+
         var bubble = document.createElement("div");
-        bubble.className = "bubble " + (mine ? "mine" : "theirs");
+        bubble.className = "msg-bubble " + (mine ? "is-mine" : "is-theirs");
         bubble.setAttribute("data-created-at", message.createdAt);
 
         var author = document.createElement("span");
-        author.className = "bubble-author";
+        author.className = "msg-bubble-author";
         author.textContent = message.senderUsername;
 
         var body = document.createElement("p");
-        body.className = "bubble-body";
+        body.className = "msg-bubble-body";
         body.textContent = message.body;
 
         var time = document.createElement("span");
-        time.className = "bubble-time";
-        time.textContent = message.createdAt;
+        time.className = "msg-bubble-time";
+        time.textContent = String(message.createdAt).replace("T", " ").slice(0, 16);
 
         bubble.appendChild(author);
         bubble.appendChild(body);
