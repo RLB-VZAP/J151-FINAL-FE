@@ -133,6 +133,41 @@
                     <input type="search" id="playerSearch" placeholder="Search players"
                            autocomplete="off" aria-label="Search players">
                 </label>
+
+                <%-- Position filter and sort. Both are previews over the pool the
+                     server already sent, so they never touch the posted fields:
+                     a hidden row keeps its checkbox and still submits. Options
+                     come from the same backend catalogue as the requirements
+                     panel, so the names always match a player's data-position. --%>
+                <c:if test="${not empty positions}">
+                    <label class="ct-filter" for="positionFilter">
+                        <span class="ct-filter-label">Position</span>
+                        <select class="ct-select" id="positionFilter">
+                            <option value="">All positions</option>
+                            <c:forEach var="cat" items="${['FORWARD','BACK']}">
+                                <optgroup label="${cat == 'FORWARD' ? 'Forwards' : 'Backs'}">
+                                    <c:forEach var="pos" items="${positions}">
+                                        <c:if test="${fn:toUpperCase(pos.positionCategory) == cat}">
+                                            <option value="${fn:escapeXml(pos.positionName)}">${fn:escapeXml(pos.positionName)}</option>
+                                        </c:if>
+                                    </c:forEach>
+                                </optgroup>
+                            </c:forEach>
+                        </select>
+                    </label>
+                </c:if>
+
+                <label class="ct-filter" for="playerSort">
+                    <span class="ct-filter-label">Sort</span>
+                    <select class="ct-select" id="playerSort">
+                        <option value="name">Player name</option>
+                        <option value="position">Position</option>
+                        <option value="club">Club</option>
+                        <option value="value-desc">Value: high to low</option>
+                        <option value="value-asc">Value: low to high</option>
+                    </select>
+                </label>
+
                 <p class="ct-budget-note">Your budget: <strong><t:money value="${budget}" /></strong></p>
             </div>
 
@@ -176,6 +211,7 @@
                                                value="<%= p.getPlayerId() %>"
                                                data-player-name="${fn:escapeXml(player.playerName)}"
                                                data-position="${fn:escapeXml(positionName)}"
+                                               data-club="${fn:escapeXml(clubName)}"
                                                data-value="<%= p.getValue() %>"
                                                <%= selectedPlayerIds.contains(p.getPlayerId().toString()) ? "checked" : "" %>
                                                <%= p.isActive() ? "" : "disabled" %>>
@@ -201,6 +237,9 @@
                                     }
                                 %>
                             </div>
+                            <p class="catalog-empty ct-no-matches" id="ctNoMatches" hidden>
+                                No players match the current filters.
+                            </p>
                         </div>
                     <% } %>
                 </section>

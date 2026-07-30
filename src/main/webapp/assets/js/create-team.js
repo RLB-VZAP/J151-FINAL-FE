@@ -26,6 +26,9 @@
   var rows = Array.prototype.slice.call(form.querySelectorAll("[data-team-row]"));
 
   var searchInput = document.getElementById("playerSearch");
+  var positionFilter = document.getElementById("positionFilter");
+  var sortSelect = document.getElementById("playerSort");
+  var noMatches = document.getElementById("ctNoMatches");
   var budgetUsed = document.getElementById("budgetUsed");
   var budgetRemaining = document.getElementById("budgetRemaining");
   var selectedCount = document.getElementById("selectedCount");
@@ -206,17 +209,137 @@
     pick.addEventListener("change", onPickChange);
   });
 
-  /* Search: hide rows whose text does not match. Hidden rows keep their
-     checked checkboxes, so the selection still submits. */
+  /* ------------------------------------------------------------------------
+     Filtering and sorting the pool.
+
+     Both are view-only: a row that is filtered out is hidden, never removed,
+     so a player picked under one filter still submits under another. The
+     server receives the same repeated playerIds either way.
+     ---------------------------------------------------------------------- */
+
+  // The order positions appear in the requirements panel is the backend
+  // catalogue's own order — forwards then backs, as a rugby squad is listed.
+  // Sorting by position follows it rather than the alphabet, so Hooker, Lock,
+  // Loose Forward, Prop come before Centre, Fly Half and the rest.
+  var positionOrder = {};
+  Array.prototype.slice.call(form.querySelectorAll("[data-req]")).forEach(function (li, index) {
+    var name = li.getAttribute("data-position");
+    if (name) positionOrder[name] = index;
+  });
+
+  function pickIn(row) {
+    return row.querySelector('input[name="playerIds"]');
+  }
+
+  function attr(row, name) {
+    var pick = pickIn(row);
+    return (pick && pick.getAttribute(name)) || "";
+  }
+
+  function rankOf(row) {
+    var position = attr(row, "data-position");
+    // A position with no requirement row still sorts, just after the known ones.
+    return Object.prototype.hasOwnProperty.call(positionOrder, position)
+      ? positionOrder[position]
+      : Number.MAX_SAFE_INTEGER;
+  }
+
+  function byName(a, b) {
+    return attr(a, "data-player-name").localeCompare(attr(b, "data-player-name"), "en");
+  }
+
+  var comparators = {
+    name: byName,
+    position: function (a, b) {
+      var diff = rankOf(a) - rankOf(b);
+      if (diff !== 0) return diff;
+      // Within a position, alphabetical — the order the page arrives in.
+      return byName(a, b);
+    },
+    club: function (a, b) {
+      var diff = attr(a, "data-club").localeCompare(attr(b, "data-club"), "en");
+      return diff !== 0 ? diff : byName(a, b);
+    },
+    "value-desc": function (a, b) {
+      var diff = (parseFloat(attr(b, "data-value")) || 0) - (parseFloat(attr(a, "data-value")) || 0);
+      return diff !== 0 ? diff : byName(a, b);
+    },
+    "value-asc": function (a, b) {
+      var diff = (parseFloat(attr(a, "data-value")) || 0) - (parseFloat(attr(b, "data-value")) || 0);
+      return diff !== 0 ? diff : byName(a, b);
+    }
+  };
+
+  function applySort() {
+    if (!sortSelect || !rows.length) return;
+    var compare = comparators[sortSelect.value];
+    if (!compare) return;
+
+    var body = rows[0].parentNode;
+    if (!body) return;
+    // One reflow: order a detached copy, then re-append in the new order.
+    var fragment = document.createDocumentFragment();
+    rows.slice().sort(compare).forEach(function (row) {
+      fragment.appendChild(row);
+    });
+    body.appendChild(fragment);
+  }
+
+  function applyFilters() {
+    var term = searchInput ? searchInput.value.trim().toLowerCase() : "";
+    var position = positionFilter ? positionFilter.value : "";
+    var visible = 0;
+
+    rows.forEach(function (row) {
+      var matchesTerm = term === "" || row.textContent.toLowerCase().indexOf(term) !== -1;
+      var matchesPosition = position === "" || attr(row, "data-position") === position;
+      row.hidden = !(matchesTerm && matchesPosition);
+      if (!row.hidden) visible++;
+    });
+
+    if (noMatches) noMatches.hidden = visible !== 0 || !rows.length;
+  }
+
   if (searchInput) {
-    searchInput.addEventListener("input", function () {
-      var term = searchInput.value.trim().toLowerCase();
-      rows.forEach(function (row) {
-        row.hidden = term !== "" && row.textContent.toLowerCase().indexOf(term) === -1;
+    searchInput.addEventListener("input", applyFilters);
+  }
+  if (positionFilter) {
+    positionFilter.addEventListener("change", applyFilters);
+  }
+  if (sortSelect) {
+    sortSelect.addEventListener("change", applySort);
+  }
+
+  // The requirements panel doubles as a filter: seeing "still need 1 Hooker"
+  // and clicking Hooker should show the hookers, which is the whole reason a
+  // user reaches for the position filter in the first place.
+  if (positionFilter) {
+    Object.keys(buckets).forEach(function (name) {
+      var li = buckets[name].el;
+      li.classList.add("is-clickable");
+      li.setAttribute("role", "button");
+      li.setAttribute("tabindex", "0");
+      li.setAttribute("title", "Show only " + name + " players");
+
+      function filterToThis() {
+        // Clicking the position already being shown clears the filter, so the
+        // same row toggles the pool back to everyone.
+        positionFilter.value = (positionFilter.value === name) ? "" : name;
+        applyFilters();
+        if (searchInput) searchInput.focus();
+      }
+
+      li.addEventListener("click", filterToThis);
+      li.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          filterToThis();
+        }
       });
     });
   }
 
   /* Initial paint (covers selections re-rendered by the JSP) */
   refreshPreview();
+  applyFilters();
 })();
