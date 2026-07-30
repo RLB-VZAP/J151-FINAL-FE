@@ -131,6 +131,19 @@ public class MessagesServlet extends AbstractServlet {
     }
 
     private void handlePoll(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Type-ahead on the New message tab. The term is required: an empty one
+        // would ask the backend for every user, which is exactly what the
+        // type-ahead exists to avoid.
+        if (request.getParameter("contacts") != null) {
+            String searchTerm = request.getParameter("q");
+            if (searchTerm == null || searchTerm.isBlank()) {
+                JsonSupport.writeJson(response, List.of());
+                return;
+            }
+            writePollResult(response, messageRestClient.listContacts(searchTerm).orElse(null));
+            return;
+        }
+
         String with = request.getParameter("with");
         if (with != null && !with.isBlank()) {
             Optional<UUID> counterpart = parseUuid(with);
@@ -179,12 +192,18 @@ public class MessagesServlet extends AbstractServlet {
         request.setAttribute("incomingRequests", messageRestClient.listIncomingRequests().orElse(List.of()));
         request.setAttribute("outgoingRequests", messageRestClient.listOutgoingRequests().orElse(List.of()));
 
-        // The directory is only needed by the New message tab, and it is the one
-        // call here that grows with the user table, so it is loaded on demand.
+        // The directory grows with the user table, so the New message tab starts
+        // empty and only fetches once the user has typed something. With
+        // JavaScript that happens per keystroke against the JSON branch above;
+        // without it, the Search button posts the term back here.
         String tab = request.getParameter("tab");
         if ("new".equals(tab)) {
             String searchTerm = request.getParameter("q");
-            request.setAttribute("contacts", messageRestClient.listContacts(searchTerm).orElse(List.of()));
+            if (searchTerm != null && !searchTerm.isBlank()) {
+                request.setAttribute("contacts", messageRestClient.listContacts(searchTerm).orElse(List.of()));
+            } else {
+                request.setAttribute("contacts", List.of());
+            }
             request.setAttribute("contactSearch", searchTerm);
         }
         request.setAttribute("activeTab", tab == null || tab.isBlank() ? "threads" : tab);

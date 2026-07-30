@@ -142,22 +142,29 @@
                         <span class="msg-rule-line"></span>
                     </div>
 
-                    <form method="get" action="${pageContext.request.contextPath}/messages" class="msg-search-form">
+                    <%-- Submitting still works with JavaScript off; messages.js
+                         takes the same term over to the JSON branch per keystroke
+                         and hides the button. --%>
+                    <form method="get" action="${pageContext.request.contextPath}/messages" class="msg-search-form"
+                          id="contactSearchForm"
+                          data-context-path="${pageContext.request.contextPath}"
+                          data-csrf="${sessionScope['csrf.token']}">
                         <input type="hidden" name="tab" value="new">
                         <div class="msg-field msg-field-grow">
                             <label class="msg-label" for="contactSearch">Search by username or email</label>
-                            <input class="msg-input" type="text" id="contactSearch" name="q"
-                                   value="${fn:escapeXml(contactSearch)}" placeholder="e.g. jarryd">
+                            <input class="msg-input" type="text" id="contactSearch" name="q" autocomplete="off"
+                                   value="${fn:escapeXml(contactSearch)}" placeholder="Start typing a username&hellip;">
                         </div>
-                        <button type="submit" class="msg-ghost">Search</button>
+                        <button type="submit" class="msg-ghost" id="contactSearchButton">Search</button>
                     </form>
 
+                    <div id="contactResults">
                     <c:choose>
                         <c:when test="${empty contacts}">
                             <p class="msg-empty" id="contactsEmptyState">
                                 <c:choose>
                                     <c:when test="${not empty contactSearch}">No users match &ldquo;<c:out value="${contactSearch}"/>&rdquo;.</c:when>
-                                    <c:otherwise>No other users to message yet.</c:otherwise>
+                                    <c:otherwise>Type a username or email above to find someone to message.</c:otherwise>
                                 </c:choose>
                             </p>
                         </c:when>
@@ -209,6 +216,7 @@
                             </ul>
                         </c:otherwise>
                     </c:choose>
+                    </div>
                 </section>
             </c:when>
 
