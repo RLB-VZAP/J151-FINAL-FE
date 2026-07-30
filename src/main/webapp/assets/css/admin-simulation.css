@@ -154,6 +154,32 @@
     margin-top: 18px;
 }
 
+/* An even split down the middle: the two halves keep a common height instead of
+   each shrinking to its own content, which otherwise leaves one panel floating
+   well short of the other (the history side is much shorter until a fixture is
+   picked, and grows a table once one is). `align-items: start` on .asim-grid is
+   what causes that, so it is overridden rather than inherited here. */
+.asim-grid-split {
+    align-items: stretch;
+}
+
+.asim-grid-split > .asim-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Pins the trigger button to the bottom of its half so both halves end on the
+   same line. Only the trigger form is stretched — the history panel's form is
+   the short inline fixture picker (display: flex, in a row) and growing that
+   would just space its own controls apart. */
+#resimulationTriggerForm {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#resimulationTriggerForm .asim-submit { margin-top: auto; }
+
 /* ---------- Panels --------------------------------------------------------------------- */
 .asim-panel {
     padding: 20px 22px;

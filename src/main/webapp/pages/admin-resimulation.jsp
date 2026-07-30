@@ -93,8 +93,39 @@
              reason (e.g. "The round has not reached its lock deadline.") through the
              ${error} alert above — that is the only explanation an admin needs, and
              only appears when something actually goes wrong. --%>
+        <%-- Trigger sits on the left as the primary action; the history beside it is
+             the reference you check against. Both halves are equal width and are
+             stretched to a common height so the split reads down the middle. --%>
         <section id="resimulationSection">
-            <div class="asim-grid asim-grid-even">
+            <div class="asim-grid asim-grid-even asim-grid-split">
+
+                <section class="asim-panel">
+                    <h2 class="asim-panel-title">Trigger resimulation</h2>
+
+                    <form method="post" action="${pageContext.request.contextPath}/admin/resimulation" id="resimulationTriggerForm">
+                        <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
+                        <input type="hidden" name="action" value="resimulate">
+
+                        <div class="asim-field">
+                            <label class="asim-label" for="resimulateFixtureId">Fixture</label>
+                            <select class="asim-input" id="resimulateFixtureId" name="fixtureId" required>
+                                <option value="">&mdash; Select fixture &mdash;</option>
+                                <c:forEach var="fixture" items="${fixtures}">
+                                    <option value="${fixture.fixtureId}" ${fixture.fixtureId eq selectedFixtureId ? 'selected' : ''}>
+                                        <c:out value="${fixture.teamAName}" /> vs <c:out value="${fixture.teamBName}" /> &mdash; ${fixture.fixtureDate}
+                                    </option>
+                                </c:forEach>
+                            </select>
+                        </div>
+
+                        <div class="asim-field">
+                            <label class="asim-label" for="resimulationReason">Reason</label>
+                            <input class="asim-input" type="text" id="resimulationReason" name="resimulationReason" placeholder="e.g. correction after review" required>
+                        </div>
+
+                        <button type="submit" class="btn-gold asim-submit">Trigger resimulation</button>
+                    </form>
+                </section>
 
                 <section class="asim-panel">
                     <h2 class="asim-panel-title">Resimulation history</h2>
@@ -144,34 +175,6 @@
                             </div>
                         </c:otherwise>
                     </c:choose>
-                </section>
-
-                <section class="asim-panel">
-                    <h2 class="asim-panel-title">Trigger resimulation</h2>
-
-                    <form method="post" action="${pageContext.request.contextPath}/admin/resimulation" id="resimulationTriggerForm">
-                        <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
-                        <input type="hidden" name="action" value="resimulate">
-
-                        <div class="asim-field">
-                            <label class="asim-label" for="resimulateFixtureId">Fixture</label>
-                            <select class="asim-input" id="resimulateFixtureId" name="fixtureId" required>
-                                <option value="">&mdash; Select fixture &mdash;</option>
-                                <c:forEach var="fixture" items="${fixtures}">
-                                    <option value="${fixture.fixtureId}" ${fixture.fixtureId eq selectedFixtureId ? 'selected' : ''}>
-                                        <c:out value="${fixture.teamAName}" /> vs <c:out value="${fixture.teamBName}" /> &mdash; ${fixture.fixtureDate}
-                                    </option>
-                                </c:forEach>
-                            </select>
-                        </div>
-
-                        <div class="asim-field">
-                            <label class="asim-label" for="resimulationReason">Reason</label>
-                            <input class="asim-input" type="text" id="resimulationReason" name="resimulationReason" placeholder="e.g. correction after review" required>
-                        </div>
-
-                        <button type="submit" class="btn-gold asim-submit">Trigger resimulation</button>
-                    </form>
                 </section>
 
             </div>
