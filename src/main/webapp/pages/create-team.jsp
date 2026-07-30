@@ -200,9 +200,21 @@
                                         }
                                         String clubName = (clubNamesById == null) ? "-" : clubNamesById.getOrDefault(p.getClubId(), "-");
                                         String positionName = (positionNamesById == null) ? "-" : positionNamesById.getOrDefault(p.getPositionId(), "-");
+                                        // A player is pickable only if still on a roster AND not
+                                        // currently injured or suspended. The backend sends ACTIVE
+                                        // when it has nothing on file, so a null here means fit.
+                                        String availability = p.getAvailabilityStatus();
+                                        boolean available = availability == null || "ACTIVE".equals(availability);
+                                        boolean selectable = p.isActive() && available;
                                         pageContext.setAttribute("player", p);
                                         pageContext.setAttribute("clubName", clubName);
                                         pageContext.setAttribute("positionName", positionName);
+                                        pageContext.setAttribute("selectable", selectable);
+                                        pageContext.setAttribute("availabilityLabel",
+                                                selectable ? "Available"
+                                                        : (!p.isActive() || availability == null
+                                                                ? "Unavailable"
+                                                                : availability.charAt(0) + availability.substring(1).toLowerCase()));
                                 %>
                                 <%-- Same row anatomy as the Players catalogue (pages/players.jsp):
                                      initials avatar, forward/back position pill, form chip and
@@ -228,7 +240,7 @@
                                                data-club="${fn:escapeXml(clubName)}"
                                                data-value="<%= p.getValue() %>"
                                                <%= selectedPlayerIds.contains(p.getPlayerId().toString()) ? "checked" : "" %>
-                                               <%= p.isActive() ? "" : "disabled" %>>
+                                               <%= selectable ? "" : "disabled" %>>
                                     </span>
                                     <span class="c-name">
                                         <span class="c-avatar" aria-hidden="true"><c:if test="${fn:length(nameParts) > 0}">${fn:toUpperCase(fn:substring(nameParts[0], 0, 1))}<c:if test="${fn:length(nameParts) > 1}">${fn:toUpperCase(fn:substring(nameParts[fn:length(nameParts) - 1], 0, 1))}</c:if></c:if></span>
@@ -254,11 +266,11 @@
                                     </span>
                                     <span>
                                         <c:choose>
-                                            <c:when test="${player.active}">
+                                            <c:when test="${selectable}">
                                                 <span class="avail avail-ok"><span class="avail-label">Available</span></span>
                                             </c:when>
                                             <c:otherwise>
-                                                <span class="avail avail-out"><span class="avail-label">Unavailable</span></span>
+                                                <span class="avail avail-out"><span class="avail-label">${fn:escapeXml(availabilityLabel)}</span></span>
                                             </c:otherwise>
                                         </c:choose>
                                     </span>

@@ -22,4 +22,11 @@ public class PlayerResponse {
     private int currentForm;
     @JsonProperty("isActive")
     private boolean isActive;
+
+    /**
+     * Current availability as the backend enum name — ACTIVE, INJURED, SUSPENDED.
+     * Separate from {@code isActive}, which only says the player is still on a
+     * roster: a rostered player can be injured and so cannot be picked.
+     */
+    private String availabilityStatus;
 }
