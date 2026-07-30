@@ -1,183 +1,519 @@
 /* ============================================================================
-   TryTons — Fantasy Rugby | Private Messages
-   Loads on top of bootstrap.min.css and theme.css, consuming the Green-Gold
-   tokens (--bg, --line, --silver, --gold) rather than a separate palette.
-   Targets only the markup in messages.jsp.
+   TryTons — Messages (Green-Gold design system)
+   Conversations, message requests and the user directory. Loads on top of
+   theme.css (palette tokens, fonts, .brand-font, .btn-gold), sidebar.css
+   (shared left nav) and catalog.css (main column, page header).
+
+   Replaces the page's earlier Bootstrap layout: this was the only screen still
+   pulling bootstrap.min.css, which is why it did not match the rest of the app.
    ========================================================================== */
 
-body.messages {
-    /* Sidebar.css requires host pages to own their own body layout so the
-       sidebar can sit beside the main column. */
-    display: flex;
-    min-height: 100vh;
-    margin: 0;
-    /* Surfaces are lifted off the near-black page ground rather than being a
-       different hue, matching the pattern set by market-dashboard.css. */
-    --msg-surface: #12211a;
-    --msg-surface-hover: #1b3026;
-    --msg-radius-field: 8px;
-    --msg-sp-2: 8px;
-    --msg-sp-3: 12px;
-    --msg-sp-4: 16px;
-}
-
-/* Bootstrap's `.container` fights the fixed-width sidebar's flex sizing, so
-   the main column owns its own max-width and padding instead. */
-#messages {
-    flex: 1;
-    /* Without this a flex child with wide content refuses to shrink and
-       pushes the sidebar off-screen. */
-    min-width: 0;
-    max-width: 1080px;
-    margin: 0 auto;
+.msg-page .catalog-main {
     padding: 32px 40px 48px;
 }
 
-.error-message {
-    /* Bootstrap's stock alert-danger palette is light-mode; recolour it to
-       stay legible and on-brand against the dark ground. */
-    --bs-alert-color: #f0a99f;
-    --bs-alert-bg: rgba(226, 117, 106, .09);
-    --bs-alert-border-color: rgba(226, 117, 106, .35);
+.msg-page .catalog-content {
+    max-width: 1080px;
 }
 
-/* Thread list and conversation panels ride on Bootstrap's .card for
-   background/border/radius; only the surface colour needs overriding so the
-   panel reads as lifted material rather than the page ground. */
-.thread-list,
-.conversation {
-    --bs-card-bg: var(--msg-surface, #12211a);
-    --bs-card-border-color: var(--line, #2c4437);
-    padding: var(--msg-sp-4);
+.msg-intro {
+    margin: .6rem 0 0;
+    max-width: 700px;
+    color: var(--silver);
+    font-size: .9rem;
+    line-height: 1.6;
 }
 
-.thread-list h2,
-.conversation-header h2 {
-    color: var(--silver-bright, #eef3ef);
-    font-size: 1.05rem;
-    margin: 0 0 var(--msg-sp-3);
+.msg-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
 }
 
-.empty-state {
-    color: var(--silver-dim, #7f9187);
-    padding: var(--msg-sp-4);
+/* ---------- Feedback ----------------------------------------------------------------- */
+.msg-alert {
+    margin: 18px 0 0;
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--gold);
+    border-radius: 10px;
+    padding: .7rem .95rem;
+    color: var(--silver-bright);
+    font-size: .85rem;
+}
+
+.msg-alert-error { border-left-color: #c0524a; }
+.msg-alert-info { border-left-color: #5fae7a; }
+
+/* ---------- Header cross-link -------------------------------------------------------- */
+.msg-page-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2px;
+    border-bottom: none;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.msg-page-link svg { flex-shrink: 0; }
+
+/* ---------- Tabs --------------------------------------------------------------------- */
+.msg-tabs {
+    display: flex;
+    gap: 4px;
+    margin-top: 24px;
+    border-bottom: 1px solid var(--line);
+}
+
+.msg-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 16px;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    color: var(--silver-dim);
+    font-size: .87rem;
+    font-weight: 600;
+    text-decoration: none;
+    /* Sits on top of the container's bottom border so the active tab joins the
+       panel below it rather than floating above a continuous line. */
+    margin-bottom: -1px;
+}
+
+.msg-tab:hover { color: var(--silver-bright); }
+
+.msg-tab.is-active {
+    border-color: var(--line);
+    background: #091810;
+    color: var(--gold-bright);
+}
+
+/* ---------- Sections ----------------------------------------------------------------- */
+.msg-section { margin-top: 26px; }
+
+.msg-section-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+}
+
+.msg-section-title {
+    margin: 0;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--silver-bright);
+    white-space: nowrap;
+}
+
+.msg-rule-line { flex: 1; height: 1px; background: var(--line); }
+
+.msg-empty {
+    margin: 0;
+    padding: 30px 20px;
+    border: 1px dashed var(--line);
+    border-radius: 14px;
+    text-align: center;
+    color: var(--silver-dim);
+    font-size: .88rem;
+}
+
+.msg-empty a { color: var(--gold-bright); font-weight: 600; }
+
+.msg-empty-sm {
+    margin-top: 14px;
+    padding: 22px 16px;
+    font-size: .82rem;
+}
+
+/* ---------- Panels ------------------------------------------------------------------- */
+.msg-panel {
+    padding: 20px 22px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #091810;
+}
+
+.msg-panel-title {
+    margin: 0 0 16px;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--silver-bright);
+}
+
+/* Thread list beside the open conversation. The conversation is the wider half
+   because it holds the message bubbles and the composer. */
+.msg-grid {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: 22px;
+    align-items: stretch;
+    margin-top: 22px;
+}
+
+.msg-conversation-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 460px;
+}
+
+/* ---------- Buttons ------------------------------------------------------------------ */
+.msg-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    height: 42px;
+    padding: 0 1.05rem;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: transparent;
+    color: var(--silver-bright);
+    font-family: inherit;
+    font-size: .85rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color .15s ease, color .15s ease;
+}
+
+.msg-ghost:hover {
+    border-color: var(--gold);
+    color: var(--gold-bright);
+    filter: none;
+}
+
+.msg-btn-sm {
+    height: 34px;
+    padding: 0 .8rem;
+    font-size: .8rem;
+    white-space: nowrap;
+}
+
+.msg-btn-danger:hover {
+    border-color: #c0524a;
+    color: #e08079;
+}
+
+/* ---------- Fields ------------------------------------------------------------------- */
+.msg-field { min-width: 0; }
+.msg-field-grow { flex: 1; min-width: 180px; }
+
+.msg-label {
+    display: block;
+    margin-bottom: .45rem;
+    color: var(--silver-dim);
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.msg-input {
+    width: 100%;
+    height: 42px;
+    box-sizing: border-box;
+    padding: 0 .8rem;
+    background: #0c1c13;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    color: var(--silver-bright);
+    font-family: inherit;
+    font-size: .88rem;
+    transition: border-color .15s ease;
+}
+
+.msg-input:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+
+.msg-input::placeholder { color: #5c6e64; }
+
+.msg-input-sm {
+    height: 34px;
+    width: auto;
+    min-width: 150px;
+    font-size: .82rem;
+}
+
+.msg-textarea {
+    height: auto;
+    padding: .6rem .8rem;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.msg-search-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+/* ---------- Avatar + state pills ----------------------------------------------------- */
+.msg-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    background: rgba(201, 162, 39, .14);
+    color: var(--gold-bright);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: .82rem;
+    font-weight: 600;
+}
+
+.msg-badge {
+    display: inline-block;
+    min-width: 20px;
+    padding: .1rem .38rem;
+    border-radius: 999px;
+    background: var(--gold);
+    color: #10210f;
+    font-size: .7rem;
+    font-weight: 700;
     text-align: center;
 }
 
-/* ---------- Thread list ----------------------------------------------------- */
-.thread {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-areas: "name badge" "preview preview";
-    gap: 2px var(--msg-sp-2);
-    padding: var(--msg-sp-3);
-    border-radius: var(--msg-radius-field);
-    text-decoration: none;
-    color: var(--silver, #c7d1c9);
-    border: 1px solid transparent;
-    transition: background-color .14s ease;
-}
-
-.thread:hover {
-    background: var(--msg-surface-hover);
-}
-
-.thread.is-active {
-    background: var(--msg-surface-hover);
-    border-color: var(--line, #2c4437);
-}
-
-.thread-name {
-    grid-area: name;
+.msg-state {
+    flex-shrink: 0;
+    padding: .2rem .55rem;
+    border-radius: 999px;
+    font-size: .72rem;
     font-weight: 600;
-    color: var(--silver-bright, #eef3ef);
+    white-space: nowrap;
 }
 
-.thread-preview {
-    grid-area: preview;
-    color: var(--silver-dim, #7f9187);
-    font-size: 0.85rem;
+.msg-state-pending { background: rgba(224, 165, 74, .12); color: #e0a54a; }
+.msg-state-blocked { background: rgba(192, 82, 74, .12); color: #e08079; }
+
+/* ---------- Request + contact lists -------------------------------------------------- */
+.msg-request-list,
+.msg-contact-list,
+.msg-thread-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.msg-request,
+.msg-contact {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    border: 1px solid var(--line);
+    background: #091810;
+}
+
+.msg-request:first-child,
+.msg-contact:first-child { border-radius: 14px 14px 0 0; }
+
+.msg-request:last-child,
+.msg-contact:last-child { border-radius: 0 0 14px 14px; }
+
+.msg-request:only-child,
+.msg-contact:only-child { border-radius: 14px; }
+
+/* Collapse the shared hairline between adjacent rows. */
+.msg-request + .msg-request,
+.msg-contact + .msg-contact { border-top: none; }
+
+.msg-request-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.msg-request-who,
+.msg-contact-name {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--silver-bright);
+}
+
+.msg-contact-name {
+    flex: 1;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.unread-badge {
-    grid-area: badge;
-    /* Gold stays an accent: dark text on gold reads far better here than
-       Bootstrap's white-on-primary default. */
-    background: var(--gold, #c9a227);
-    color: #141f0e;
+.msg-request-note {
+    color: var(--silver-dim);
+    font-size: .8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-/* ---------- Conversation ----------------------------------------------------- */
-.conversation-header {
+.msg-request-actions,
+.msg-request-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* ---------- Thread list -------------------------------------------------------------- */
+.msg-thread-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.msg-thread {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    text-decoration: none;
+    transition: background .15s ease, border-color .15s ease;
+}
+
+.msg-thread:hover { background: rgba(255, 255, 255, .025); }
+
+.msg-thread.is-active {
+    border-color: var(--gold);
+    background: rgba(201, 162, 39, .07);
+}
+
+.msg-thread-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex: 1;
+    min-width: 0;
+}
+
+.msg-thread-name {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: .88rem;
+    font-weight: 600;
+    color: var(--silver-bright);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.msg-thread-preview {
+    color: var(--silver-dim);
+    font-size: .78rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ---------- Conversation ------------------------------------------------------------- */
+.msg-conversation-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid var(--line, #2c4437);
-    padding-bottom: var(--msg-sp-3);
-    margin-bottom: var(--msg-sp-3);
+    gap: 12px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
 }
 
-#conversationMessages {
+.msg-conversation-head .msg-panel-title { margin-bottom: 0; }
+
+/* Grows to fill the panel so the composer stays pinned to the bottom, and
+   scrolls internally rather than pushing the page down. */
+.msg-bubbles {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: var(--msg-sp-2);
-    max-height: 52vh;
+    gap: 8px;
     overflow-y: auto;
-    padding: var(--msg-sp-2);
+    max-height: 460px;
+    padding: 16px 2px;
 }
 
-.bubble {
-    max-width: 72%;
-    padding: var(--msg-sp-2) var(--msg-sp-3);
-    border-radius: 14px;
-    border: 1px solid var(--line, #2c4437);
-    color: var(--silver-bright, #eef3ef);
+.msg-bubble {
+    max-width: 76%;
+    padding: .55rem .8rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
 }
 
-.bubble .bubble-body {
-    margin: 0;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-}
-
-.bubble-time {
-    display: block;
-    margin-top: 2px;
-    font-size: 0.72rem;
-    color: var(--silver-dim, #7f9187);
-}
-
-.bubble.mine {
+.msg-bubble.is-mine {
     align-self: flex-end;
-    background: var(--msg-surface-hover);
-    /* Gold stays an accent — a border tag distinguishes "mine" bubbles
-       instead of an inverted gold fill. */
-    border-color: var(--gold-deep, #8a6a15);
+    border-color: rgba(201, 162, 39, .35);
+    background: rgba(201, 162, 39, .09);
 }
 
-.bubble.theirs {
+.msg-bubble.is-theirs {
     align-self: flex-start;
-    background: var(--msg-surface, #12211a);
+    background: rgba(255, 255, 255, .025);
 }
 
-/* Send form: layout comes from Bootstrap's d-flex/gap utilities in the JSP;
-   only the input's border needs realigning with the app's dark surfaces. */
-#sendForm .form-control {
-    border-color: var(--line, #2c4437);
-    background: #0f2118;
+.msg-bubble-body {
+    margin: 0;
+    color: var(--silver-bright);
+    font-size: .87rem;
+    line-height: 1.5;
+    /* Long unbroken strings must not widen the panel. */
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
 }
 
-/* ---------- Narrow screens: sidebar becomes a wrapping top strip, matching
-   sidebar.css's own 900px breakpoint ------------------------------------- */
-@media (max-width: 900px) {
-    body.messages {
-        flex-direction: column;
+.msg-bubble-time {
+    display: block;
+    margin-top: .25rem;
+    color: var(--silver-dim);
+    font-size: .68rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.msg-send-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+}
+
+.msg-send-btn {
+    flex-shrink: 0;
+    height: 42px;
+    padding: 0 1.2rem;
+}
+
+/* ---------- Narrow screens ----------------------------------------------------------- */
+@media (max-width: 1000px) {
+    .msg-grid { grid-template-columns: minmax(0, 1fr); }
+    .msg-conversation-panel { min-height: 0; }
+}
+
+@media (max-width: 640px) {
+    .msg-page .catalog-main { padding: 24px 16px 32px; }
+
+    .msg-request,
+    .msg-contact {
+        flex-wrap: wrap;
     }
 
-    #messages {
-        padding: 24px 16px 32px;
-    }
+    .msg-request-form { width: 100%; }
+    .msg-input-sm { flex: 1; min-width: 0; }
+    .msg-tabs { overflow-x: auto; }
 }
