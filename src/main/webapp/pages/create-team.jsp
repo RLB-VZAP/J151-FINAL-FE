@@ -183,11 +183,12 @@
                         <div class="ctable">
                             <div class="crow chead">
                                 <span aria-hidden="true"></span>
-                                <span>Player</span>
+                                <span>Name</span>
                                 <span>Club</span>
                                 <span>Position</span>
                                 <span>Value</span>
-                                <span>Status</span>
+                                <span>Form</span>
+                                <span>Availability</span>
                             </div>
                             <div class="cbody">
                                 <%
@@ -203,6 +204,19 @@
                                         pageContext.setAttribute("clubName", clubName);
                                         pageContext.setAttribute("positionName", positionName);
                                 %>
+                                <%-- Same row anatomy as the Players catalogue (pages/players.jsp):
+                                     initials avatar, forward/back position pill, form chip and
+                                     availability dot. The one difference is the leading checkbox,
+                                     because here a row is a pick rather than a link. --%>
+                                <c:set var="isForward" value="${false}" />
+                                <c:forEach var="pos" items="${positions}">
+                                    <c:if test="${pos.positionId == player.positionId}">
+                                        <c:set var="isForward" value="${pos.positionCategory == 'FORWARD'}" />
+                                    </c:if>
+                                </c:forEach>
+                                <c:set var="formScore" value="${player.currentForm / 10}" />
+                                <c:set var="playerName" value="${empty player.playerName ? '' : player.playerName}" />
+                                <c:set var="nameParts" value="${fn:split(playerName, ' ')}" />
                                 <label class="crow" data-team-row>
                                     <span>
                                         <input class="ct-check"
@@ -217,11 +231,27 @@
                                                <%= p.isActive() ? "" : "disabled" %>>
                                     </span>
                                     <span class="c-name">
-                                        <span class="c-name-text" title="${fn:escapeXml(player.playerName)}">${fn:escapeXml(player.playerName)}</span>
+                                        <span class="c-avatar" aria-hidden="true"><c:if test="${fn:length(nameParts) > 0}">${fn:toUpperCase(fn:substring(nameParts[0], 0, 1))}<c:if test="${fn:length(nameParts) > 1}">${fn:toUpperCase(fn:substring(nameParts[fn:length(nameParts) - 1], 0, 1))}</c:if></c:if></span>
+                                        <span class="c-name-text" title="${fn:escapeXml(playerName)}">${fn:escapeXml(playerName)}</span>
                                     </span>
                                     <span class="c-text" title="${fn:escapeXml(clubName)}">${fn:escapeXml(clubName)}</span>
-                                    <span class="c-text">${fn:escapeXml(positionName)}</span>
-                                    <span class="ct-value"><t:money value="${player.value}" /></span>
+                                    <span>
+                                        <span class="pos-pill ${isForward ? 'pos-fwd' : 'pos-back'}">${fn:escapeXml(positionName)}</span>
+                                    </span>
+                                    <span class="p-value"><t:money value="${player.value}" /></span>
+                                    <span>
+                                        <c:choose>
+                                            <c:when test="${formScore >= 7}">
+                                                <span class="form-chip form-up"><span aria-hidden="true">&uarr;</span><t:rating value="${player.currentForm}" /></span>
+                                            </c:when>
+                                            <c:when test="${formScore < 5}">
+                                                <span class="form-chip form-down"><span aria-hidden="true">&darr;</span><t:rating value="${player.currentForm}" /></span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="form-chip"><span aria-hidden="true">&ndash;</span><t:rating value="${player.currentForm}" /></span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </span>
                                     <span>
                                         <c:choose>
                                             <c:when test="${player.active}">

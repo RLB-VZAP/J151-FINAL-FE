@@ -38,6 +38,10 @@
             <span>Players</span>
         </a>
         <c:if test="${not isAdmin}">
+        <a class="sidebar-link ${activeNav == 'create-team' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/create-team">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
+            <span>Create Team</span>
+        </a>
         <a class="sidebar-link ${activeNav == 'clubs' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/clubs?submit=clubs">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M10 21v-5h4v5"/></svg>
             <span>Clubs</span>
@@ -52,10 +56,6 @@
             <span>Leaderboards</span>
         </a>
         <c:if test="${not isAdmin}">
-        <a class="sidebar-link ${activeNav == 'create-team' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/create-team">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
-            <span>Create Team</span>
-        </a>
         <a class="sidebar-link ${activeNav == 'transfers' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/transfers">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l4 4-4 4"/><path d="M21 7H8"/><path d="M7 21l-4-4 4-4"/><path d="M3 17h13"/></svg>
             <span>Transfers</span>
