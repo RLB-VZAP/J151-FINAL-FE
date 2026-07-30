@@ -23,10 +23,25 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@WebServlet(name = "AdminSimulationServlet", urlPatterns = {"/admin/simulation"})
+/**
+ * Serves the two admin simulation screens. They were one page originally, which
+ * left an admin scrolling past the whole settings editor to reach the
+ * resimulation controls; splitting them also means each request only makes the
+ * two or three API calls its own screen needs instead of all five.
+ *
+ * <ul>
+ *   <li>{@code /admin/simulation} — season weighting settings (view, create, edit)</li>
+ *   <li>{@code /admin/resimulation} — controlled resimulation (history, trigger)</li>
+ * </ul>
+ */
+@WebServlet(name = "AdminSimulationServlet", urlPatterns = {"/admin/simulation", "/admin/resimulation"})
 public class AdminSimulationServlet extends AbstractServlet {
 
-    private static final String VIEW = "/pages/admin-simulation.jsp";
+    private static final String SETTINGS_PATH = "/admin/simulation";
+    private static final String RESIMULATION_PATH = "/admin/resimulation";
+
+    private static final String SETTINGS_VIEW = "/pages/admin-simulation.jsp";
+    private static final String RESIMULATION_VIEW = "/pages/admin-resimulation.jsp";
 
     @Inject
     private SimulationSettingRestClient simulationSettingRestClient;
@@ -44,8 +59,13 @@ public class AdminSimulationServlet extends AbstractServlet {
         if (!requireAdmin(request, response)) {
             return;
         }
-        loadPage(request, request.getParameter("fixtureId"));
-        request.getRequestDispatcher(VIEW).forward(request, response);
+        if (RESIMULATION_PATH.equals(request.getServletPath())) {
+            loadResimulationPage(request, request.getParameter("fixtureId"));
+            request.getRequestDispatcher(RESIMULATION_VIEW).forward(request, response);
+            return;
+        }
+        loadSettingsPage(request);
+        request.getRequestDispatcher(SETTINGS_VIEW).forward(request, response);
     }
 
     @Override
@@ -58,17 +78,18 @@ public class AdminSimulationServlet extends AbstractServlet {
             action = "";
         }
 
+        // Which of the two screens the POST came from decides both the
+        // redirect target on success and the view re-rendered on failure.
+        boolean isResimulation = "resimulate".equals(action);
         String fixtureIdForReload = request.getParameter("fixtureId");
         Outcome outcome;
         switch (action) {
             case "saveSettings" -> outcome = saveSettings(request, response);
-            case "resimulate" -> {
-                outcome = resimulate(request, response);
-                fixtureIdForReload = request.getParameter("fixtureId");
-            }
+            case "resimulate" -> outcome = resimulate(request, response);
             default -> {
                 request.setAttribute("error", "Unknown simulation action requested");
                 outcome = Outcome.FAILURE;
+                isResimulation = RESIMULATION_PATH.equals(request.getServletPath());
             }
         }
 
@@ -77,20 +98,24 @@ public class AdminSimulationServlet extends AbstractServlet {
         }
 
         if (outcome == Outcome.SUCCESS) {
-            flashSuccess(request, "resimulate".equals(action) ? "Resimulation triggered" : "Simulation settings saved");
-            String redirect = request.getContextPath() + "/admin/simulation";
-            if (fixtureIdForReload != null && !fixtureIdForReload.isBlank()) {
+            flashSuccess(request, isResimulation ? "Resimulation triggered" : "Simulation settings saved");
+            String redirect = request.getContextPath() + (isResimulation ? RESIMULATION_PATH : SETTINGS_PATH);
+            // Only the resimulation screen is fixture-scoped: coming back with the
+            // same fixture selected keeps its history table on screen.
+            if (isResimulation && fixtureIdForReload != null && !fixtureIdForReload.isBlank()) {
                 redirect += "?fixtureId=" + URLEncoder.encode(fixtureIdForReload, StandardCharsets.UTF_8);
-            }
-            if ("resimulate".equals(action)) {
-                redirect += "#resimulationSection";
             }
             response.sendRedirect(redirect);
             return;
         }
 
-        loadPage(request, fixtureIdForReload);
-        request.getRequestDispatcher(VIEW).forward(request, response);
+        if (isResimulation) {
+            loadResimulationPage(request, fixtureIdForReload);
+            request.getRequestDispatcher(RESIMULATION_VIEW).forward(request, response);
+            return;
+        }
+        loadSettingsPage(request);
+        request.getRequestDispatcher(SETTINGS_VIEW).forward(request, response);
     }
 
     private Outcome saveSettings(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -154,16 +179,22 @@ public class AdminSimulationServlet extends AbstractServlet {
         return handleApiFailure(request, response, "Resimulation could not be triggered") ? Outcome.HANDLED : Outcome.FAILURE;
     }
 
-    private void loadPage(HttpServletRequest request, String fixtureIdParam) {
-        Optional<SimulationSettingResponse> active = simulationSettingRestClient.getActiveSimulationSetting();
-        if (active.isPresent()) {
-            request.setAttribute("activeSetting", active.get());
-        } else {
-            request.setAttribute("activeSettingError", "No active simulation settings are configured");
-        }
+    /** Settings screen: the active setting summary plus every season's setting. */
+    private void loadSettingsPage(HttpServletRequest request) {
+        loadActiveSetting(request);
 
         Optional<List<SimulationSettingResponse>> settings = simulationSettingRestClient.listSimulationSettings();
         request.setAttribute("simulationSettings", settings.orElse(List.of()));
+    }
+
+    /**
+     * Resimulation screen: the fixture list, and the selected fixture's run
+     * history. The active setting comes along because its resimulation cap and
+     * allow/approval flags govern whether a trigger will be accepted at all —
+     * the admin needs those visible here, not on the other page.
+     */
+    private void loadResimulationPage(HttpServletRequest request, String fixtureIdParam) {
+        loadActiveSetting(request);
 
         Optional<List<FixtureResponse>> fixtures = fixtureRestClient.listFixtures(null);
         request.setAttribute("fixtures", fixtures.orElse(List.of()));
@@ -176,6 +207,15 @@ public class AdminSimulationServlet extends AbstractServlet {
                         resimulationRestClient.listResimulationsForFixture(fixtureId.get());
                 request.setAttribute("resimulations", resimulations.orElse(List.of()));
             }
+        }
+    }
+
+    private void loadActiveSetting(HttpServletRequest request) {
+        Optional<SimulationSettingResponse> active = simulationSettingRestClient.getActiveSimulationSetting();
+        if (active.isPresent()) {
+            request.setAttribute("activeSetting", active.get());
+        } else {
+            request.setAttribute("activeSettingError", "No active simulation settings are configured");
         }
     }
 
@@ -203,6 +243,6 @@ public class AdminSimulationServlet extends AbstractServlet {
 
     @Override
     public String getServletInfo() {
-        return "Admin Simulation Servlet, handles simulation settings capture and controlled resimulation requests";
+        return "Admin Simulation Servlet, serves the simulation settings screen and the controlled resimulation screen";
     }
 }
