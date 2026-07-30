@@ -88,9 +88,30 @@
     }, 3400);
   }
 
+  // The positions still short of their minimum, with how many each still needs.
+  function shortfalls() {
+    var missing = [];
+    Object.keys(buckets).forEach(function (name) {
+      var short = buckets[name].min - countInBucket(name);
+      if (short > 0) {
+        missing.push({ name: name, count: short });
+      }
+    });
+    return missing;
+  }
+
+  function describe(missing) {
+    var parts = missing.map(function (m) { return m.count + " " + m.name; });
+    if (parts.length === 1) {
+      return parts[0];
+    }
+    return parts.slice(0, -1).join(", ") + " and " + parts[parts.length - 1];
+  }
+
   // Returns a message if checking this pick would break a hard squad rule,
   // otherwise null. Hard rules are the ones a user cannot un-break by adding
-  // more players: the 20-man cap and each position's maximum.
+  // more players: the 20-man cap, each position's maximum, and — because the
+  // squad is a fixed size — spending a slot that an unmet minimum still needs.
   function violationFor(justChecked) {
     if (checkedPicks().length > squadSize) {
       return "Your squad is full — you can only pick " + squadSize +
@@ -101,6 +122,18 @@
     if (bucket && countInBucket(name) > bucket.max) {
       return "You can only pick up to " + bucket.max + " " + name +
         " player" + (bucket.max === 1 ? "" : "s") + " — you already have " + bucket.max + ".";
+    }
+
+    // Every remaining slot is now spoken for by a position still under its
+    // minimum. Allowing this pick would fill one of those slots and leave the
+    // squad impossible to complete — you could only get out by removing
+    // players, which the server would tell you about far too late.
+    var missing = shortfalls();
+    var stillNeeded = missing.reduce(function (total, m) { return total + m.count; }, 0);
+    var slotsLeft = squadSize - checkedPicks().length;
+    if (stillNeeded > slotsLeft) {
+      return "You still need " + describe(missing) + ", and that leaves no room for another " +
+        name + ". Pick those first.";
     }
     return null;
   }
