@@ -24,6 +24,8 @@ public class MessageRestClient {
     private static final String UNREAD_COUNT_PATH = "/messages/unread-count";
     private static final String BLOCK_PATH = "/messages/block";
     private static final String BLOCKED_PATH = "/messages/blocked";
+    private static final String CONTACTS_PATH = "/messages/contacts";
+    private static final String REQUESTS_PATH = "/messages/requests";
 
     private static final Logger LOG = Logger.getLogger(MessageRestClient.class.getName());
 
@@ -108,6 +110,71 @@ public class MessageRestClient {
             LOG.log(Level.WARNING, "Unable to load blocked users.");
         }
         return response.map(users -> new ArrayList<>(Arrays.asList(users)));
+    }
+
+    // ----- permission to message -----
+
+    public Optional<List<MessageContactResponse>> listContacts(String searchTerm) {
+        String path = CONTACTS_PATH;
+        if (searchTerm != null && !searchTerm.isBlank()) {
+            path += "?q=" + encode(searchTerm.trim());
+        }
+        Optional<MessageContactResponse[]> response = apiClient.get(path, MessageContactResponse[].class);
+        if (response.isEmpty()) {
+            LOG.log(Level.WARNING, "Unable to load message contacts.");
+        }
+        return response.map(contacts -> new ArrayList<>(Arrays.asList(contacts)));
+    }
+
+    public Optional<List<MessageRequestResponse>> listIncomingRequests() {
+        Optional<MessageRequestResponse[]> response = apiClient.get(REQUESTS_PATH, MessageRequestResponse[].class);
+        if (response.isEmpty()) {
+            LOG.log(Level.WARNING, "Unable to load incoming message requests.");
+        }
+        return response.map(requests -> new ArrayList<>(Arrays.asList(requests)));
+    }
+
+    public Optional<List<MessageRequestResponse>> listOutgoingRequests() {
+        Optional<MessageRequestResponse[]> response =
+                apiClient.get(REQUESTS_PATH + "/outgoing", MessageRequestResponse[].class);
+        if (response.isEmpty()) {
+            LOG.log(Level.WARNING, "Unable to load outgoing message requests.");
+        }
+        return response.map(requests -> new ArrayList<>(Arrays.asList(requests)));
+    }
+
+    public Optional<MessageRequestResponse> createRequest(CreateMessageRequestRequest request) {
+        if (request == null || request.getAddresseeUserId() == null) {
+            LOG.log(Level.WARNING, "A user is required to send a message request.");
+            return Optional.empty();
+        }
+        Optional<MessageRequestResponse> response =
+                apiClient.post(REQUESTS_PATH, request, MessageRequestResponse.class);
+        if (response.isEmpty()) {
+            LOG.log(Level.WARNING, "Unable to send message request.");
+        }
+        return response;
+    }
+
+    public Optional<MessageRequestResponse> acceptRequest(UUID requestId) {
+        return respondToRequest(requestId, "accept");
+    }
+
+    public Optional<MessageRequestResponse> declineRequest(UUID requestId) {
+        return respondToRequest(requestId, "decline");
+    }
+
+    private Optional<MessageRequestResponse> respondToRequest(UUID requestId, String decision) {
+        if (requestId == null) {
+            LOG.log(Level.WARNING, "A message request is required.");
+            return Optional.empty();
+        }
+        String path = REQUESTS_PATH + "/" + encode(requestId.toString()) + "/" + decision;
+        Optional<MessageRequestResponse> response = apiClient.put(path, null, MessageRequestResponse.class);
+        if (response.isEmpty()) {
+            LOG.log(Level.WARNING, "Unable to " + decision + " message request.");
+        }
+        return response;
     }
 
     private String encode(String value) {
