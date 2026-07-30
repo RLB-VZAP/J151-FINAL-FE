@@ -1,10 +1,12 @@
 /* ============================================================================
-   TryTons — Admin: Simulation Settings (Green-Gold redesign)
-   Active-settings summary, an all-settings table with the settings form, and
-   the controlled-resimulation section. Loads on top of theme.css (palette
-   tokens, fonts, .brand-font, .btn-gold), sidebar.css (shared left nav,
-   including the admin-only Administration section) and catalog.css (main
-   column, page header).
+   TryTons — Admin: Simulation (Green-Gold redesign)
+   Shared by the two admin simulation screens, which use the same `asim-*`
+   vocabulary:
+     admin-simulation.jsp    — active-settings summary, all-settings table, form
+     admin-resimulation.jsp  — governing limits, resimulation history, trigger
+   Loads on top of theme.css (palette tokens, fonts, .brand-font, .btn-gold),
+   sidebar.css (shared left nav, including the admin-only Administration
+   section) and catalog.css (main column, page header).
    ========================================================================== */
 
 .asim-page .catalog-main {
@@ -38,8 +40,15 @@
 .asim-alert-error { border-left-color: #c0524a; }
 
 /* ---------- Section headers ---------------------------------------------------------- */
-#activeSettingSection { margin-top: 24px; }
-#resimulationSection { margin-top: 30px; }
+#activeSettingSection,
+#resimulationLimitsSection { margin-top: 24px; }
+
+/* Smaller than the settings page's 30px because this section carries no heading
+   of its own on the resimulation page — the two panel titles are the headings. */
+#resimulationSection { margin-top: 8px; }
+
+/* The limits grid already sits above it; only the note needs separating. */
+#resimulationDisabledNote { margin-top: 14px; }
 
 .asim-section-head {
     display: flex;
@@ -144,6 +153,32 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     margin-top: 18px;
 }
+
+/* An even split down the middle: the two halves keep a common height instead of
+   each shrinking to its own content, which otherwise leaves one panel floating
+   well short of the other (the history side is much shorter until a fixture is
+   picked, and grows a table once one is). `align-items: start` on .asim-grid is
+   what causes that, so it is overridden rather than inherited here. */
+.asim-grid-split {
+    align-items: stretch;
+}
+
+.asim-grid-split > .asim-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Pins the trigger button to the bottom of its half so both halves end on the
+   same line. Only the trigger form is stretched — the history panel's form is
+   the short inline fixture picker (display: flex, in a row) and growing that
+   would just space its own controls apart. */
+#resimulationTriggerForm {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#resimulationTriggerForm .asim-submit { margin-top: auto; }
 
 /* ---------- Panels --------------------------------------------------------------------- */
 .asim-panel {
@@ -354,6 +389,35 @@
     filter: none;
 }
 
+/* ---------- Cross-link between the two simulation screens --------------------------------- */
+/* .asim-ghost is sized for <button>; as an <a> it also needs the flex box for its
+   arrow icon and must drop the underline theme.css gives links. */
+.asim-page-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: none;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.asim-page-link svg { flex-shrink: 0; }
+
+/* The header is `align-items: flex-end`, so the link already sits on the
+   baseline of the intro text; this keeps it off the text on narrow screens
+   where the header wraps. */
+.asim-header .asim-page-link { margin-bottom: 2px; }
+
+.asim-count-link {
+    color: var(--gold-bright);
+    font-size: .78rem;
+    font-weight: 600;
+    white-space: nowrap;
+    border-bottom: none;
+}
+
+.asim-count-link:hover { text-decoration: underline; }
+
 /* ---------- Stub note ---------------------------------------------------------------------- */
 .asim-stub {
     margin: 0 0 4px;
@@ -365,6 +429,11 @@
     color: var(--silver);
     font-size: .84rem;
     line-height: 1.55;
+}
+
+.asim-stub a {
+    color: var(--gold-bright);
+    font-weight: 600;
 }
 
 /* ---------- Resimulation history table ------------------------------------------------------ */
