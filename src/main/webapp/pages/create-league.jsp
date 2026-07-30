@@ -39,12 +39,12 @@
                  membership needs a team (leagueMembership.teamId is NOT NULL). The backend
                  rejects the attempt outright, so the form is withheld rather than letting it
                  be filled in and fail on submit. --%>
-            <c:when test="${not hasTeam}">
+            <c:when test="${not canCreateLeague}">
                 <div class="cl-notice">
                     <span class="cl-notice-icon" aria-hidden="true">
                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     </span>
-                    <h2>You need a team first</h2>
+                        <h2>You need a team first</h2>
                     <p>Creating a league signs you up as its first member and manager &mdash; and that needs a fantasy team.</p>
                     <a class="btn-gold cl-notice-cta" href="${pageContext.request.contextPath}/create-team">Create your team &rarr;</a>
                 </div>
@@ -73,21 +73,35 @@
                     <div class="cl-row">
                         <div class="cl-field">
                             <label class="cl-label" for="leagueType">Visibility</label>
+                            <%-- Administrators have no fantasy team, so they cannot be a
+                                 league's founding member — which is what a private league's
+                                 manager is. The server enforces this; the form simply does
+                                 not offer a choice that would be rejected. ${isAdmin} comes
+                                 from sidebar.jspf, included above. --%>
                             <div class="cl-select-wrap">
                                 <select class="cl-select" id="leagueType" name="leagueType" required>
-                                    <option value="PUBLIC" ${param.leagueType == 'PUBLIC' ? 'selected' : ''}>Public</option>
-                                    <option value="PRIVATE" ${param.leagueType == 'PRIVATE' ? 'selected' : ''}>Private</option>
+                                    <option value="PUBLIC" ${isAdmin or param.leagueType == 'PUBLIC' ? 'selected' : ''}>Public</option>
+                                    <c:if test="${not isAdmin}">
+                                        <option value="PRIVATE" ${param.leagueType == 'PRIVATE' ? 'selected' : ''}>Private</option>
+                                    </c:if>
                                 </select>
                                 <svg class="cl-select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
                             </div>
-                            <p class="cl-help">Public leagues anyone can find and join. Private leagues need an invite code.</p>
+                            <c:choose>
+                                <c:when test="${isAdmin}">
+                                    <p class="cl-help">Administrators create public leagues, open for anyone to find and join. You will not be a member of it yourself.</p>
+                                </c:when>
+                                <c:otherwise>
+                                    <p class="cl-help">Public leagues anyone can find and join. Private leagues need an invite code.</p>
+                                </c:otherwise>
+                            </c:choose>
                         </div>
 
                         <div class="cl-field">
                             <label class="cl-label" for="maxMembers">Max members</label>
                             <input class="cl-input" type="number" id="maxMembers" name="maxMembers" min="1" max="100"
                                    value="${empty param.maxMembers ? 20 : fn:escapeXml(param.maxMembers)}" required>
-                            <p class="cl-help">Up to how many teams can join, including yours.</p>
+                            <p class="cl-help">Up to how many teams can join${isAdmin ? '.' : ', including yours.'}</p>
                         </div>
                     </div>
 

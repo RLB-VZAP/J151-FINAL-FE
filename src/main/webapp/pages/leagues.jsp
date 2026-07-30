@@ -85,9 +85,10 @@
                     <div class="lg-actions">
                         <a class="btn-outline" href="${pageContext.request.contextPath}/league/join">Join league</a>
                         <%-- Creating a league enrols you as its first member and manager, which
-                             needs a team just as joining does, so it is gated the same way. --%>
+                             needs a team just as joining does — except for an administrator,
+                             who opens a public league without joining it. --%>
                         <c:choose>
-                            <c:when test="${hasTeam}">
+                            <c:when test="${canCreateLeague}">
                                 <a class="btn-gold" href="${pageContext.request.contextPath}/league/create">
                                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
                                     Create league

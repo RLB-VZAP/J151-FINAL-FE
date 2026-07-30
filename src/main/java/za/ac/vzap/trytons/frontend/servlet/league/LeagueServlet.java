@@ -45,6 +45,16 @@ public class LeagueServlet extends AbstractServlet {
         return authContext.isAuthenticated() && fantasyTeamRestClient.getMyTeam().isPresent();
     }
 
+    /**
+     * Whether the caller may open the create-league form. Everyone else needs a
+     * team because creating a league enrols them as its first member; an
+     * administrator creates a public league without joining it, so the team
+     * requirement does not apply to them. The backend enforces the same split.
+     */
+    private boolean currentUserCanCreateLeague() {
+        return authContext.isAdmin() || currentUserHasTeam();
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String path = request.getServletPath();
@@ -60,7 +70,10 @@ public class LeagueServlet extends AbstractServlet {
                 }
 
                 request.setAttribute("myLeagues", loadMyLeagues());
+                // Two different gates: joining always needs a team, creating does not
+                // when the creator is an admin who will not be a member.
                 request.setAttribute("hasTeam", currentUserHasTeam());
+                request.setAttribute("canCreateLeague", currentUserCanCreateLeague());
                 populateLeaguesView(request, publicLeagues.orElseGet(List::of));
                 yield "/pages/leagues.jsp";
             }
@@ -80,10 +93,11 @@ public class LeagueServlet extends AbstractServlet {
 
             case "/league/create" -> {
                 // Creating a league enrols the creator as its first member, which needs a
-                // team. The button on the leagues page is disabled without one, but this
-                // URL is reachable directly, so the form is withheld here too rather than
-                // letting a filled-in form fail on submit.
-                request.setAttribute("hasTeam", currentUserHasTeam());
+                // team — unless the creator is an admin, who creates a public league
+                // without joining it. The button on the leagues page is disabled without
+                // one, but this URL is reachable directly, so the form is withheld here
+                // too rather than letting a filled-in form fail on submit.
+                request.setAttribute("canCreateLeague", currentUserCanCreateLeague());
                 yield "/pages/create-league.jsp";
             }
 
@@ -142,6 +156,7 @@ public class LeagueServlet extends AbstractServlet {
                     return;
                 }
                 if (handleApiFailure(request, response, "Unable to create league. Check your details and try again.")) return;
+                request.setAttribute("canCreateLeague", currentUserCanCreateLeague());
                 request.getRequestDispatcher("/pages/create-league.jsp").forward(request, response);
             }
 
