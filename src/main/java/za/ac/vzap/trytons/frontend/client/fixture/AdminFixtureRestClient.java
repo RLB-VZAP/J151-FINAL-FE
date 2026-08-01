@@ -21,13 +21,8 @@ public class AdminFixtureRestClient {
     @Inject
     private APIClient apiClient ;
 
-    public Optional<FixtureResponse> createFixture(FixtureRequest request){
-        Optional<FixtureResponse> response = apiClient.post(FIXTURES_PATH,request,FixtureResponse.class);
-        if(response.isEmpty()){
-            LOG.log(Level.SEVERE, "Unable to create fixture");
-        }
-        return response;
-    }
+    // No create: the backend has no POST /fixtures. Fixtures are generated when a
+    // tournament is created, so administrators may only view and update them.
     public Optional<FixtureResponse> updateFixtureStatus(String fixtureId, String status){
         String path = FIXTURES_PATH + "/" + encode(fixtureId) + "/status?status=" + encode(status);
         Optional<FixtureResponse> response = apiClient.put(path, null, FixtureResponse.class);

@@ -1,0 +1,19 @@
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%--
+    "Friendly league" notice: a PRIVATE league plays real fixtures and keeps its
+    own internal standings, but per the public/private points rule those results
+    are excluded from a manager's overall fantasy points, tournament seeding and
+    player pricing. Pages set "isPrivateLeague" before including; this renders
+    only when that is true, so including it is always safe.
+--%>
+<c:if test="${isPrivateLeague}">
+    <section class="lg-noteam" role="status">
+        <span class="lg-noteam-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        </span>
+        <span class="lg-noteam-text">
+            <p class="lg-noteam-title">Friendly league</p>
+            <p class="lg-noteam-sub">Results here count toward this league&#39;s own standings only &mdash; they don&#39;t add to your overall fantasy points, tournament seeding or player prices.</p>
+        </span>
+    </section>
+</c:if>

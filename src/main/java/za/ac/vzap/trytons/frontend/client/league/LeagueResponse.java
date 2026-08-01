@@ -21,4 +21,8 @@ public class LeagueResponse {
     private int maxMembers;
     private String managerDisplayName;
     private String leagueCode;
+    /** FORMING until the manager starts the tournament, then IN_PROGRESS / COMPLETED. */
+    private String status;
+    /** Null while the league is still FORMING. */
+    private LocalDateTime startedAt;
 }

@@ -465,6 +465,20 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    /* The footer can now carry two links plus a Start league form, so it wraps
+       rather than squashing them on a narrow card. */
+    flex-wrap: wrap;
+}
+
+/* Start league: the league manager's action on the league detail card. */
+.lg-start-form {
+    margin: 0;
+}
+
+.lg-start {
+    flex-shrink: 0;
+    padding: .5rem .95rem;
+    font-size: .8rem;
 }
 
 .lg-link {

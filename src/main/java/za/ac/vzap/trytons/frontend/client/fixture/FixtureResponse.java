@@ -26,4 +26,12 @@ public class FixtureResponse {
     private String fixtureStatus;
     private LocalDateTime simulationDate;
     private LocalDateTime createdAt;
+    /** POOL, or a knockout stage (QUARTER_FINAL, SEMI_FINAL, FINAL, ...). Null for a
+     *  non-tournament fixture. */
+    private String stage;
+    private Integer roundNumber;
+    private Integer matchdayNumber;
+    /** Null until the fixture has been simulated. */
+    private Integer teamAScore;
+    private Integer teamBScore;
 }

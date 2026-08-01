@@ -17,9 +17,10 @@
     </a>
 
     <%-- Admins manage the game rather than play it, so the player-facing tabs
-         (Home, My Team, Clubs, Create Team, Transfers, Fixtures, History) are
-         hidden for them. Admins keep Players, Leagues, Leaderboards,
-         Notifications and Profile, plus the Administration section below. --%>
+         (Home, My Team, Create Team/Edit Team, Transfers, Fixtures, History) are
+         hidden for them. Admins keep Players, Clubs, Leagues (view only — the
+         join actions are hidden on the page itself), Leaderboards, Notifications,
+         Messages, Market and Profile, plus the Administration section below. --%>
     <c:set var="isAdmin" value="${sessionScope.role == 'ADMINISTRATOR'}" scope="page" />
 
     <nav class="sidebar-nav">
@@ -33,19 +34,35 @@
             <span>My Team</span>
         </a>
         </c:if>
+        <%-- Players and Clubs are standalone browse catalogues for everyone:
+             regular users research picks there, admins manage the catalogues. --%>
         <a class="sidebar-link ${activeNav == 'players' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/players?submit=players">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span>Players</span>
         </a>
-        <c:if test="${not isAdmin}">
-        <a class="sidebar-link ${activeNav == 'create-team' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/create-team">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
-            <span>Create Team</span>
-        </a>
         <a class="sidebar-link ${activeNav == 'clubs' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/clubs?submit=clubs">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M10 21v-5h4v5"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-4.4 7-10V5.5L12 3 5 5.5V11c0 5.6 7 10 7 10z"/><path d="M9.5 11.5l1.8 1.8 3.4-3.6"/></svg>
             <span>Clubs</span>
         </a>
+        <%-- This link flips between "Create Team" and "Edit Team" based on the
+             session-cached team lookup SidebarBadgeFilter populates, so it never
+             round-trips to the backend on every page. Both states share the
+             create-team activeNav key. --%>
+        <c:if test="${not isAdmin}">
+        <c:choose>
+            <c:when test="${sessionScope.hasFantasyTeam and not empty sessionScope.fantasyTeamId}">
+                <a class="sidebar-link ${activeNav == 'create-team' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/fantasy-team/update?teamId=${sessionScope.fantasyTeamId}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
+                    <span>Edit Team</span>
+                </a>
+            </c:when>
+            <c:otherwise>
+                <a class="sidebar-link ${activeNav == 'create-team' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/create-team">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
+                    <span>Create Team</span>
+                </a>
+            </c:otherwise>
+        </c:choose>
         </c:if>
         <a class="sidebar-link ${activeNav == 'leagues' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/leagues">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/></svg>

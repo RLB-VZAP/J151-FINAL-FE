@@ -19,9 +19,14 @@
                                data-dir="asc|desc" and data-type="text|number"
    ========================================================================== */
 document.addEventListener("DOMContentLoaded", function () {
-    var root = document.querySelector("[data-catalog]");
-    if (!root) return;
+    // A page can host more than one catalogue (e.g. Create Team's Clubs and
+    // Players browse sections above the squad picker), so every [data-catalog]
+    // root gets its own independent instance rather than binding to only the
+    // first one found.
+    Array.prototype.forEach.call(document.querySelectorAll("[data-catalog]"), initCatalog);
+});
 
+function initCatalog(root) {
     var body = root.querySelector("[data-catalog-body]");
     if (!body) return;
 
@@ -92,4 +97,4 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     apply();
-});
+}

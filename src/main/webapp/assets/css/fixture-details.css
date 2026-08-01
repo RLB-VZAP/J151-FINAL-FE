@@ -223,6 +223,53 @@
 }
 .fxd-line-val.is-neg { color: #e08279; }
 
+/* Per-event composition, indented under the player-points line it sums to. */
+.fxd-events {
+    list-style: none;
+    margin: 0 0 2px;
+    padding: 2px 0 6px 12px;
+    border-left: 2px solid var(--line);
+}
+
+.fxd-event {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 4px 0;
+    color: var(--silver-dim);
+    font-size: .78rem;
+}
+
+.fxd-event-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fxd-event-count {
+    flex-shrink: 0;
+    color: var(--silver-dim);
+    font-size: .72rem;
+    font-variant-numeric: tabular-nums;
+    opacity: .85;
+}
+
+.fxd-event-pts {
+    flex-shrink: 0;
+    min-width: 3.2em;
+    text-align: right;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-weight: 600;
+    color: var(--silver);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Deductions read as negative: red figure and a dimmed label. */
+.fxd-event-pts.is-neg { color: #e08279; }
+.fxd-event.is-deduction .fxd-event-label { color: #c98d86; }
+
 .fxd-line-total {
     margin-top: 4px;
     padding-top: 11px;

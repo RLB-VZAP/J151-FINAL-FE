@@ -5,12 +5,14 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import za.ac.vzap.trytons.frontend.client.catalog.ClubRestClient;
 import za.ac.vzap.trytons.frontend.client.catalog.PlayerResponse;
 import za.ac.vzap.trytons.frontend.client.catalog.PositionRestClient;
 import za.ac.vzap.trytons.frontend.client.catalog.PositionResponse;
 import za.ac.vzap.trytons.frontend.client.fantasyteam.*;
 import za.ac.vzap.trytons.frontend.client.catalog.PlayerRestClient;
+import za.ac.vzap.trytons.frontend.filter.SidebarBadgeFilter;
 import java.io.IOException;
 import java.util.*;
 
@@ -99,21 +101,27 @@ public class FantasyTeamServlet extends AbstractServlet{
                     request.setAttribute("adminCannotCreate", true);
                     yield CREATE_TEAM_JSP;
                 }
-                // One team per user (uk_fantasyTeam_owner): if they already have a team,
-                // show a notice pointing at it rather than the create form.
+                // One team per user (uk_fantasyTeam_owner): an existing owner is sent
+                // straight to the edit view rather than shown a create-form dead end.
                 Optional<UUID> existingTeamId = fantasyTeamRestClient.getMyTeam()
                         .map(FantasyTeamResponse::getTeamId);
                 if (existingTeamId.isPresent()) {
-                    request.setAttribute("existingTeamId", existingTeamId.get());
-                    yield CREATE_TEAM_JSP;
+                    redirectTo(response, request, "/fantasy-team/update?teamId=" + existingTeamId.get());
+                    yield null;
                 }
                 loadPlayerOptions(request);
                 yield CREATE_TEAM_JSP;
             }
         };
+        if(destination == null){
+            // Already redirected (either to the edit view or, on session expiry, to
+            // /login) inside the switch above — nothing left to forward.
+            return;
+        }
         request.getRequestDispatcher(destination).forward(request, response);
 
     }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if(!requireAuthenticated(request, response)) return;
@@ -174,6 +182,13 @@ public class FantasyTeamServlet extends AbstractServlet{
         FantasyTeamRequest fantasyTeamRequest = buildFantasyTeamRequest(teamName,selectedPlayerIds);
         Optional<FantasyTeamResponse> fantasyTeamResponse = fantasyTeamRestClient.createTeam(fantasyTeamRequest);
         if(fantasyTeamResponse.isPresent()){
+            // The sidebar/dashboard nav read this session cache (see
+            // SidebarBadgeFilter) rather than calling the backend on every page, so
+            // it has to be refreshed here or the nav would keep offering "Create
+            // Team" until the cache happened to be repopulated some other way.
+            HttpSession session = request.getSession(true);
+            session.setAttribute(SidebarBadgeFilter.SESSION_HAS_TEAM, Boolean.TRUE);
+            session.setAttribute(SidebarBadgeFilter.SESSION_TEAM_ID, fantasyTeamResponse.get().getTeamId());
             flashSuccess(request, "Team created");
             return true;
         }
