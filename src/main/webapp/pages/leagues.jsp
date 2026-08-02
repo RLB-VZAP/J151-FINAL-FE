@@ -49,7 +49,17 @@
                             </span>
                             <div class="lg-card-heading">
                                 <p class="lg-card-name"><c:out value="${league.leagueName}" /></p>
-                                <p class="lg-card-sub">Managed by <c:out value="${empty league.managerDisplayName ? 'the league' : league.managerDisplayName}" /></p>
+                                <%-- A public league has no manager: it is run by the
+                                     administrators. Only a private league is owned by
+                                     one of its own players. --%>
+                                <c:choose>
+                                    <c:when test="${not empty league.managerDisplayName}">
+                                        <p class="lg-card-sub">Managed by <c:out value="${league.managerDisplayName}" /></p>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <p class="lg-card-sub">Run by the administrators</p>
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
                             <span class="lg-type ${league.leagueType == 'PRIVATE' ? 'lg-type-private' : 'lg-type-public'}">
                                 ${league.leagueType == 'PRIVATE' ? 'Private' : 'Public'}
