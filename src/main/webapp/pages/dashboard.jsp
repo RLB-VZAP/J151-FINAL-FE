@@ -37,15 +37,30 @@
 
     <section class="dashboard-grid">
 
-        <%-- Admins manage the competition rather than play it — see sidebar.jspf. --%>
+        <%-- Admins manage the competition rather than play it — see sidebar.jspf.
+             Flips to "Edit Team" once the session-cached lookup (SidebarBadgeFilter)
+             shows the user already owns a team, same as the sidebar nav entry. --%>
         <c:if test="${not isAdmin}">
-        <a class="dashboard-card card-create-team" href="${pageContext.request.contextPath}/create-team">
-            <span class="dashboard-card-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
-            </span>
-            <span class="dashboard-card-title brand-font">Create Team <span class="dashboard-card-arrow">&rarr;</span></span>
-            <p class="dashboard-card-desc">Build your squad and get ready to compete.</p>
-        </a>
+        <c:choose>
+            <c:when test="${sessionScope.hasFantasyTeam and not empty sessionScope.fantasyTeamId}">
+                <a class="dashboard-card card-create-team" href="${pageContext.request.contextPath}/fantasy-team/update?teamId=${sessionScope.fantasyTeamId}">
+                    <span class="dashboard-card-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
+                    </span>
+                    <span class="dashboard-card-title brand-font">Edit Team <span class="dashboard-card-arrow">&rarr;</span></span>
+                    <p class="dashboard-card-desc">Adjust your squad ahead of the next deadline.</p>
+                </a>
+            </c:when>
+            <c:otherwise>
+                <a class="dashboard-card card-create-team" href="${pageContext.request.contextPath}/create-team">
+                    <span class="dashboard-card-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
+                    </span>
+                    <span class="dashboard-card-title brand-font">Create Team <span class="dashboard-card-arrow">&rarr;</span></span>
+                    <p class="dashboard-card-desc">Build your squad and get ready to compete.</p>
+                </a>
+            </c:otherwise>
+        </c:choose>
         </c:if>
 
         <a class="dashboard-card card-leagues" href="${pageContext.request.contextPath}/leagues">

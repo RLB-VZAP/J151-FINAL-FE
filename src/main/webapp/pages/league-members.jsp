@@ -96,7 +96,11 @@
                     </c:if>
                 </section>
 
-                <%-- ---------- Members list ---------- --%>
+                <%-- ---------- Members list ----------
+                     Suppressed entirely when "error" is set (e.g. a 403 from a denied
+                     listMembers() call) so a denial never renders next to the
+                     "No members yet" empty state and gets mistaken for it. --%>
+                <c:if test="${empty error}">
                 <div class="lm-list-head">
                     <h2 class="lm-list-title">Members</h2>
                     <span class="lm-list-rule"></span>
@@ -164,6 +168,7 @@
                         </section>
                     </c:otherwise>
                 </c:choose>
+                </c:if>
             </c:otherwise>
         </c:choose>
 

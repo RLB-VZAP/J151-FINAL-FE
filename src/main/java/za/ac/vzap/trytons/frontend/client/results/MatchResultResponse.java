@@ -24,4 +24,7 @@ public class MatchResultResponse {
     private boolean isCurrent;
     private LocalDateTime resultDate;
     private UUID approvedByAdminUserId;
+    /** Null until the fixture has been simulated. */
+    private TeamPointsBreakdownResponse teamABreakdown;
+    private TeamPointsBreakdownResponse teamBBreakdown;
 }

@@ -42,8 +42,6 @@
         </c:if>
 
         <div class="afx-grid">
-
-            <%-- ================= Left: filter + fixtures ================= --%>
             <div class="afx-col">
 
                 <section id="fixtureListSection">
@@ -126,95 +124,10 @@
                 </section>
             </div>
 
-            <%-- ================= Right: create fixture ================= --%>
-            <section class="afx-panel" id="createFixtureSection">
-                <h2 class="afx-panel-title">Create fixture</h2>
-                <form method="post" action="${pageContext.request.contextPath}/admin/fixtures" id="createFixtureForm">
-                    <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
-                    <input type="hidden" name="submit" value="create-fixture">
-
-                    <div class="afx-field">
-                        <label class="afx-label" for="createFixtureLeagueId">League</label>
-                        <div class="afx-select-wrap">
-                            <select class="afx-select" id="createFixtureLeagueId" name="leagueId" required>
-                                <option value="">&mdash; Select league &mdash;</option>
-                                <c:forEach var="league" items="${leagues}">
-                                    <option value="${league.leagueId}"><c:out value="${league.leagueName}" /></option>
-                                </c:forEach>
-                            </select>
-                            <svg class="afx-select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                        </div>
-                    </div>
-
-                    <div class="afx-field">
-                        <label class="afx-label" for="createFixtureRoundId">Round</label>
-                        <div class="afx-select-wrap">
-                            <select class="afx-select" id="createFixtureRoundId" name="roundId" required>
-                                <option value="">&mdash; Select round &mdash;</option>
-                                <c:forEach var="round" items="${rounds}">
-                                    <option value="${round.roundId}"><c:out value="${round.season}" /> &middot; Round <c:out value="${round.roundNumber}" /></option>
-                                </c:forEach>
-                            </select>
-                            <svg class="afx-select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                        </div>
-                    </div>
-
-                    <div class="afx-field">
-                        <label class="afx-label" for="createFixtureTeamAId">Team A</label>
-                        <div class="afx-select-wrap">
-                            <select class="afx-select" id="createFixtureTeamAId" name="teamAId" required>
-                                <option value="">&mdash; Select league first &mdash;</option>
-                                <c:forEach var="league" items="${leagues}">
-                                    <c:forEach var="member" items="${teamsByLeagueId[league.leagueId]}">
-                                        <option value="${member.teamId}" data-league-id="${league.leagueId}"><c:out value="${member.teamDisplayName}" /></option>
-                                    </c:forEach>
-                                </c:forEach>
-                            </select>
-                            <svg class="afx-select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                        </div>
-                    </div>
-
-                    <div class="afx-field">
-                        <label class="afx-label" for="createFixtureTeamBId">Team B</label>
-                        <div class="afx-select-wrap">
-                            <select class="afx-select" id="createFixtureTeamBId" name="teamBId" required>
-                                <option value="">&mdash; Select league first &mdash;</option>
-                                <c:forEach var="league" items="${leagues}">
-                                    <c:forEach var="member" items="${teamsByLeagueId[league.leagueId]}">
-                                        <option value="${member.teamId}" data-league-id="${league.leagueId}"><c:out value="${member.teamDisplayName}" /></option>
-                                    </c:forEach>
-                                </c:forEach>
-                            </select>
-                            <svg class="afx-select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                        </div>
-                    </div>
-
-                    <%-- League -> active teams map, consumed by the script below to
-                         populate the team dropdowns when a league is chosen. Held in a
-                         hidden input so HTML attribute escaping keeps the JSON safe. --%>
-                    <input type="hidden" id="afxTeamsByLeague" value="${fn:escapeXml(teamsByLeagueJson)}">
-
-
-                    <div class="afx-row-2">
-                        <div class="afx-field">
-                            <label class="afx-label" for="createFixtureDate">Date</label>
-                            <input class="afx-input" type="date" id="createFixtureDate" name="fixtureDate" required>
-                        </div>
-                        <div class="afx-field">
-                            <label class="afx-label" for="createFixtureTime">Time</label>
-                            <input class="afx-input" type="time" id="createFixtureTime" name="fixtureTime" required>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-gold afx-submit">Create fixture</button>
-                </form>
-            </section>
-
         </div>
 
     </div>
 </main>
 
-<script src="${pageContext.request.contextPath}/assets/js/admin-fixtures.js"></script>
 </body>
 </html>

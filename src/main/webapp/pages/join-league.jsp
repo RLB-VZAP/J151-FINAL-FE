@@ -39,7 +39,10 @@
 
         <%-- ---------- Private league: code only ---------- --%>
         <%-- The code is enough to identify the league, so there is no id to enter.
-             Never pre-filled from a URL, and this form always posts. --%>
+             Never pre-filled from a URL, and this form always posts. Admins
+             administer leagues rather than compete in them, so they are not
+             offered the join-by-code entry at all. --%>
+        <c:if test="${not isAdmin}">
         <section class="lg-card lg-code-card">
             <div class="lg-card-head">
                 <span class="lg-card-icon">
@@ -62,6 +65,7 @@
                 <button type="submit" class="btn-gold lg-join" ${not hasTeam ? "disabled" : ""}>Join</button>
             </form>
         </section>
+        </c:if>
 
         <%-- ---------- Public leagues: search by name ---------- --%>
         <div class="lg-tabs" role="presentation">
@@ -105,12 +109,14 @@
                                     <span class="lg-spots">${spotsLeft} of ${openLeague.maxMembers} spots left</span>
                                     <%-- Public leagues need no code; the league is chosen by clicking,
                                          so there is nothing for the user to type or look up. --%>
-                                    <form class="lg-join-form" action="${pageContext.request.contextPath}/league/join" method="post">
-                                        <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
-                                        <input type="hidden" name="submit" value="league/join">
-                                        <input type="hidden" name="leagueId" value="${fn:escapeXml(openLeague.leagueId)}">
-                                        <button type="submit" class="btn-gold lg-join" ${spotsLeft <= 0 or not hasTeam ? "disabled" : ""}>Join</button>
-                                    </form>
+                                    <c:if test="${not isAdmin}">
+                                        <form class="lg-join-form" action="${pageContext.request.contextPath}/league/join" method="post">
+                                            <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
+                                            <input type="hidden" name="submit" value="league/join">
+                                            <input type="hidden" name="leagueId" value="${fn:escapeXml(openLeague.leagueId)}">
+                                            <button type="submit" class="btn-gold lg-join" ${spotsLeft <= 0 or not hasTeam ? "disabled" : ""}>Join</button>
+                                        </form>
+                                    </c:if>
                                 </div>
                             </article>
                         </c:forEach>

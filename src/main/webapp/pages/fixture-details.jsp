@@ -99,6 +99,9 @@
                         <c:set var="tsName" value="${tsIsA ? fixture.teamAName : fixture.teamBName}" />
                         <c:set var="tsParts" value="${fn:split(tsName, ' ')}" />
                         <c:set var="tsWon" value="${(tsIsA and aWon) or (not tsIsA and bWon)}" />
+                        <%-- Breakdown rides on the match result and is null until the fixture
+                             has been simulated, so the card falls back to the plain lines. --%>
+                        <c:set var="tsBd" value="${tsIsA ? matchResult.teamABreakdown : matchResult.teamBBreakdown}" />
                         <section class="panel fxd-card">
                             <div class="fxd-card-head">
                                 <span class="fxd-crest fxd-crest-sm" aria-hidden="true"><c:if test="${fn:length(tsParts) > 0}">${fn:toUpperCase(fn:substring(tsParts[0], 0, 1))}<c:if test="${fn:length(tsParts) > 1}">${fn:toUpperCase(fn:substring(tsParts[fn:length(tsParts) - 1], 0, 1))}</c:if></c:if></span>
@@ -107,6 +110,24 @@
                             </div>
                             <div class="fxd-card-lines">
                                 <div class="fxd-line"><span>Player points</span><span class="fxd-line-val">${ts.playerPoints}</span></div>
+
+                                <%-- One row per scoring rule, summing to the player points above.
+                                     pointsEarned is already signed, so deductions print negative
+                                     as they arrive. The rule set is admin-configurable, hence no
+                                     hardcoded event list. --%>
+                                <c:if test="${not empty tsBd and not empty tsBd.events}">
+                                    <ul class="fxd-events">
+                                        <c:forEach var="ev" items="${tsBd.events}">
+                                            <c:set var="evLabel" value="${empty ev.description ? fn:replace(ev.eventType, '_', ' ') : ev.description}" />
+                                            <li class="fxd-event ${ev.deduction ? 'is-deduction' : ''}">
+                                                <span class="fxd-event-label">${fn:escapeXml(evLabel)}</span>
+                                                <span class="fxd-event-count">&times;${ev.eventCount}</span>
+                                                <span class="fxd-event-pts ${ev.pointsEarned < 0 ? 'is-neg' : ''}">${ev.pointsEarned}</span>
+                                            </li>
+                                        </c:forEach>
+                                    </ul>
+                                </c:if>
+
                                 <div class="fxd-line"><span>Captain bonus</span><span class="fxd-line-val">+${ts.captainBonus}</span></div>
                                 <div class="fxd-line"><span>Transfer penalty</span><span class="fxd-line-val ${ts.transferPenalty > 0 ? 'is-neg' : ''}">${ts.transferPenalty > 0 ? '&minus;' : ''}${ts.transferPenalty}</span></div>
                                 <div class="fxd-line fxd-line-total"><span>Total score</span><span class="fxd-line-val">${ts.totalScore}</span></div>

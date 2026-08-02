@@ -85,7 +85,30 @@ public class LeagueServlet extends AbstractServlet {
                     yield "/pages/leagues.jsp";
                 }
                 leagueRestClient.getLeague(leagueId).ifPresentOrElse(
-                        league -> request.setAttribute("league", league),
+                        league -> {
+                            request.setAttribute("league", league);
+                            // Only the manager may start the league, so the page needs to
+                            // know who is looking. Derived from the league already fetched
+                            // rather than re-fetching it.
+                            UUID currentUserId = authContext.isAuthenticated() ? authContext.getUserId() : null;
+                            boolean isManager = currentUserId != null && currentUserId.equals(league.getManagerUserId());
+                            boolean isPrivate = "PRIVATE".equalsIgnoreCase(league.getLeagueType());
+                            request.setAttribute("isLeagueManager", isManager);
+                            request.setAttribute("isPrivateLeague", isPrivate);
+
+                            // Must agree with FixtureServiceImpl.assertCanViewLeagueFixtures
+                            // (which mirrors LeagueServiceImpl.getLeague): a PUBLIC league's
+                            // fixtures are open to anyone, a PRIVATE league's only to an
+                            // active member or an admin. Keeping this in lockstep is what
+                            // stops "View fixtures" from ever pointing at a 403. The
+                            // listMyLeagues() round-trip is skipped whenever the league type
+                            // or manager/admin status already answers the question, since
+                            // membership can't change the outcome in those cases.
+                            boolean isAdmin = authContext.isAdmin();
+                            boolean canViewFixtures = !isPrivate || isManager || isAdmin
+                                    || isCurrentUserMember(leagueId);
+                            request.setAttribute("canViewFixtures", canViewFixtures);
+                        },
                         () -> request.setAttribute("error", "League not found, or you don't have access to view it")
                 );
                 yield "/pages/leagues.jsp";
@@ -128,9 +151,18 @@ public class LeagueServlet extends AbstractServlet {
                 String leagueId = request.getParameter("leagueId");
                 request.setAttribute("leagueId", leagueId);
                 List<LeagueMemberResponse> members = reloadMembers(leagueId);
-                request.setAttribute("members", members);
-                request.setAttribute("isLeagueManager", isCurrentUserManager(leagueId));
-                populateMembersView(request, leagueId, members);
+                // reloadMembers() collapses a denied Optional to an empty list the same
+                // way it collapses a genuinely empty one, so a non-member viewing a
+                // private league's members would otherwise render identically to "no
+                // members yet". apiCallStatus is request-scoped and was just populated
+                // by the listMembers() call above, so isForbidden() still reflects it.
+                if (apiCallStatus.isForbidden()) {
+                    request.setAttribute("error", "You are not permitted to view this league's members.");
+                } else {
+                    request.setAttribute("members", members);
+                    request.setAttribute("isLeagueManager", isCurrentUserManager(leagueId));
+                    populateMembersView(request, leagueId, members);
+                }
                 yield "/pages/league-members.jsp";
             }
 
@@ -263,6 +295,21 @@ public class LeagueServlet extends AbstractServlet {
     }
 
     /**
+     * Whether the caller is a member (or manager) of the given league, per
+     * {@code listMyLeagues()} — the endpoint that returns every league the
+     * caller belongs to. Only called when the answer isn't already settled by
+     * league type or manager/admin status (see the "/league" branch above),
+     * so a public league's detail page never pays for this round-trip.
+     * Both sides of the comparison are the plain String leagueId that
+     * LeagueResponse carries — no UUID parsing needed.
+     */
+    private boolean isCurrentUserMember(String leagueId) {
+        if (!authContext.isAuthenticated() || leagueId == null) return false;
+        return leagueRestClient.listMyLeagues().orElse(List.of()).stream()
+                .anyMatch(league -> leagueId.equals(league.getLeagueId()));
+    }
+
+    /**
      * Supplies the extra data the leagues page needs beyond the raw league lists:
      * the master leaderboard behind the spotlight, per-league member counts, the
      * standings behind each mini leaderboard, and the split between leagues the
@@ -283,6 +330,7 @@ public class LeagueServlet extends AbstractServlet {
 
         UUID currentUserId = authContext.isAuthenticated() ? authContext.getUserId() : null;
         String currentUsername = authContext.getUsername();
+        boolean actorIsAdmin = authContext.isAdmin();
 
         Map<String, Integer> memberCounts = new HashMap<>();
         Map<String, List<LeaderboardEntryResponse>> leagueStandings = new HashMap<>();
@@ -304,7 +352,11 @@ public class LeagueServlet extends AbstractServlet {
                 memberLeagues.add(league);
                 parseUuid(leagueId).ifPresent(id -> leaderboardRestClient.getLeaderboardForLeague(id)
                         .ifPresent(standings -> leagueStandings.put(leagueId, standings)));
-            } else if ("PUBLIC".equalsIgnoreCase(league.getLeagueType())) {
+            } else if (actorIsAdmin || "PUBLIC".equalsIgnoreCase(league.getLeagueType())) {
+                // An admin belongs to no league yet oversees every one of them, so the
+                // second panel is their only route into a league they did not create.
+                // The endpoint has already scoped visibility, so a private league only
+                // reaches this point when the caller is entitled to see it.
                 discoverLeagues.add(league);
             }
         }

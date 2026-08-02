@@ -38,6 +38,9 @@
                     <p class="catalog-error" role="alert"><c:out value="${error}" /></p>
                 </c:if>
 
+                <%-- ---------- Friendly-league note ---------- --%>
+                <%@ include file="/WEB-INF/jspf/friendly-league-notice.jspf" %>
+
                 <div class="lg-grid" style="margin-top:26px">
                     <section class="lg-card">
                         <div class="lg-card-head">
@@ -68,8 +71,45 @@
                             </c:if>
                         </div>
 
+                        <%-- A league is FORMING until it is started, which draws the
+                             tournament. The manager sees the start action, and so does an
+                             administrator (admins may start any league); everyone sees the
+                             tournament once it exists. --%>
+                        <c:set var="leagueStatus" value="${empty league.status ? 'FORMING' : fn:toUpperCase(league.status)}" />
+                        <div class="lg-position">
+                            <span>
+                                <span class="lg-stat-label">Status</span>
+                                <span class="lg-standing-points">
+                                    <c:choose>
+                                        <c:when test="${leagueStatus == 'IN_PROGRESS'}">In progress</c:when>
+                                        <c:when test="${leagueStatus == 'COMPLETED'}">Completed</c:when>
+                                        <c:otherwise>Forming</c:otherwise>
+                                    </c:choose>
+                                </span>
+                            </span>
+                        </div>
+
                         <div class="lg-card-footer">
                             <a class="lg-link" href="${pageContext.request.contextPath}/league/members?leagueId=${league.leagueId}">View members &rarr;</a>
+                            <c:if test="${leagueStatus != 'FORMING'}">
+                                <a class="lg-link" href="${pageContext.request.contextPath}/tournament?leagueId=${league.leagueId}">View tournament &rarr;</a>
+                            </c:if>
+                            <%-- Must agree with FixtureServiceImpl.assertCanViewLeagueFixtures
+                                 (mirroring LeagueServiceImpl.getLeague): a PUBLIC league's
+                                 fixtures are viewable by anyone, a PRIVATE league's only by an
+                                 active member or an admin. canViewFixtures is computed in
+                                 LeagueServlet so this link never points at a 403. --%>
+                            <c:if test="${canViewFixtures}">
+                                <a class="lg-link" href="${pageContext.request.contextPath}/tournament?leagueId=${league.leagueId}#rounds-fixtures">View fixtures &rarr;</a>
+                            </c:if>
+                            <a class="lg-link" href="${pageContext.request.contextPath}/leaderboard?leagueId=${league.leagueId}">View standings &rarr;</a>
+                            <c:if test="${(isLeagueManager or isAdmin) and leagueStatus == 'FORMING'}">
+                                <form class="lg-start-form" action="${pageContext.request.contextPath}/league/start" method="post">
+                                    <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
+                                    <input type="hidden" name="leagueId" value="${fn:escapeXml(league.leagueId)}">
+                                    <button type="submit" class="btn-gold lg-start">Start league</button>
+                                </form>
+                            </c:if>
                         </div>
                     </section>
                 </div>
@@ -83,7 +123,11 @@
                         <h1 class="brand-font">Leagues</h1>
                     </div>
                     <div class="lg-actions">
-                        <a class="btn-outline" href="${pageContext.request.contextPath}/league/join">Join league</a>
+                        <%-- Admins administer leagues, they never compete in one, so the
+                             join entry point is not offered to them. --%>
+                        <c:if test="${not isAdmin}">
+                            <a class="btn-outline" href="${pageContext.request.contextPath}/league/join">Join league</a>
+                        </c:if>
                         <%-- Creating a league enrols you as its first member and manager, which
                              needs a team just as joining does — except for an administrator,
                              who opens a public league without joining it. --%>
@@ -187,11 +231,13 @@
 
                 <%-- ---------- Tabs ---------- --%>
                 <div class="lg-tabs" role="tablist">
+                    <%-- An admin competes in no league, so "yours" means the ones they
+                         opened and "discover" means every other league they oversee. --%>
                     <button type="button" class="lg-tab is-active" data-lg-tab="mine" role="tab" aria-selected="true">
-                        Your leagues<span class="lg-tab-count">${fn:length(memberLeagues)}</span>
+                        ${isAdmin ? 'Leagues you opened' : 'Your leagues'}<span class="lg-tab-count">${fn:length(memberLeagues)}</span>
                     </button>
                     <button type="button" class="lg-tab" data-lg-tab="discover" role="tab" aria-selected="false">
-                        Discover<span class="lg-tab-count">${fn:length(discoverLeagues)}</span>
+                        ${isAdmin ? 'All leagues' : 'Discover'}<span class="lg-tab-count">${fn:length(discoverLeagues)}</span>
                     </button>
                 </div>
 
@@ -199,7 +245,17 @@
                 <div data-lg-panel="mine">
                     <c:choose>
                         <c:when test="${empty memberLeagues}">
-                            <p class="catalog-empty">You haven't joined a league yet. Try the Discover tab.</p>
+                            <%-- Plain literal branches, no EL string literals: a single-quoted EL
+                                 string cannot contain an escaped apostrophe without desyncing Wasp's
+                                 tag parser (it did, and broke tag balancing further down the file). --%>
+                            <c:choose>
+                                <c:when test="${isAdmin}">
+                                    <p class="catalog-empty">You haven&#39;t opened a league yet. Every league you administer is under All leagues.</p>
+                                </c:when>
+                                <c:otherwise>
+                                    <p class="catalog-empty">You haven&#39;t joined a league yet. Try the Discover tab.</p>
+                                </c:otherwise>
+                            </c:choose>
                         </c:when>
                         <c:otherwise>
                             <div class="lg-grid">
@@ -275,6 +331,12 @@
 
                                         <div class="lg-card-footer">
                                             <a class="lg-link" href="${pageContext.request.contextPath}/leaderboard?leagueId=${myLeague.leagueId}">View standings &rarr;</a>
+                                            <%-- The tournament only exists once the league has been
+                                                 started; the start action itself lives on the league
+                                                 detail page, where the manager check is available. --%>
+                                            <c:if test="${not empty myLeague.status and fn:toUpperCase(myLeague.status) != 'FORMING'}">
+                                                <a class="lg-link" href="${pageContext.request.contextPath}/tournament?leagueId=${myLeague.leagueId}">View tournament &rarr;</a>
+                                            </c:if>
                                         </div>
                                     </article>
                                 </c:forEach>
@@ -301,25 +363,56 @@
                                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/></svg>
                                             </span>
                                             <div class="lg-card-heading">
-                                                <p class="lg-card-name" title="${fn:escapeXml(openLeague.leagueName)}">${fn:escapeXml(openLeague.leagueName)}</p>
+                                                <%-- Opens the league detail, which is where a league is
+                                                     started. Without this the panel was a dead end for an
+                                                     admin, who never joins and so never gets a card in the
+                                                     first panel to click through from. --%>
+                                                <a class="lg-card-name lg-card-name-link" href="${pageContext.request.contextPath}/league?leagueId=${openLeague.leagueId}" title="${fn:escapeXml(openLeague.leagueName)}">${fn:escapeXml(openLeague.leagueName)}</a>
                                                 <p class="lg-card-sub">${memberCount} / ${openLeague.maxMembers} teams</p>
                                             </div>
-                                            <span class="lg-type lg-type-public">Public</span>
+                                            <%-- A private league reaches this panel only for an admin, so
+                                                 the badge must reflect the type rather than assume public. --%>
+                                            <span class="lg-type ${openLeague.leagueType == 'PRIVATE' ? 'lg-type-private' : 'lg-type-public'}">
+                                                ${openLeague.leagueType == 'PRIVATE' ? 'Private' : 'Public'}
+                                            </span>
                                         </div>
 
                                         <p class="lg-desc">${fn:escapeXml(openLeague.description)}</p>
 
                                         <div class="lg-card-footer">
-                                            <span class="lg-spots">${spotsLeft} of ${openLeague.maxMembers} spots left</span>
-                                            <form class="lg-join-form" action="${pageContext.request.contextPath}/league/join" method="post">
-                                                <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
-                                                <input type="hidden" name="submit" value="league/join">
-                                                <input type="hidden" name="leagueId" value="${fn:escapeXml(openLeague.leagueId)}">
-                                                <%-- Disabled without a team: the join would be rejected anyway. --%>
-                                                <button type="submit" class="btn-gold lg-join"
-                                                        ${spotsLeft <= 0 or not hasTeam ? 'disabled' : ''}
-                                                        title="${not hasTeam ? 'Create a team before joining a league' : ''}">Join</button>
-                                            </form>
+                                            <c:choose>
+                                                <%-- An admin cannot take a spot, so the count is replaced by
+                                                     the one thing they act on: whether the league has started. --%>
+                                                <c:when test="${isAdmin}">
+                                                    <c:set var="openStatus" value="${empty openLeague.status ? 'FORMING' : fn:toUpperCase(openLeague.status)}" />
+                                                    <span class="lg-spots">
+                                                        <c:choose>
+                                                            <c:when test="${openStatus == 'IN_PROGRESS'}">In progress &middot; ${memberCount} managers</c:when>
+                                                            <c:when test="${openStatus == 'COMPLETED'}">Completed &middot; ${memberCount} managers</c:when>
+                                                            <c:otherwise>Forming &middot; ${memberCount} managers</c:otherwise>
+                                                        </c:choose>
+                                                    </span>
+                                                    <a class="lg-link" href="${pageContext.request.contextPath}/league?leagueId=${openLeague.leagueId}">
+                                                        ${openStatus == 'FORMING' ? 'Open and start' : 'Open league'} &rarr;
+                                                    </a>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="lg-spots">${spotsLeft} of ${openLeague.maxMembers} spots left</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                            <%-- Admins browse the same list but never join, so the
+                                                 action is withheld from them entirely. --%>
+                                            <c:if test="${not isAdmin}">
+                                                <form class="lg-join-form" action="${pageContext.request.contextPath}/league/join" method="post">
+                                                    <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
+                                                    <input type="hidden" name="submit" value="league/join">
+                                                    <input type="hidden" name="leagueId" value="${fn:escapeXml(openLeague.leagueId)}">
+                                                    <%-- Disabled without a team: the join would be rejected anyway. --%>
+                                                    <button type="submit" class="btn-gold lg-join"
+                                                            ${spotsLeft <= 0 or not hasTeam ? 'disabled' : ''}
+                                                            title="${not hasTeam ? 'Create a team before joining a league' : ''}">Join</button>
+                                                </form>
+                                            </c:if>
                                         </div>
                                     </article>
                                 </c:forEach>

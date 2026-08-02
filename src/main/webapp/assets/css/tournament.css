@@ -1,0 +1,648 @@
+/* ============================================================================
+   Tournament page — pool tables, knockout bracket and podium.
+   Builds on catalog.css (.ctable / .crow / .chead / .cbody) and the shared
+   theme.css palette. Every wide block scrolls inside its own .tn-scroll
+   container so the page body never scrolls sideways.
+   ========================================================================== */
+
+.tournament-page {
+    /* Belt and braces: nothing in here may push the document sideways. */
+    overflow-x: hidden;
+}
+
+/* Header actions. .btn-outline is otherwise only defined by leagues.css, which
+   this page does not load, so it is restated here. */
+.tn-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 40px;
+    padding: 0 1rem;
+    box-sizing: border-box;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: none;
+    color: var(--silver-bright);
+    font-family: inherit;
+    font-size: .85rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color .15s ease, color .15s ease;
+}
+
+.btn-outline:hover {
+    border-color: var(--gold);
+    color: var(--gold-bright);
+}
+
+/* ---------- Panels ----------------------------------------------------------- */
+.tn-panel {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #091810;
+    padding: 26px;
+    margin-top: 26px;
+}
+
+.tn-notstarted h2 {
+    font-size: 1.25rem;
+    margin: 0 0 12px;
+}
+
+.tn-notstarted p {
+    max-width: 62ch;
+    font-size: .9rem;
+    line-height: 1.6;
+    margin: 0 0 10px;
+}
+
+.tn-muted {
+    color: var(--silver-dim);
+}
+
+.tn-notstarted-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+
+.tn-notstarted-actions form {
+    margin: 0;
+}
+
+.tn-notstarted-actions .btn-gold {
+    height: 40px;
+    padding: 0 1.1rem;
+}
+
+/* ---------- Summary ---------------------------------------------------------- */
+.tn-summary {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: linear-gradient(155deg, #10241a, #091810);
+    padding: 22px 24px;
+    margin-top: 26px;
+}
+
+.tn-summary-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.tn-season {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    color: var(--gold-bright);
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    margin: 0 0 6px;
+}
+
+.tn-shape {
+    color: var(--silver-bright);
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.tn-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 14px;
+    margin-top: 20px;
+}
+
+.tn-stat {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, .015);
+}
+
+.tn-stat-label {
+    display: block;
+    color: var(--silver-dim);
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.tn-stat-value {
+    display: block;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    color: var(--silver-bright);
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-top: 4px;
+}
+
+/* ---------- Status pills ------------------------------------------------------ */
+.tn-pill {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 4px 11px;
+    color: var(--silver-dim);
+    font-size: .66rem;
+    font-weight: 600;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.tn-pill-pool_stage,
+.tn-pill-upcoming { color: var(--silver); }
+.tn-pill-knockout_stage,
+.tn-pill-locked,
+.tn-pill-simulating { color: var(--gold-bright); border-color: var(--gold-deep); }
+.tn-pill-completed,
+.tn-pill-processed { color: #5fae7a; border-color: rgba(95, 174, 122, .45); }
+.tn-pill-cancelled { color: #c0524a; border-color: rgba(192, 82, 74, .45); }
+
+/* ---------- Sections --------------------------------------------------------- */
+.tn-section {
+    margin-top: 34px;
+}
+
+.tn-section-title {
+    color: var(--silver-bright);
+    font-size: 1.1rem;
+    margin: 0 0 8px;
+}
+
+.tn-section-note {
+    color: var(--silver-dim);
+    font-size: .8rem;
+    line-height: 1.55;
+    max-width: 74ch;
+    margin: 0 0 16px;
+}
+
+/* A single scroll host per wide block. */
+.tn-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ---------- Podium ------------------------------------------------------------ */
+.tn-podium-wrap {
+    margin-top: 30px;
+}
+
+.tn-podium {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: end;
+    gap: 14px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #091810;
+    padding: 24px 20px 0;
+}
+
+.tn-podium-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-width: 0;
+}
+
+.tn-crown {
+    color: var(--gold-bright);
+    margin-bottom: 6px;
+}
+
+.tn-medal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--silver-bright);
+}
+
+.tn-medal-1 { border-color: var(--gold); color: var(--gold-bright); }
+.tn-medal-2 { border-color: #8fa39a; }
+.tn-medal-3 { border-color: #a9793f; color: #d2a06a; }
+
+.tn-podium-team {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    color: var(--silver-bright);
+    font-size: .92rem;
+    font-weight: 600;
+    margin-top: 10px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tn-podium-role {
+    color: var(--silver-dim);
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin: 4px 0 10px;
+}
+
+.tn-podium-stand {
+    width: 100%;
+    border-radius: 8px 8px 0 0;
+    background: linear-gradient(180deg, #1c3527, #0d1c13);
+    border: 1px solid var(--line);
+    border-bottom: none;
+}
+
+.tn-podium-1 .tn-podium-stand { height: 84px; border-color: var(--gold-deep); }
+.tn-podium-2 .tn-podium-stand { height: 58px; }
+.tn-podium-3 .tn-podium-stand { height: 42px; }
+
+/* ---------- Pool tables ------------------------------------------------------- */
+.tn-pool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(430px, 1fr));
+    gap: 18px;
+}
+
+.tn-pool {
+    min-width: 0;
+}
+
+.tn-pool-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.tn-pool-name {
+    color: var(--silver-bright);
+    font-size: .95rem;
+    margin: 0;
+}
+
+.tn-pool-size {
+    color: var(--silver-dim);
+    font-size: .75rem;
+}
+
+/* Keeps the 11 columns legible: the table itself never shrinks below this,
+   it scrolls inside .tn-scroll instead. */
+.tn-table {
+    min-width: 400px;
+}
+
+.tn-standing-row {
+    grid-template-columns: 30px minmax(110px, 1fr) repeat(9, 34px);
+    gap: 6px;
+    padding: 10px 14px;
+}
+
+.tn-num {
+    text-align: right;
+    color: var(--silver);
+    font-size: .82rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.chead .tn-num {
+    color: var(--silver-dim);
+}
+
+.tn-pts {
+    color: var(--silver-bright);
+    font-weight: 700;
+}
+
+.tn-pos {
+    color: var(--silver-dim);
+    font-size: .8rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.tn-manager {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.tn-team-name {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    color: var(--silver-bright);
+    font-size: .85rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tn-owner {
+    color: var(--silver-dim);
+    font-size: .72rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Qualified for the knockout stage. */
+.cbody .crow.is-qualified {
+    background: rgba(201, 162, 39, .07);
+    box-shadow: inset 2px 0 0 var(--gold);
+}
+
+.cbody .crow.is-qualified .tn-pos {
+    color: var(--gold-bright);
+    font-weight: 700;
+}
+
+/* ---------- Knockout bracket -------------------------------------------------- */
+.tn-bracket {
+    display: flex;
+    align-items: stretch;
+    gap: 16px;
+    padding-bottom: 6px;
+}
+
+.tn-round {
+    flex: 0 0 232px;
+    min-width: 232px;
+}
+
+.tn-round-title {
+    color: var(--silver-dim);
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin: 0 0 10px;
+}
+
+.tn-round-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tn-tie {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #091810;
+    padding: 10px 12px;
+}
+
+.tn-tie-side {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 3px 0;
+    min-width: 0;
+}
+
+.tn-tie-team {
+    color: var(--silver);
+    font-size: .83rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tn-tie-score {
+    color: var(--silver-bright);
+    font-size: .83rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+
+.tn-tie-side.is-winner .tn-tie-team,
+.tn-tie-side.is-winner .tn-tie-score {
+    color: var(--gold-bright);
+    font-weight: 700;
+}
+
+.tn-tie-status {
+    display: block;
+    color: var(--silver-dim);
+    font-size: .65rem;
+    font-weight: 600;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(44, 68, 55, .55);
+}
+
+/* ---------- Pool fixtures ----------------------------------------------------- */
+.tn-matchday {
+    margin-top: 22px;
+}
+
+.tn-matchday-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.tn-matchday-title {
+    color: var(--silver-bright);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-size: .9rem;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.tn-matchday-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+}
+
+.tn-matchday-round {
+    color: var(--silver-dim);
+    font-size: .75rem;
+    white-space: nowrap;
+}
+
+.tn-fixture-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tn-fixture {
+    display: grid;
+    grid-template-columns: 82px minmax(0, 1fr) 76px minmax(0, 1fr) 104px;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #091810;
+    padding: 10px 14px;
+}
+
+.tn-fixture-pool {
+    color: var(--silver-dim);
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.tn-fixture-team {
+    color: var(--silver);
+    font-size: .85rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.tn-fixture-away {
+    text-align: right;
+}
+
+.tn-fixture-team.is-winner {
+    color: var(--gold-bright);
+    font-weight: 600;
+}
+
+.tn-fixture-centre {
+    text-align: center;
+}
+
+.tn-fixture-score {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    color: var(--silver-bright);
+    font-size: .95rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.tn-fixture-vs {
+    color: var(--silver-dim);
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+}
+
+.tn-fixture .tn-pill {
+    justify-self: end;
+}
+
+/* ---------- Rounds & fixtures (collapsible round blocks) ---------------------- */
+.tn-round-block {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #091810;
+    padding: 18px 20px;
+    margin-top: 14px;
+}
+
+.tn-round-block:first-of-type {
+    margin-top: 0;
+}
+
+.tn-round-summary {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    cursor: pointer;
+    margin-bottom: 0;
+}
+
+.tn-round-summary::-webkit-details-marker {
+    display: none;
+}
+
+/* Own chevron indicator, rotates when the parent <details> is open. */
+.tn-round-summary::after {
+    content: "";
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    margin-left: 12px;
+    border-right: 2px solid var(--silver-dim);
+    border-bottom: 2px solid var(--silver-dim);
+    transform: rotate(45deg);
+    transition: transform .15s ease, border-color .15s ease;
+}
+
+.tn-round-summary:hover::after {
+    border-color: var(--gold-bright);
+}
+
+.tn-round-block[open] > .tn-round-summary::after {
+    transform: rotate(-135deg);
+}
+
+.tn-round-block[open] > .tn-round-summary {
+    margin-bottom: 12px;
+}
+
+.tn-round-count {
+    color: var(--silver-dim);
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    white-space: nowrap;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 3px 10px;
+}
+
+.tn-round-list-fixtures {
+    margin-top: 4px;
+}
+
+/* ---------- Narrow screens ----------------------------------------------------- */
+@media (max-width: 900px) {
+    .tn-pool-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .tn-fixture {
+        grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr);
+        row-gap: 8px;
+    }
+
+    /* Pool label and status pill drop onto their own row above/below the tie. */
+    .tn-fixture-pool {
+        grid-column: 1 / -1;
+    }
+
+    .tn-fixture .tn-pill {
+        grid-column: 1 / -1;
+        justify-self: start;
+    }
+
+    .tn-podium {
+        padding: 20px 12px 0;
+        gap: 8px;
+    }
+}
