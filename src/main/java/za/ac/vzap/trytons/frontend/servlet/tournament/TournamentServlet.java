@@ -10,6 +10,7 @@ import za.ac.vzap.trytons.frontend.client.fixture.FixtureResponse;
 import za.ac.vzap.trytons.frontend.client.fixture.FixtureRestClient;
 import za.ac.vzap.trytons.frontend.client.league.LeagueResponse;
 import za.ac.vzap.trytons.frontend.client.league.LeagueRestClient;
+import za.ac.vzap.trytons.frontend.client.tournament.MatchDayResponse;
 import za.ac.vzap.trytons.frontend.client.tournament.StartLeagueResponse;
 import za.ac.vzap.trytons.frontend.client.tournament.TournamentFixtureResponse;
 import za.ac.vzap.trytons.frontend.client.tournament.TournamentResponse;
@@ -19,6 +20,7 @@ import za.ac.vzap.trytons.frontend.servlet.shared.AbstractServlet;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,7 +30,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
 import java.util.UUID;
 
 /**
@@ -90,9 +91,11 @@ public class TournamentServlet extends AbstractServlet {
         // not-started panel, neither of which the tournament endpoint can give
         // us when there is no tournament yet.
         Optional<LeagueResponse> league = leagueRestClient.getLeague(leagueId);
+        request.setAttribute("canEditMatchDays", Boolean.FALSE);
         league.ifPresent(found -> {
             request.setAttribute("league", found);
             request.setAttribute("isLeagueManager", isManagerOf(found));
+            request.setAttribute("canEditMatchDays", canEditMatchDays(found));
             // Private leagues are friendlies — real fixtures, but excluded from the
             // master leaderboard, seeding and pricing. Surfaced here so it is visible
             // wherever this league's fixtures are browsed.
@@ -152,34 +155,98 @@ public class TournamentServlet extends AbstractServlet {
         request.setAttribute("fixtureTimeById", timeLabels);
     }
 
+    /**
+     * One card per fantasy round. Grouped by roundId rather than by round
+     * number because the round is what the match-day editor moves, and because
+     * rounds are minted per league now — the season-wide roundNumber is still a
+     * fine sort key (it increases in mint order) but it is no longer what the
+     * page shows.
+     */
     private List<RoundFixtureGroup> groupByFantasyRound(List<FixtureResponse> fixtures) {
-        Map<Integer, List<FixtureResponse>> byRound = new TreeMap<>();
+        Map<UUID, List<FixtureResponse>> byRound = new LinkedHashMap<>();
+        List<FixtureResponse> unknownRound = new ArrayList<>();
         for (FixtureResponse fixture : fixtures) {
             if (fixture == null) continue;
-            Integer number = fixture.getRoundNumber();
-            byRound.computeIfAbsent(number == null ? Integer.MAX_VALUE : number, key -> new ArrayList<>())
-                    .add(fixture);
+            if (fixture.getRoundId() == null) {
+                unknownRound.add(fixture);
+                continue;
+            }
+            byRound.computeIfAbsent(fixture.getRoundId(), key -> new ArrayList<>()).add(fixture);
         }
 
         Integer currentRound = determineCurrentRound(fixtures);
 
         List<RoundFixtureGroup> groups = new ArrayList<>();
-        byRound.forEach((number, group) -> {
-            boolean unknownRound = number.equals(Integer.MAX_VALUE);
-            groups.add(new RoundFixtureGroup(
-                    unknownRound ? null : number,
-                    stageLabel(group),
-                    group,
-                    !unknownRound && number.equals(currentRound)));
-        });
+        byRound.forEach((roundId, group) -> groups.add(toGroup(roundId, group, currentRound)));
+        // Playing order: the season-wide round number, which increases with each
+        // minted round. Unnumbered rounds sort last rather than being dropped.
+        groups.sort(Comparator.comparing(
+                group -> group.getRoundNumber() == null ? Integer.MAX_VALUE : group.getRoundNumber()));
+
+        if (!unknownRound.isEmpty()) {
+            groups.add(toGroup(null, unknownRound, currentRound));
+        }
         return groups;
     }
 
+    private RoundFixtureGroup toGroup(UUID roundId, List<FixtureResponse> group, Integer currentRound) {
+        FixtureResponse first = group.get(0);
+        Integer roundNumber = first.getRoundNumber();
+        return new RoundFixtureGroup(
+                roundId == null ? null : roundId.toString(),
+                roundNumber,
+                first.getMatchdayNumber(),
+                first.getStage(),
+                stageLabel(group),
+                matchDayIso(group),
+                isEditable(group),
+                group,
+                roundNumber != null && roundNumber.equals(currentRound));
+    }
+
+    /**
+     * The backend now names its own stages ({@code stageLabel} on the DTO), so
+     * that is what the page shows. KNOCKOUT_STAGES stays only as the fallback
+     * for a response that predates the field — one label, decided in one place,
+     * rather than the frontend quietly inventing a second vocabulary.
+     */
     private String stageLabel(List<FixtureResponse> group) {
-        String stage = group.isEmpty() ? null : group.get(0).getStage();
+        FixtureResponse first = group.isEmpty() ? null : group.get(0);
+        if (first == null) return "Fixtures";
+
+        String label = first.getStageLabel();
+        if (label != null && !label.isBlank()) return label;
+
+        String stage = first.getStage();
         if (stage == null) return "Fixtures";
-        if ("POOL".equalsIgnoreCase(stage)) return "Pool";
+        if ("POOL".equalsIgnoreCase(stage)) return "Pool Stage";
         return KNOCKOUT_STAGES.getOrDefault(stage.toUpperCase(Locale.ROOT), stage);
+    }
+
+    /** The round's match day as yyyy-MM-dd, for the date input. */
+    private String matchDayIso(List<FixtureResponse> group) {
+        for (FixtureResponse fixture : group) {
+            if (fixture.getFixtureDate() != null) {
+                return fixture.getFixtureDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Whether the editor is worth showing for this round. The decision is the
+     * backend's ({@code TournamentServiceImpl.updateMatchDay}); this only
+     * mirrors the two conditions the page can actually see — nothing played
+     * yet, and the kickoff still ahead — so a hopeless form is not offered.
+     * A round that has opened will be refused by the backend regardless.
+     */
+    private boolean isEditable(List<FixtureResponse> group) {
+        LocalDate today = LocalDate.now();
+        for (FixtureResponse fixture : group) {
+            if (!"UPCOMING".equalsIgnoreCase(fixture.getFixtureStatus())) return false;
+            if (fixture.getFixtureDate() == null || !fixture.getFixtureDate().isAfter(today)) return false;
+        }
+        return !group.isEmpty();
     }
 
     /**
@@ -209,20 +276,46 @@ public class TournamentServlet extends AbstractServlet {
 
     /** View model for one fantasy-round card in the Rounds & fixtures section. */
     public static class RoundFixtureGroup {
+        private final String roundId;
         private final Integer roundNumber;
+        private final Integer matchdayNumber;
+        private final String stage;
         private final String stageLabel;
+        private final String matchDayIso;
+        private final boolean editable;
         private final List<FixtureResponse> fixtures;
         private final boolean current;
 
-        RoundFixtureGroup(Integer roundNumber, String stageLabel, List<FixtureResponse> fixtures, boolean current) {
+        RoundFixtureGroup(String roundId,
+                          Integer roundNumber,
+                          Integer matchdayNumber,
+                          String stage,
+                          String stageLabel,
+                          String matchDayIso,
+                          boolean editable,
+                          List<FixtureResponse> fixtures,
+                          boolean current) {
+            this.roundId = roundId;
             this.roundNumber = roundNumber;
+            this.matchdayNumber = matchdayNumber;
+            this.stage = stage;
             this.stageLabel = stageLabel;
+            this.matchDayIso = matchDayIso;
+            this.editable = editable;
             this.fixtures = fixtures;
             this.current = current;
         }
 
+        public String getRoundId() { return roundId; }
+        /** The season-wide sequence. Kept for sorting; not shown to managers. */
         public Integer getRoundNumber() { return roundNumber; }
+        /** The league's own matchday, 1..n. What the card is titled with. */
+        public Integer getMatchdayNumber() { return matchdayNumber; }
+        public String getStage() { return stage; }
         public String getStageLabel() { return stageLabel; }
+        /** yyyy-MM-dd, for &lt;input type="date"&gt;. */
+        public String getMatchDayIso() { return matchDayIso; }
+        public boolean isEditable() { return editable; }
         public List<FixtureResponse> getFixtures() { return fixtures; }
         public boolean isCurrent() { return current; }
         public int getCount() { return fixtures.size(); }
@@ -234,6 +327,14 @@ public class TournamentServlet extends AbstractServlet {
         // Starting a tournament is a league manager's action, not an admin one —
         // the backend authorises the league's own manager (or an admin).
         if (!requireAuthenticated(request, response)) return;
+
+        // Action dispatch. Anything other than "matchday" — including no action
+        // parameter at all — falls through to the start path, so the existing
+        // Start League form (which posts no action) keeps working untouched.
+        if ("matchday".equals(request.getParameter("action"))) {
+            handleMatchDayUpdate(request, response);
+            return;
+        }
 
         String leagueId = request.getParameter("leagueId");
         if (leagueId == null || leagueId.isBlank()) {
@@ -255,6 +356,59 @@ public class TournamentServlet extends AbstractServlet {
         if (sessionExpiredRedirect(request, response)) return;
         flashError(request, apiCallStatus.getMessage("Unable to start this league right now."));
         redirectTo(response, request, "/leagues");
+    }
+
+    /**
+     * Moves one round's match day. POST-redirect-GET, so a refresh cannot
+     * resubmit and the toast survives the redirect; the anchor drops the manager
+     * back at the section they were editing.
+     */
+    private void handleMatchDayUpdate(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        String leagueId = request.getParameter("leagueId");
+        String roundId = request.getParameter("roundId");
+        String matchDayParam = request.getParameter("matchDay");
+
+        if (leagueId == null || leagueId.isBlank()) {
+            flashError(request, "A league id is required to move a match day.");
+            redirectTo(response, request, "/leagues");
+            return;
+        }
+
+        String back = "/tournament?leagueId=" + encode(leagueId) + "#rounds-fixtures";
+
+        if (roundId == null || roundId.isBlank()) {
+            flashError(request, "A round is required to move a match day.");
+            redirectTo(response, request, back);
+            return;
+        }
+
+        LocalDate matchDay;
+        try {
+            matchDay = LocalDate.parse(matchDayParam, DateTimeFormatter.ISO_LOCAL_DATE);
+        } catch (RuntimeException e) {
+            flashError(request, "Pick a match day first — Wednesday, Saturday or Sunday.");
+            redirectTo(response, request, back);
+            return;
+        }
+
+        Optional<MatchDayResponse> moved =
+                tournamentRestClient.updateMatchDay(leagueId, roundId, matchDay);
+        if (moved.isPresent()) {
+            MatchDayResponse result = moved.get();
+            flashSuccess(request, "Match day moved to "
+                    + result.getMatchDay().format(FIXTURE_DATE) + ". "
+                    + result.getFixturesMoved() + " fixture"
+                    + (result.getFixturesMoved() == 1 ? "" : "s") + " moved with it.");
+            redirectTo(response, request, back);
+            return;
+        }
+
+        if (sessionExpiredRedirect(request, response)) return;
+        // APIClient never throws, so the reason for the empty Optional lives on
+        // apiCallStatus — a validation refusal reads as the backend's own message.
+        flashError(request, apiCallStatus.getMessage("Unable to move this match day."));
+        redirectTo(response, request, back);
     }
 
     /**
@@ -285,9 +439,27 @@ public class TournamentServlet extends AbstractServlet {
             // fixture sorts last rather than being dropped.
             inStage.sort(Comparator.comparing(
                     fixture -> fixture.getBracketSlot() == null ? Integer.MAX_VALUE : fixture.getBracketSlot()));
-            grouped.put(stage.getValue(), inStage);
+            // The backend's own label where it has one, so the bracket headings
+            // and the round cards cannot end up naming the same stage
+            // differently ("Quarter-finals" here, "Quarter-Finals" there).
+            String label = inStage.get(0).getStageLabel();
+            grouped.put(label == null || label.isBlank() ? stage.getValue() : label, inStage);
         }
         return grouped;
+    }
+
+    /**
+     * Whether to offer the match-day editor at all. Mirrors the backend's
+     * {@code TournamentServiceImpl.requireMatchDayEditor} exactly — an
+     * administrator may reschedule any league, a PRIVATE league's own manager
+     * may reschedule theirs, and nobody else may. This is display only; the
+     * decision is still the backend's, and the two must not drift apart (this
+     * codebase has broken twice by letting one authorisation path disagree with
+     * another — see LESSONS.md).
+     */
+    private boolean canEditMatchDays(LeagueResponse league) {
+        if (authContext.isAdmin()) return true;
+        return "PRIVATE".equalsIgnoreCase(league.getLeagueType()) && isManagerOf(league);
     }
 
     private boolean isManagerOf(LeagueResponse league) {

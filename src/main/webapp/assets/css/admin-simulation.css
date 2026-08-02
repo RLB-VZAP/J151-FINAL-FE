@@ -36,8 +36,8 @@
     font-size: .85rem;
 }
 
-.asim-alert-success { border-left-color: #5fae7a; }
-.asim-alert-error { border-left-color: #c0524a; }
+.asim-alert-success { border-left-color: var(--success); }
+.asim-alert-error { border-left-color: var(--danger); }
 
 /* ---------- Section headers ---------------------------------------------------------- */
 #activeSettingSection,
@@ -96,7 +96,7 @@
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     border: 1px solid var(--line);
     border-radius: 16px;
-    background: #091810;
+    background: var(--surface);
     overflow: hidden;
 }
 
@@ -137,7 +137,7 @@
     font-weight: 600;
 }
 
-.asim-flag.is-yes { background: rgba(95, 174, 122, .16); color: #8fd0a5; }
+.asim-flag.is-yes { background: rgba(95, 174, 122, .16); color: var(--success-bright); }
 .asim-flag.is-no { background: rgba(255, 255, 255, .04); color: var(--silver-dim); }
 
 /* ---------- Two-column rows ------------------------------------------------------------ */
@@ -185,7 +185,7 @@
     padding: 20px 22px;
     border: 1px solid var(--line);
     border-radius: 16px;
-    background: #091810;
+    background: var(--surface);
 }
 
 .asim-panel-title {
@@ -223,7 +223,7 @@
 .stbl2 {
     border: 1px solid var(--line);
     border-radius: 14px;
-    background: #091810;
+    background: var(--surface);
     overflow: hidden;
 }
 
@@ -302,7 +302,7 @@
     height: 42px;
     box-sizing: border-box;
     padding: 0 .8rem;
-    background: #0c1c13;
+    background: var(--surface-raised);
     border: 1px solid var(--line);
     border-radius: 9px;
     color: var(--silver-bright);
@@ -316,7 +316,7 @@
     border-color: var(--gold);
 }
 
-.asim-input::placeholder { color: #5c6e64; }
+.asim-input::placeholder { color: var(--silver-faint); }
 
 /* The four weights sit in a 2x2 grid. */
 .asim-row-2 {
@@ -422,7 +422,7 @@
 .asim-stub {
     margin: 0 0 4px;
     border: 1px solid var(--line);
-    border-left: 3px solid #e0a54a;
+    border-left: 3px solid var(--warning);
     border-radius: 10px;
     padding: .75rem 1rem;
     background: rgba(224, 165, 74, .05);

@@ -60,7 +60,7 @@
     flex-shrink: 0;
     border: 1px solid var(--line);
     border-radius: 999px;
-    background: #0c1c13;
+    background: var(--surface-raised);
     transition: background .15s ease, border-color .15s ease;
 }
 
@@ -145,7 +145,7 @@
     border: 1px solid var(--line);
     border-left: 3px solid transparent;
     border-radius: 13px;
-    background: #091810;
+    background: var(--surface);
 }
 
 /* Unread carries a gold accent and a wash that fades out to the right. */
@@ -168,8 +168,8 @@
 }
 
 .n-icon-gold { background: rgba(201, 162, 39, .15); color: var(--gold-bright); }
-.n-icon-green { background: rgba(95, 174, 122, .14); color: #8fd0a5; }
-.n-icon-red { background: rgba(192, 82, 74, .14); color: #e08279; }
+.n-icon-green { background: rgba(95, 174, 122, .14); color: var(--success-bright); }
+.n-icon-red { background: rgba(192, 82, 74, .14); color: var(--danger-bright); }
 .n-icon-silver { background: rgba(199, 209, 201, .1); color: var(--silver); }
 
 .n-body {
@@ -190,8 +190,8 @@
 }
 
 .n-type-gold { color: var(--gold-bright); }
-.n-type-green { color: #8fd0a5; }
-.n-type-red { color: #e08279; }
+.n-type-green { color: var(--success-bright); }
+.n-type-red { color: var(--danger-bright); }
 .n-type-silver { color: var(--silver); }
 
 .n-dot {

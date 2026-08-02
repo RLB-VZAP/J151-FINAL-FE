@@ -51,16 +51,18 @@ public class PlayerServlet extends AbstractServlet {
 
         String destination;
         if (playersList) {
-            destination = renderPlayersList(request);
+            destination = renderPlayersList(request, response);
+            if (destination == null) return; // handleEmptyResult already redirected (session expiry)
         } else if (playerDetail) {
-            destination = renderPlayerDetail(request);
+            destination = renderPlayerDetail(request, response);
+            if (destination == null) return;
         } else {
             destination = "/index.jsp";
         }
         request.getRequestDispatcher(destination).forward(request, response);
     }
 
-    private String renderPlayersList(HttpServletRequest request) {
+    private String renderPlayersList(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String search = request.getParameter("search");
         UUID clubId = parseUuid(request.getParameter("clubId")).orElse(null);
         UUID positionId = parseUuid(request.getParameter("positionId")).orElse(null);
@@ -68,7 +70,9 @@ public class PlayerServlet extends AbstractServlet {
         if (players.isPresent()) {
             request.setAttribute("players", players.get());
         } else {
-            request.setAttribute("error", "Unable to load players");
+            if (handleEmptyResult(request, response, "Unable to load players") == ApiFailure.REDIRECTED) {
+                return null;
+            }
             request.setAttribute("players", List.of());
         }
 
@@ -88,11 +92,11 @@ public class PlayerServlet extends AbstractServlet {
         return "/pages/players.jsp";
     }
 
-    private String renderPlayerDetail(HttpServletRequest request) {
+    private String renderPlayerDetail(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Optional<UUID> playerId = parseUuid(request.getParameter("playerId"));
         if (playerId.isEmpty()) {
             request.setAttribute("error", "Invalid or missing player id");
-            return renderPlayersList(request);
+            return renderPlayersList(request, response);
         }
         Optional<PlayerResponse> player = playerRestClient.getPlayer(playerId.get());
         if (player.isPresent()) {
@@ -107,7 +111,7 @@ public class PlayerServlet extends AbstractServlet {
             return "/pages/player.jsp";
         }
         request.setAttribute("error", "Player not found");
-        return renderPlayersList(request);
+        return renderPlayersList(request, response);
     }
 
     private Map<UUID, String> buildClubNameLookup() {

@@ -15,7 +15,7 @@ body.catalog-page {
     display: flex;
     min-height: 100vh;
     margin: 0;
-    background: #08120d;
+    background: var(--surface-deep);
     color: var(--silver);
     font-family: "Inter", system-ui, -apple-system, sans-serif;
 }
@@ -79,7 +79,7 @@ body.catalog-page {
 .catalog-error {
     margin: 18px 0 0;
     border: 1px solid var(--line);
-    border-left: 2px solid #c0524a;
+    border-left: 2px solid var(--danger);
     padding: .65rem .9rem;
     color: var(--silver-bright);
     font-size: .85rem;
@@ -105,7 +105,7 @@ body.catalog-page {
     height: 44px;
     box-sizing: border-box;
     padding: 0 .8rem;
-    background: #091810;
+    background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 9px;
     transition: border-color .15s ease;
@@ -138,14 +138,14 @@ body.catalog-page {
 }
 
 .search-wrap input::placeholder {
-    color: #5c6e64;
+    color: var(--silver-faint);
 }
 
 .sel {
     height: 44px;
     box-sizing: border-box;
     padding: 0 .8rem;
-    background: #091810;
+    background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 9px;
     color: var(--silver);
@@ -189,7 +189,7 @@ body.catalog-page {
     border: 1px solid var(--line);
     border-radius: 14px;
     overflow: hidden;
-    background: #091810;
+    background: var(--surface);
 }
 
 /* Pages set grid-template-columns; everything else about the row is shared. */
@@ -259,7 +259,7 @@ a.crow-link:hover {
     flex-shrink: 0;
     border-radius: 50%;
     border: 1px solid var(--line);
-    background: linear-gradient(155deg, #1c3527, #0d1c13);
+    background: var(--card-gradient);
     color: var(--silver-bright);
     font-size: .78rem;
     font-weight: 600;
@@ -300,8 +300,8 @@ a.crow-link:hover {
     color: var(--silver);
 }
 
-.form-up { color: #5fae7a; }
-.form-down { color: #c0524a; }
+.form-up { color: var(--success); }
+.form-down { color: var(--danger); }
 
 /* Status dot + label. The dot takes the status colour; the halo is that same
    hue at 15% alpha, so it has to be spelled out per state rather than ridden
@@ -323,9 +323,9 @@ a.crow-link:hover {
     background: currentColor;
 }
 
-.avail-ok { color: #5fae7a; }
+.avail-ok { color: var(--success); }
 .avail-warn { color: var(--gold); }
-.avail-out { color: #c0524a; }
+.avail-out { color: var(--danger); }
 
 .avail-ok::before { box-shadow: 0 0 0 3px rgba(95, 174, 122, .15); }
 .avail-warn::before { box-shadow: 0 0 0 3px rgba(201, 162, 39, .15); }

@@ -66,7 +66,9 @@ public class LeagueServlet extends AbstractServlet {
                 Optional<List<LeagueResponse>> publicLeagues = leagueRestClient.listPublicLeagues();
                 request.setAttribute("publicLeagues", publicLeagues.orElseGet(List::of));
                 if (publicLeagues.isEmpty()) {
-                    request.setAttribute("error", "Unable to load leagues right now");
+                    if (handleEmptyResult(request, response, "Unable to load leagues right now") == ApiFailure.REDIRECTED) {
+                        yield null;
+                    }
                 }
 
                 request.setAttribute("myLeagues", loadMyLeagues());
@@ -169,6 +171,11 @@ public class LeagueServlet extends AbstractServlet {
             default -> "/index.jsp";
         };
 
+        if (destination == null) {
+            // handleEmptyResult already redirected (session expiry) inside the switch
+            // above — nothing left to forward.
+            return;
+        }
         request.getRequestDispatcher(destination).forward(request, response);
     }
 
@@ -333,6 +340,11 @@ public class LeagueServlet extends AbstractServlet {
         boolean actorIsAdmin = authContext.isAdmin();
 
         Map<String, Integer> memberCounts = new HashMap<>();
+        // Keyed by the String leagueId because the hub JSP has to gate per card, and an
+        // EL comparison between LeagueResponse.managerUserId (a UUID) and
+        // sessionScope.userId (a String) can never be true — it would silently hide the
+        // manager's own actions on every card.
+        Map<String, Boolean> managerFlags = new HashMap<>();
         Map<String, List<LeaderboardEntryResponse>> leagueStandings = new HashMap<>();
         List<LeagueResponse> memberLeagues = new ArrayList<>();
         List<LeagueResponse> discoverLeagues = new ArrayList<>();
@@ -347,6 +359,7 @@ public class LeagueServlet extends AbstractServlet {
             boolean isMember = currentUserId != null && active.stream()
                     .anyMatch(member -> currentUserId.toString().equals(member.getUserId()));
             boolean isManager = currentUserId != null && currentUserId.equals(league.getManagerUserId());
+            managerFlags.put(leagueId, isManager);
 
             if (isMember || isManager) {
                 memberLeagues.add(league);
@@ -364,6 +377,7 @@ public class LeagueServlet extends AbstractServlet {
         request.setAttribute("memberLeagues", memberLeagues);
         request.setAttribute("discoverLeagues", discoverLeagues);
         request.setAttribute("memberCounts", memberCounts);
+        request.setAttribute("managerFlags", managerFlags);
         request.setAttribute("leagueStandings", leagueStandings);
         request.setAttribute("currentUsername", currentUsername);
         request.setAttribute("masterStandings", leaderboardRestClient.getOverallLeaderboard().orElse(List.of()));

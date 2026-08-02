@@ -5,15 +5,10 @@
    ========================================================================== */
 
 .landing-page {
-    /* Landing uses a slightly deeper page black than the app chrome. */
-    --ln-page: #08120d;
     --ln-band: #0b1a12;
-    --ln-card: #091810;
-    --ln-green: #5fae7a;
-    --ln-green-bright: #8fd0a5;
 
     margin: 0;
-    background: var(--ln-page);
+    background: var(--surface-deep);
     color: var(--silver);
     font-family: "Inter", system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -290,7 +285,7 @@
 
 .ln-feature {
     padding: 26px 24px;
-    background: var(--ln-card);
+    background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 16px;
     transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
@@ -340,7 +335,7 @@
     display: flex;
     flex-direction: column;
     padding: 22px;
-    background: var(--ln-card);
+    background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 16px;
     transition: transform .18s ease, border-color .18s ease;
@@ -370,7 +365,7 @@
     padding: .22rem .6rem;
     border-radius: 999px;
     background: rgba(95, 174, 122, .14);
-    color: var(--ln-green-bright);
+    color: var(--success-bright);
     font-size: .7rem;
     font-weight: 600;
     letter-spacing: .05em;
@@ -424,7 +419,7 @@
     text-align: left;
     border: 1px solid var(--line);
     border-radius: 16px;
-    background: var(--ln-card);
+    background: var(--surface);
     overflow: hidden;
 }
 
@@ -497,7 +492,7 @@
     height: 34px;
     flex-shrink: 0;
     border-radius: 50%;
-    background: #0c1c13;
+    background: var(--surface-raised);
     border: 1px solid var(--line);
     color: var(--gold-bright);
     font-size: .74rem;
@@ -558,7 +553,7 @@
 .ln-footer {
     border-top: 1px solid var(--line);
     padding: 30px 0;
-    background: var(--ln-page);
+    background: var(--surface-deep);
 }
 
 .ln-footer-inner {

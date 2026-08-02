@@ -37,7 +37,7 @@
     height: 44px;
     box-sizing: border-box;
     padding: 0 .7rem 0 .85rem;
-    background: #091810;
+    background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 9px;
     transition: border-color .15s ease;
@@ -155,7 +155,7 @@
     padding: 20px;
     border: 1px solid var(--line);
     border-radius: 16px;
-    background: #091810;
+    background: var(--surface);
 }
 
 .ct-summary h2 {
@@ -203,7 +203,7 @@
 
 /* Set by create-team.js when the picked squad costs more than the budget. */
 .ct-stat-value.over {
-    color: #c0524a;
+    color: var(--danger);
 }
 
 /* ---------- Selected list ---------------------------------------------------------- */
@@ -247,7 +247,7 @@
 
 .ct-selected li button:hover {
     background: rgba(192, 82, 74, .15);
-    color: #c0524a;
+    color: var(--danger);
     filter: none;
 }
 
@@ -277,7 +277,7 @@
     height: 44px;
     box-sizing: border-box;
     padding: 0 .8rem;
-    background: #08120d;
+    background: var(--surface-deep);
     border: 1px solid var(--line);
     border-radius: 9px;
     color: var(--silver-bright);
@@ -314,8 +314,8 @@
     font-size: .85rem;
 }
 
-.ct-alert-error { border-left-color: #c0524a; }
-.ct-alert-success { border-left-color: #5fae7a; }
+.ct-alert-error { border-left-color: var(--danger); }
+.ct-alert-success { border-left-color: var(--success); }
 
 .ct-alert ul {
     margin: .35rem 0 0;
@@ -339,7 +339,7 @@
     height: 56px;
     margin-bottom: 16px;
     border-radius: 14px;
-    background: #0c1c13;
+    background: var(--surface-raised);
     color: var(--gold);
 }
 
@@ -395,7 +395,7 @@
 }
 
 .ct-reqs-summary.is-complete {
-    color: #8fd0a5;
+    color: var(--success-bright);
     font-weight: 600;
 }
 
@@ -479,11 +479,11 @@
 }
 
 /* States, driven by create-team.js: below minimum, satisfied, or over maximum. */
-.ct-req.is-under .ct-req-dot { background: #e0a54a; }
-.ct-req.is-ok   .ct-req-dot { background: #5fae7a; }
+.ct-req.is-under .ct-req-dot { background: var(--warning); }
+.ct-req.is-ok   .ct-req-dot { background: var(--success); }
 .ct-req.is-ok   .ct-req-name { color: var(--silver-bright); }
-.ct-req.is-over .ct-req-dot { background: #c0524a; }
-.ct-req.is-over .ct-req-count { color: #e08279; }
+.ct-req.is-over .ct-req-dot { background: var(--danger); }
+.ct-req.is-over .ct-req-count { color: var(--danger-bright); }
 
 /* ---------- Illegal-pick flash toast ------------------------------------------------ */
 .ct-flash {
@@ -495,9 +495,9 @@
     transform: translateX(-50%) translateY(12px);
     padding: .8rem 1.05rem;
     border: 1px solid var(--line);
-    border-left: 3px solid #c0524a;
+    border-left: 3px solid var(--danger);
     border-radius: 11px;
-    background: #0c1c13;
+    background: var(--surface-raised);
     color: var(--silver-bright);
     font-size: .85rem;
     line-height: 1.4;

@@ -48,33 +48,37 @@ public class ClubServlet extends AbstractServlet {
 
         String destination;
         if (clubsList) {
-            destination = renderClubsList(request);
+            destination = renderClubsList(request, response);
+            if (destination == null) return; // handleEmptyResult already redirected (session expiry)
         } else if (clubDetail) {
-            destination = renderClubDetail(request);
+            destination = renderClubDetail(request, response);
+            if (destination == null) return;
         } else {
             destination = "/index.jsp";
         }
         request.getRequestDispatcher(destination).forward(request, response);
     }
 
-    private String renderClubsList(HttpServletRequest request) {
+    private String renderClubsList(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String search = request.getParameter("search");
         Optional<List<ClubResponse>> clubs = clubRestClient.listClubs();
         if (clubs.isPresent()) {
             request.setAttribute("clubs", clubs.get());
         } else {
-            request.setAttribute("error", "Unable to load clubs");
+            if (handleEmptyResult(request, response, "Unable to load clubs") == ApiFailure.REDIRECTED) {
+                return null;
+            }
             request.setAttribute("clubs", List.of());
         }
         request.setAttribute("searchTerm", search);
         return "/pages/clubs.jsp";
     }
 
-    private String renderClubDetail(HttpServletRequest request) {
+    private String renderClubDetail(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Optional<UUID> clubId = parseUuid(request.getParameter("clubId"));
         if (clubId.isEmpty()) {
             request.setAttribute("error", "Invalid or missing club id");
-            return renderClubsList(request);
+            return renderClubsList(request, response);
         }
         Optional<ClubResponse> club = clubRestClient.getClubById(clubId.get());
         if (club.isPresent()) {
@@ -83,7 +87,7 @@ public class ClubServlet extends AbstractServlet {
             return "/pages/club.jsp";
         }
         request.setAttribute("error", "Club not found");
-        return renderClubsList(request);
+        return renderClubsList(request, response);
     }
 
     /**

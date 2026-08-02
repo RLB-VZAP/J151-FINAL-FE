@@ -89,28 +89,15 @@
                             </span>
                         </div>
 
-                        <div class="lg-card-footer">
-                            <a class="lg-link" href="${pageContext.request.contextPath}/league/members?leagueId=${league.leagueId}">View members &rarr;</a>
-                            <c:if test="${leagueStatus != 'FORMING'}">
-                                <a class="lg-link" href="${pageContext.request.contextPath}/tournament?leagueId=${league.leagueId}">View tournament &rarr;</a>
-                            </c:if>
-                            <%-- Must agree with FixtureServiceImpl.assertCanViewLeagueFixtures
-                                 (mirroring LeagueServiceImpl.getLeague): a PUBLIC league's
-                                 fixtures are viewable by anyone, a PRIVATE league's only by an
-                                 active member or an admin. canViewFixtures is computed in
-                                 LeagueServlet so this link never points at a 403. --%>
-                            <c:if test="${canViewFixtures}">
-                                <a class="lg-link" href="${pageContext.request.contextPath}/tournament?leagueId=${league.leagueId}#rounds-fixtures">View fixtures &rarr;</a>
-                            </c:if>
-                            <a class="lg-link" href="${pageContext.request.contextPath}/leaderboard?leagueId=${league.leagueId}">View standings &rarr;</a>
-                            <c:if test="${(isLeagueManager or isAdmin) and leagueStatus == 'FORMING'}">
-                                <form class="lg-start-form" action="${pageContext.request.contextPath}/league/start" method="post">
-                                    <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
-                                    <input type="hidden" name="leagueId" value="${fn:escapeXml(league.leagueId)}">
-                                    <button type="submit" class="btn-gold lg-start">Start league</button>
-                                </form>
-                            </c:if>
-                        </div>
+                        <%-- The action row is shared with the hub's "Your leagues" card so the
+                             two cannot offer different things again. canViewFixtures is computed
+                             in LeagueServlet to agree with
+                             FixtureServiceImpl.assertCanViewLeagueFixtures, so the fixtures link
+                             never points at a 403. --%>
+                        <c:set var="cardLeague" value="${league}" />
+                        <c:set var="cardIsManager" value="${isLeagueManager}" />
+                        <c:set var="cardCanViewFixtures" value="${canViewFixtures}" />
+                        <%@ include file="/WEB-INF/jspf/league-card-actions.jspf" %>
                     </section>
                 </div>
             </c:when>
@@ -329,15 +316,16 @@
                                             </div>
                                         </c:if>
 
-                                        <div class="lg-card-footer">
-                                            <a class="lg-link" href="${pageContext.request.contextPath}/leaderboard?leagueId=${myLeague.leagueId}">View standings &rarr;</a>
-                                            <%-- The tournament only exists once the league has been
-                                                 started; the start action itself lives on the league
-                                                 detail page, where the manager check is available. --%>
-                                            <c:if test="${not empty myLeague.status and fn:toUpperCase(myLeague.status) != 'FORMING'}">
-                                                <a class="lg-link" href="${pageContext.request.contextPath}/tournament?leagueId=${myLeague.leagueId}">View tournament &rarr;</a>
-                                            </c:if>
-                                        </div>
+                                        <%-- Same action row as the league detail card, from the same
+                                             fragment. managerFlags is keyed by the String leagueId
+                                             because an EL comparison between the UUID managerUserId
+                                             and sessionScope.userId can never match. Every card in
+                                             this panel is one the user belongs to or manages, so
+                                             the fixtures link is always allowed here. --%>
+                                        <c:set var="cardLeague" value="${myLeague}" />
+                                        <c:set var="cardIsManager" value="${managerFlags[myLeague.leagueId]}" />
+                                        <c:set var="cardCanViewFixtures" value="${true}" />
+                                        <%@ include file="/WEB-INF/jspf/league-card-actions.jspf" %>
                                     </article>
                                 </c:forEach>
                             </div>
@@ -392,8 +380,16 @@
                                                             <c:otherwise>Forming &middot; ${memberCount} managers</c:otherwise>
                                                         </c:choose>
                                                     </span>
+                                                    <%-- An admin may start PUBLIC leagues only (see
+                                                         TournamentServiceImpl.requireCanStartLeague), so a private
+                                                         league gets the plain "open" label rather than promising an
+                                                         action the backend would refuse. --%>
                                                     <a class="lg-link" href="${pageContext.request.contextPath}/league?leagueId=${openLeague.leagueId}">
-                                                        ${openStatus == 'FORMING' ? 'Open and start' : 'Open league'} &rarr;
+                                                        <c:choose>
+                                                            <c:when test="${openStatus == 'FORMING' and openLeague.leagueType == 'PUBLIC'}">Open and start</c:when>
+                                                            <c:otherwise>Open league</c:otherwise>
+                                                        </c:choose>
+                                                        &rarr;
                                                     </a>
                                                 </c:when>
                                                 <c:otherwise>

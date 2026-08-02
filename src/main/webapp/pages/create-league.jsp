@@ -72,27 +72,26 @@
 
                     <div class="cl-row">
                         <div class="cl-field">
-                            <label class="cl-label" for="leagueType">Visibility</label>
-                            <%-- Administrators have no fantasy team, so they cannot be a
-                                 league's founding member — which is what a private league's
-                                 manager is. The server enforces this; the form simply does
-                                 not offer a choice that would be rejected. ${isAdmin} comes
+                            <span class="cl-label">Visibility</span>
+                            <%-- There is no choice to make. Public leagues are part of the
+                                 competition proper (master leaderboard, tournament seeding,
+                                 pricing, market demand) and are run by administrators, who
+                                 hold no fantasy team and so cannot be a founding member. A
+                                 registered user's own league is a friendly: always private,
+                                 joined with its league code. The backend rejects the other
+                                 combination outright, so the form posts a fixed value rather
+                                 than offering one that would be refused. ${isAdmin} comes
                                  from sidebar.jspf, included above. --%>
-                            <div class="cl-select-wrap">
-                                <select class="cl-select" id="leagueType" name="leagueType" required>
-                                    <option value="PUBLIC" ${isAdmin or param.leagueType == 'PUBLIC' ? 'selected' : ''}>Public</option>
-                                    <c:if test="${not isAdmin}">
-                                        <option value="PRIVATE" ${param.leagueType == 'PRIVATE' ? 'selected' : ''}>Private</option>
-                                    </c:if>
-                                </select>
-                                <svg class="cl-select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                            </div>
                             <c:choose>
                                 <c:when test="${isAdmin}">
-                                    <p class="cl-help">Administrators create public leagues, open for anyone to find and join. You will not be a member of it yourself.</p>
+                                    <input type="hidden" name="leagueType" value="PUBLIC">
+                                    <p class="cl-static">Public</p>
+                                    <p class="cl-help">Administrator-created leagues are public: anyone can find and join them, and their results count towards the master leaderboard. You will not be a member of it yourself.</p>
                                 </c:when>
                                 <c:otherwise>
-                                    <p class="cl-help">Public leagues anyone can find and join. Private leagues need an invite code.</p>
+                                    <input type="hidden" name="leagueType" value="PRIVATE">
+                                    <p class="cl-static">Private</p>
+                                    <p class="cl-help">Your league is private. Once it is created you will get a league code &mdash; share it with friends and they join with it. Public leagues are run by administrators.</p>
                                 </c:otherwise>
                             </c:choose>
                         </div>

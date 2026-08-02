@@ -77,10 +77,9 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l4 4-4 4"/><path d="M21 7H8"/><path d="M7 21l-4-4 4-4"/><path d="M3 17h13"/></svg>
             <span>Transfers</span>
         </a>
-        <a class="sidebar-link ${activeNav == 'fixtures' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/fixtures?submit=fixtures">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
-            <span>Fixtures</span>
-        </a>
+        <%-- No standalone Fixtures entry: fixtures belong to a league, and a global
+             list made it ambiguous which round belonged to which competition. They
+             are reached through "View fixtures" on a league card instead. --%>
         <a class="sidebar-link ${activeNav == 'history' ? 'is-active' : ''}" href="${pageContext.request.contextPath}/history">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
             <span>History</span>

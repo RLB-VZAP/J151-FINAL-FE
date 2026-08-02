@@ -12,9 +12,7 @@
     min-height: 100vh;
     /* Surfaces are lifted off the near-black page ground rather than being a
        different hue, so the cards read as one material under one light. */
-    --md-surface: #12211a;
     --md-surface-raised: #16281f;
-    --md-surface-hover: #1b3026;
 
     --md-pos: #5ec98b;
     --md-neg: #e2756a;
@@ -118,7 +116,7 @@
     display: flex;
     flex-direction: column;
     padding: var(--md-sp-5) var(--md-sp-5) var(--md-sp-4);
-    background: var(--md-surface);
+    background: var(--surface-card);
     border: 1px solid var(--line, #2c4437);
     border-radius: var(--md-radius);
     transition: border-color .18s ease, transform .18s ease;
@@ -200,7 +198,7 @@
 }
 
 .card tbody tr:hover {
-    background: var(--md-surface-hover);
+    background: var(--surface-hover);
 }
 
 .card tbody td a {

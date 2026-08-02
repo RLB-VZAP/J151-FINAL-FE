@@ -29,7 +29,7 @@
                 <a class="opp-back" href="${pageContext.request.contextPath}/fixture?submit=fixture&amp;fixtureId=${fn:escapeXml(param.fixtureId)}">&larr; Back to fixture</a>
             </c:when>
             <c:otherwise>
-                <a class="opp-back" href="${pageContext.request.contextPath}/fixtures?submit=fixtures">&larr; Back to fixtures</a>
+                <a class="opp-back" href="${pageContext.request.contextPath}/leagues">&larr; Back to leagues</a>
             </c:otherwise>
         </c:choose>
 

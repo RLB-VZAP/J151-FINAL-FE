@@ -6,6 +6,7 @@ import za.ac.vzap.trytons.frontend.client.shared.APIClient;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -85,6 +86,30 @@ public class TournamentRestClient {
             LOG.log(Level.WARNING, "Unable to list tournament fixtures.");
         }
         return response.map(fixtures -> new ArrayList<>(Arrays.asList(fixtures)));
+    }
+
+    /**
+     * PUT /tournaments/leagues/{leagueId}/rounds/{roundId}/match-day — moves a
+     * round and every fixture in it to another match day.
+     *
+     * <p>Not an admin-only call: the backend allows a PRIVATE league's own
+     * manager to move their own match days, and only withholds a PUBLIC
+     * league's calendar. A 403 comes back as an empty Optional with the reason
+     * on ApiCallStatus, per the APIClient contract.
+     */
+    public Optional<MatchDayResponse> updateMatchDay(String leagueId, String roundId, LocalDate matchDay) {
+        if (isBlank(leagueId) || isBlank(roundId) || matchDay == null) {
+            LOG.log(Level.WARNING, "A league, a round and a match day are required to reschedule a round.");
+            return Optional.empty();
+        }
+        String path = TOURNAMENTS_PATH + "/leagues/" + encode(leagueId)
+                + "/rounds/" + encode(roundId) + "/match-day";
+        Optional<MatchDayResponse> response =
+                apiClient.put(path, new MatchDayUpdateRequest(matchDay), MatchDayResponse.class);
+        if (response.isEmpty()) {
+            LOG.log(Level.WARNING, "Unable to reschedule the round''s match day.");
+        }
+        return response;
     }
 
     /** GET /tournaments/settings */

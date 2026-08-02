@@ -8,7 +8,7 @@ body.dashboard {
     display: flex;
     min-height: 100vh;
     margin: 0;
-    background: #08120d;
+    background: var(--surface-deep);
     color: var(--silver);
     font-family: "Inter", system-ui, -apple-system, sans-serif;
 }
@@ -92,7 +92,7 @@ body.dashboard {
     border: 1px solid var(--line);
     border-radius: 14px;
     overflow: hidden;
-    background-color: #091810;
+    background-color: var(--surface);
     background-size: cover;
     background-position: center;
     transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;

@@ -10,10 +10,6 @@ body.admin-pricing {
     display: flex;
     min-height: 100vh;
     margin: 0;
-    /* Surfaces are lifted off the near-black page ground rather than being a
-       different hue, matching the pattern set by market-dashboard.css. */
-    --ap-surface: #12211a;
-    --ap-surface-hover: #1b3026;
     --ap-sp-3: 12px;
     --ap-sp-4: 16px;
 }
@@ -66,7 +62,7 @@ body.admin-pricing {
    they read as lifted material rather than the page ground. */
 #pricingSettings,
 #pricingActions {
-    --bs-card-bg: var(--ap-surface, #12211a);
+    --bs-card-bg: var(--surface-card);
     --bs-card-border-color: var(--line, #2c4437);
     padding: 1.25rem;
     margin-bottom: 1.5rem;
@@ -87,9 +83,9 @@ body.admin-pricing {
    recolour it to the page's own surface tones instead of Bootstrap's
    generic dark-grey defaults. */
 .changes-table {
-    --bs-table-bg: var(--ap-surface, #12211a);
+    --bs-table-bg: var(--surface-card);
     --bs-table-border-color: var(--line, #2c4437);
-    --bs-table-hover-bg: var(--ap-surface-hover, #1b3026);
+    --bs-table-hover-bg: var(--surface-hover);
     --bs-table-color: var(--silver, #c7d1c9);
 }
 

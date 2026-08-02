@@ -55,7 +55,7 @@
     margin: 26px 0 0;
     border: 1px solid var(--line);
     border-radius: 20px;
-    background-color: #091810;
+    background-color: var(--surface);
     background-image: linear-gradient(105deg, rgba(6, 15, 10, .96) 30%, rgba(6, 15, 10, .82) 62%, rgba(6, 15, 10, .55) 100%),
                       url("../images/Leagues.jpg");
     background-size: cover;
@@ -237,12 +237,12 @@
 }
 
 .lg-chip-up {
-    color: #5fae7a;
+    color: var(--success);
     background: rgba(95, 174, 122, .12);
 }
 
 .lg-chip-down {
-    color: #c0524a;
+    color: var(--danger);
     background: rgba(192, 82, 74, .12);
 }
 
@@ -309,7 +309,7 @@
     padding: 22px;
     border: 1px solid var(--line);
     border-radius: 16px;
-    background: #091810;
+    background: var(--surface);
     transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;
 }
 
@@ -369,7 +369,7 @@
 
 .lg-type-public {
     background: rgba(95, 174, 122, .14);
-    color: #8fd0a5;
+    color: var(--success-bright);
 }
 
 .lg-type-private {

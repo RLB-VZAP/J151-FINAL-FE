@@ -37,7 +37,7 @@
 .th-alert {
     margin: 18px 0 0;
     border: 1px solid var(--line);
-    border-left: 3px solid #c0524a;
+    border-left: 3px solid var(--danger);
     border-radius: 10px;
     padding: .7rem .95rem;
     color: var(--silver-bright);
@@ -52,7 +52,7 @@
     border: 1px solid var(--line);
     border-radius: 14px;
     overflow: hidden;
-    background: #091810;
+    background: var(--surface);
 }
 
 .th-stat {
@@ -83,8 +83,8 @@
 }
 
 .th-stat-value.is-gold { color: var(--gold-bright); }
-.th-stat-value.is-red { color: #e08279; }
-.th-stat-value.is-green { color: #8fd0a5; }
+.th-stat-value.is-red { color: var(--danger-bright); }
+.th-stat-value.is-green { color: var(--success-bright); }
 
 /* ---------- Timeline --------------------------------------------------------------- */
 .th-timeline {
@@ -134,7 +134,7 @@
     height: 14px;
     border-radius: 50%;
     background: var(--gold);
-    border: 3px solid #08120d;
+    border: 3px solid var(--surface-deep);
     box-shadow: 0 0 0 1px var(--gold-deep);
 }
 
@@ -142,7 +142,7 @@
 .swap {
     border: 1px solid var(--line);
     border-radius: 14px;
-    background: #091810;
+    background: var(--surface);
     overflow: hidden;
     transition: border-color .2s ease;
 }
@@ -182,7 +182,7 @@
 .swap-avatar-out {
     background: rgba(192, 82, 74, .12);
     border-color: rgba(192, 82, 74, .4);
-    color: #e08279;
+    color: var(--danger-bright);
 }
 
 .swap-avatar-in {
@@ -203,7 +203,7 @@
     text-transform: uppercase;
 }
 
-.swap-tag-out { color: #e08279; }
+.swap-tag-out { color: var(--danger-bright); }
 .swap-tag-in { color: var(--gold-bright); }
 
 .swap-name {
@@ -258,11 +258,11 @@
     font-weight: 600;
 }
 
-.swap-diff.is-red { color: #e08279; }
-.swap-diff.is-green { color: #8fd0a5; }
+.swap-diff.is-red { color: var(--danger-bright); }
+.swap-diff.is-green { color: var(--success-bright); }
 .swap-diff.is-zero { color: var(--silver); }
 
-.swap-penalty-red { color: #e08279; font-weight: 600; }
+.swap-penalty-red { color: var(--danger-bright); font-weight: 600; }
 .swap-penalty-none { color: var(--silver-dim); }
 
 /* Status badge. */
@@ -284,9 +284,9 @@
     background: currentColor;
 }
 
-.swap-status-confirmed { background: rgba(95, 174, 122, .14); color: #8fd0a5; }
-.swap-status-pending { background: rgba(224, 165, 74, .14); color: #e0a54a; }
-.swap-status-reverted { background: rgba(192, 82, 74, .14); color: #e08279; }
+.swap-status-confirmed { background: rgba(95, 174, 122, .14); color: var(--success-bright); }
+.swap-status-pending { background: rgba(224, 165, 74, .14); color: var(--warning); }
+.swap-status-reverted { background: rgba(192, 82, 74, .14); color: var(--danger-bright); }
 
 /* ---------- Empty state ------------------------------------------------------------ */
 .th-empty {
@@ -305,7 +305,7 @@
     height: 52px;
     margin-bottom: 14px;
     border-radius: 14px;
-    background: #0c1c13;
+    background: var(--surface-raised);
     color: var(--gold);
 }
 

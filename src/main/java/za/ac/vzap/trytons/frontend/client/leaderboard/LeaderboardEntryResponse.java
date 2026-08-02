@@ -6,10 +6,13 @@ import lombok.*;
 import java.util.UUID;
 
 /**
- * Tolerates unknown JSON fields: the backend serialises the master-leaderboard
- * score column as "pointsDifference" while this DTO calls it "scoreDifference".
- * Without this, the whole array fails to deserialise (Jackson defaults to
- * FAIL_ON_UNKNOWN_PROPERTIES=true) and the leaderboard renders empty.
+ * Tolerates unknown JSON fields so an additive backend field never breaks
+ * deserialisation (Jackson defaults to FAIL_ON_UNKNOWN_PROPERTIES=true).
+ * The backend DTO's field names (including "scoreDifference") now match
+ * this bean's exactly -- they previously disagreed ("pointsDifference" vs
+ * "scoreDifference"), which this annotation silently swallowed, so the DIFF
+ * column always rendered 0. Keep the two in sync; don't rely on this to
+ * paper over a future rename the way it papered over that one.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Getter

@@ -27,7 +27,7 @@
 .cl-alert {
     margin-bottom: 18px;
     border: 1px solid var(--line);
-    border-left: 3px solid #c0524a;
+    border-left: 3px solid var(--danger);
     border-radius: 10px;
     padding: .7rem .95rem;
     color: var(--silver-bright);
@@ -40,7 +40,7 @@
     overflow: hidden;
     border: 1px solid var(--line);
     border-radius: 20px;
-    background-color: #091810;
+    background-color: var(--surface);
     background-image: linear-gradient(120deg, rgba(6, 15, 10, .95) 30%, rgba(6, 15, 10, .82) 65%, rgba(6, 15, 10, .6) 100%),
                       url("../images/Stadium%20hero.jpg");
     background-size: cover;
@@ -78,7 +78,7 @@
     flex-shrink: 0;
     border-radius: 20px;
     border: 1px solid var(--line);
-    background: linear-gradient(155deg, #1c3527, #0d1c13);
+    background: var(--card-gradient);
     color: var(--gold-bright);
     font-family: "Space Grotesk", system-ui, sans-serif;
     font-size: 2rem;
@@ -132,8 +132,8 @@
     background: currentColor;
 }
 
-.cl-status-active { background: rgba(95, 174, 122, .14); color: #8fd0a5; }
-.cl-status-inactive { background: rgba(192, 82, 74, .14); color: #e08279; }
+.cl-status-active { background: rgba(95, 174, 122, .14); color: var(--success-bright); }
+.cl-status-inactive { background: rgba(192, 82, 74, .14); color: var(--danger-bright); }
 
 .cl-meta {
     display: flex;
@@ -237,7 +237,7 @@
     padding: 34px 24px;
     border: 1px solid var(--line);
     border-radius: 14px;
-    background: #091810;
+    background: var(--surface);
     text-align: center;
     color: var(--silver-dim);
     font-size: .88rem;

@@ -194,4 +194,76 @@ public class AbstractServlet extends HttpServlet {
         return false;
     }
 
+    // ---- Empty-Optional triage -------------------------------------------
+    // APIClient never throws: every call returns an Optional that is empty on
+    // BOTH a genuine "nothing here" AND a 401/403/500/network failure, with the
+    // real reason recorded on the request-scoped apiCallStatus. Left unchecked,
+    // a denied or broken call renders identically to a legitimate empty state
+    // (see LESSONS.md, "APIClient never throws, so a 403 renders as an empty
+    // state"). REDIRECTED / DENIED / FAILED are the three ways an empty
+    // Optional can mean "this call did not succeed"; a caller only reaches
+    // this method once it already knows the Optional was empty, so there is no
+    // fourth "call succeeded but was empty" case to confuse it with.
+    protected enum ApiFailure { REDIRECTED, DENIED, FAILED }
+
+    /**
+     * Resolves an empty {@code Optional} from an API call into the right request
+     * state, distinguishing an authorisation denial and a backend/network failure
+     * from a genuinely empty result, in one call. Must be invoked immediately
+     * after the API call whose Optional came back empty — {@code apiCallStatus}
+     * is request-scoped and reflects only the most recently completed call.
+     * <p>
+     * Do not call this for a result you already know is a legitimate empty
+     * collection (e.g. a 2xx with an empty list) — only when the {@code Optional}
+     * itself is empty. On {@code REDIRECTED} the response has already been sent;
+     * the caller must stop processing immediately, exactly as with
+     * {@link #sessionExpiredRedirect}.
+     *
+     * <p>Outcomes and the request attributes they set (the JSP contract):
+     * <ul>
+     *   <li>{@code 401} — session cleared, redirect to {@code /login?expired=1}.
+     *       No attributes are set. Returns {@link ApiFailure#REDIRECTED}.</li>
+     *   <li>{@code 403} — sets {@code accessDenied} (Boolean.TRUE) and
+     *       {@code error} (the backend message, or {@code fallbackMessage}) so the
+     *       JSP can render a "you don't have access to this" panel instead of an
+     *       empty state. Returns {@link ApiFailure#DENIED}.</li>
+     *   <li>anything else (500, 404, network failure, ...) — sets
+     *       {@code loadFailed} (Boolean.TRUE) and {@code error} (the backend
+     *       message, or {@code fallbackMessage}). Returns {@link ApiFailure#FAILED}.</li>
+     * </ul>
+     *
+     * @param fallbackMessage shown when the backend returned no message of its own
+     */
+    protected ApiFailure handleEmptyResult(HttpServletRequest req, HttpServletResponse resp, String fallbackMessage) throws IOException {
+        return handleEmptyResult(req, resp, fallbackMessage, "error");
+    }
+
+    /**
+     * Same as {@link #handleEmptyResult(HttpServletRequest, HttpServletResponse, String)},
+     * for a page that renders more than one independently-loaded section (e.g. two API
+     * calls on one JSP, each with its own message placeholder) and so cannot share a
+     * single {@code error} attribute without one call's message clobbering the other's.
+     * {@code accessDenied} / {@code loadFailed} remain page-level booleans — either
+     * section failing marks the page as having a denial/failure — while
+     * {@code errorAttribute} carries that section's own message.
+     *
+     * @param errorAttribute the request attribute to hold this section's message,
+     *                        e.g. {@code "pointsHistoryError"}
+     */
+    protected ApiFailure handleEmptyResult(HttpServletRequest req, HttpServletResponse resp, String fallbackMessage, String errorAttribute) throws IOException {
+        if (apiCallStatus.isUnauthorized()) {
+            clearAuthSession(req);
+            resp.sendRedirect(req.getContextPath() + "/login?expired=1");
+            return ApiFailure.REDIRECTED;
+        }
+        if (apiCallStatus.isForbidden()) {
+            req.setAttribute("accessDenied", Boolean.TRUE);
+            req.setAttribute(errorAttribute, apiCallStatus.getMessage(fallbackMessage));
+            return ApiFailure.DENIED;
+        }
+        req.setAttribute("loadFailed", Boolean.TRUE);
+        req.setAttribute(errorAttribute, apiCallStatus.getMessage(fallbackMessage));
+        return ApiFailure.FAILED;
+    }
+
 }

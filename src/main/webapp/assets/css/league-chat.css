@@ -33,5 +33,5 @@
     white-space: nowrap;
 }
 
-.lch-type.is-public { background: rgba(95, 174, 122, .16); color: #8fd0a5; }
+.lch-type.is-public { background: rgba(95, 174, 122, .16); color: var(--success-bright); }
 .lch-type.is-private { background: rgba(255, 255, 255, .05); color: var(--silver-dim); }

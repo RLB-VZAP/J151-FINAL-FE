@@ -30,12 +30,12 @@
 
 .tf-pill-open {
     background: rgba(95, 174, 122, .14);
-    color: #8fd0a5;
+    color: var(--success-bright);
 }
 
 .tf-pill-locked {
     background: rgba(192, 82, 74, .16);
-    color: #e08279;
+    color: var(--danger-bright);
 }
 
 .tf-status-line {
@@ -60,7 +60,7 @@
     margin: 22px 0 0;
     padding: 14px 18px;
     border: 1px solid var(--line);
-    border-left: 3px solid #5fae7a;
+    border-left: 3px solid var(--success);
     border-radius: 12px;
     background: rgba(95, 174, 122, .05);
 }
@@ -70,7 +70,7 @@
     font-family: "Space Grotesk", system-ui, sans-serif;
     font-size: .95rem;
     font-weight: 600;
-    color: #8fd0a5;
+    color: var(--success-bright);
 }
 
 .tf-latest-sub {
@@ -158,7 +158,7 @@
 .tf-slot.is-filled .tf-slot-disc {
     border: 1px solid var(--line);
     border-style: solid;
-    background: linear-gradient(155deg, #1c3527, #0d1c13);
+    background: var(--card-gradient);
     color: var(--silver-bright);
     font-family: "Space Grotesk", system-ui, sans-serif;
     font-size: .8rem;
@@ -178,7 +178,7 @@
     color: var(--silver-dim);
 }
 
-.tf-slot-out.is-filled .tf-slot-tag { color: #e08279; }
+.tf-slot-out.is-filled .tf-slot-tag { color: var(--danger-bright); }
 .tf-slot-in.is-filled .tf-slot-tag { color: var(--gold-bright); }
 
 .tf-slot-name {
@@ -234,10 +234,10 @@
     color: var(--silver-bright);
 }
 
-.tf-stat-value.is-up { color: #e08279; }
-.tf-stat-value.is-down { color: #8fd0a5; }
+.tf-stat-value.is-up { color: var(--danger-bright); }
+.tf-stat-value.is-down { color: var(--success-bright); }
 .tf-stat-value.is-gold { color: var(--gold-bright); }
-.tf-stat-value.is-negative { color: #e08279; }
+.tf-stat-value.is-negative { color: var(--danger-bright); }
 
 .tf-actions {
     display: flex;
@@ -274,7 +274,7 @@
 .tf-warning {
     width: 100%;
     margin: 0;
-    color: #e08279;
+    color: var(--danger-bright);
     font-size: .82rem;
 }
 
@@ -304,7 +304,7 @@
 .panel {
     border: 1px solid var(--line);
     border-radius: 16px;
-    background: #091810;
+    background: var(--surface);
     overflow: hidden;
 }
 
@@ -400,9 +400,9 @@
 }
 
 .pick-row.is-out .pick-radio {
-    border-color: #c0524a;
-    background: #c0524a;
-    box-shadow: inset 0 0 0 2px #091810;
+    border-color: var(--danger);
+    background: var(--danger);
+    box-shadow: inset 0 0 0 2px var(--surface);
 }
 
 .pick-row.is-in {
@@ -413,7 +413,7 @@
 .pick-row.is-in .pick-radio {
     border-color: var(--gold);
     background: var(--gold);
-    box-shadow: inset 0 0 0 2px #091810;
+    box-shadow: inset 0 0 0 2px var(--surface);
 }
 
 .pick-avatar {
@@ -425,7 +425,7 @@
     flex-shrink: 0;
     border-radius: 50%;
     border: 1px solid var(--line);
-    background: linear-gradient(155deg, #1c3527, #0d1c13);
+    background: var(--card-gradient);
     color: var(--silver-bright);
     font-size: .72rem;
     font-weight: 600;
@@ -518,7 +518,7 @@
     padding: 16px;
     border: 1px solid var(--line);
     border-radius: 14px;
-    background: #091810;
+    background: var(--surface);
 }
 
 .rec-head {
@@ -588,7 +588,7 @@
     margin: 9px 0 0;
     padding: 10px 12px;
     border-radius: 9px;
-    background: #0c1c13;
+    background: var(--surface-raised);
     color: var(--silver);
     font-size: .78rem;
     line-height: 1.5;

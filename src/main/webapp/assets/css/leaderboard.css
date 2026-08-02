@@ -11,7 +11,7 @@
     display: inline-flex;
     padding: 3px;
     border-radius: 9px;
-    background: #0c1c13;
+    background: var(--surface-raised);
     border: 1px solid var(--line);
 }
 
@@ -37,7 +37,7 @@
 .lb-alert {
     margin: 18px 0 0;
     border: 1px solid var(--line);
-    border-left: 3px solid #c0524a;
+    border-left: 3px solid var(--danger);
     border-radius: 10px;
     padding: .7rem .95rem;
     color: var(--silver-bright);
@@ -60,7 +60,7 @@
     padding: 20px 16px;
     border: 1px solid var(--line);
     border-radius: 16px;
-    background: #091810;
+    background: var(--surface);
     text-align: center;
 }
 
@@ -105,7 +105,7 @@
     margin-top: 12px;
     border-radius: 11px;
     border: 1px solid var(--line);
-    background: linear-gradient(155deg, #1c3527, #0d1c13);
+    background: var(--card-gradient);
     color: var(--silver-bright);
     font-family: "Space Grotesk", system-ui, sans-serif;
     font-size: .82rem;
@@ -203,7 +203,7 @@
     flex-shrink: 0;
     border-radius: 50%;
     border: 1px solid var(--line);
-    background: linear-gradient(155deg, #1c3527, #0d1c13);
+    background: var(--card-gradient);
     color: var(--silver-bright);
     font-size: .78rem;
     font-weight: 600;
@@ -258,15 +258,15 @@
     color: var(--silver-dim);
 }
 
-.lb-move-up { color: #5fae7a; }
-.lb-move-down { color: #c0524a; }
+.lb-move-up { color: var(--success); }
+.lb-move-down { color: var(--danger); }
 
 /* ---------- Standings table --------------------------------------------------------- */
 .lb-table-wrap {
     border: 1px solid var(--line);
     border-radius: 16px;
     overflow-x: auto;
-    background: #091810;
+    background: var(--surface);
 }
 
 .lb-table {
@@ -360,12 +360,12 @@
     font-weight: 600;
 }
 
-.lb-count-w { background: rgba(95, 174, 122, .14); color: #8fd0a5; }
+.lb-count-w { background: rgba(95, 174, 122, .14); color: var(--success-bright); }
 .lb-count-d { background: rgba(199, 209, 201, .1); color: var(--silver); }
-.lb-count-l { background: rgba(192, 82, 74, .14); color: #e08279; }
+.lb-count-l { background: rgba(192, 82, 74, .14); color: var(--danger-bright); }
 
-.lb-diff-pos { color: #5fae7a; }
-.lb-diff-neg { color: #c0524a; }
+.lb-diff-pos { color: var(--success); }
+.lb-diff-neg { color: var(--danger); }
 
 .lb-league-pts { color: var(--gold-bright); font-weight: 600; }
 .lb-fantasy-pts { color: var(--silver-bright); font-weight: 600; }

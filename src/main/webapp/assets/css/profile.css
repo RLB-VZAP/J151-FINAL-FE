@@ -13,7 +13,7 @@
 .pf-alert {
     margin: 18px 0 0;
     border: 1px solid var(--line);
-    border-left: 3px solid #c0524a;
+    border-left: 3px solid var(--danger);
     border-radius: 10px;
     padding: .7rem .95rem;
     color: var(--silver-bright);
@@ -21,7 +21,7 @@
 }
 
 .pf-alert-success {
-    border-left-color: #5fae7a;
+    border-left-color: var(--success);
 }
 
 /* ---------- Profile hero ---------------------------------------------------------- */
@@ -30,7 +30,7 @@
     margin: 24px 0 22px;
     border: 1px solid var(--line);
     border-radius: 18px;
-    background: #091810;
+    background: var(--surface);
 }
 
 .pf-banner {
@@ -68,8 +68,8 @@
     flex-shrink: 0;
     border-radius: 50%;
     /* The 3px ring is the card colour, so the avatar reads as lifted off the banner. */
-    border: 3px solid #091810;
-    background: linear-gradient(155deg, #1c3527, #0d1c13);
+    border: 3px solid var(--surface);
+    background: var(--card-gradient);
     overflow: hidden;
 }
 
@@ -147,8 +147,8 @@
 
 .pf-pill-gold { background: rgba(201, 162, 39, .15); color: var(--gold-bright); }
 .pf-pill-silver { background: rgba(199, 209, 201, .1); color: var(--silver); }
-.pf-pill-active { background: rgba(95, 174, 122, .14); color: #8fd0a5; }
-.pf-pill-inactive { background: rgba(192, 82, 74, .14); color: #e08279; }
+.pf-pill-active { background: rgba(95, 174, 122, .14); color: var(--success-bright); }
+.pf-pill-inactive { background: rgba(192, 82, 74, .14); color: var(--danger-bright); }
 
 .pf-pill-active::before,
 .pf-pill-inactive::before {
@@ -208,7 +208,7 @@
     padding: 24px 26px;
     border: 1px solid var(--line);
     border-radius: 16px;
-    background: #091810;
+    background: var(--surface);
 }
 
 .panel + .panel {

@@ -12,7 +12,7 @@
     margin: 24px 0 0;
     border: 1px solid var(--line);
     border-radius: 20px;
-    background-color: #091810;
+    background-color: var(--surface);
     background-image: linear-gradient(180deg, rgba(6, 15, 10, .82), rgba(6, 15, 10, .9)),
                       url("../images/Fixtures.jpg");
     background-size: cover;
@@ -139,7 +139,7 @@ a.fx-side-link:hover .fx-crest {
     flex-shrink: 0;
     border-radius: 16px;
     border: 1px solid var(--line);
-    background: linear-gradient(155deg, #1c3527, #0d1c13);
+    background: var(--card-gradient);
     color: var(--silver-bright);
     font-family: "Space Grotesk", system-ui, sans-serif;
     font-size: 1.1rem;
@@ -200,9 +200,9 @@ a.fx-side-link:hover .fx-crest {
 .fx-pill-upcoming { background: rgba(199, 209, 201, .1); color: var(--silver); }
 .fx-pill-locked,
 .fx-pill-simulating { background: rgba(201, 162, 39, .14); color: var(--gold-bright); }
-.fx-pill-completed { background: rgba(95, 174, 122, .14); color: #8fd0a5; }
-.fx-pill-cancelled { background: rgba(192, 82, 74, .14); color: #e08279; }
-.fx-pill-processed { background: rgba(95, 174, 122, .1); color: #8fd0a5; }
+.fx-pill-completed { background: rgba(95, 174, 122, .14); color: var(--success-bright); }
+.fx-pill-cancelled { background: rgba(192, 82, 74, .14); color: var(--danger-bright); }
+.fx-pill-processed { background: rgba(95, 174, 122, .1); color: var(--success-bright); }
 
 /* Simulating carries a pulsing dot: the round is being run right now. */
 .fx-pill-simulating::before {
@@ -235,7 +235,7 @@ a.fx-side-link:hover .fx-crest {
     padding: .45rem .85rem;
     border: 1px solid var(--line);
     border-radius: 8px;
-    background: #091810;
+    background: var(--surface);
     color: var(--silver);
     font-family: inherit;
     font-size: .82rem;
@@ -308,7 +308,7 @@ a.fx-side-link:hover .fx-crest {
     border: 1px solid var(--line);
     border-left: 3px solid var(--line);
     border-radius: 14px;
-    background: #091810;
+    background: var(--surface);
     transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;
 }
 
@@ -326,15 +326,15 @@ a.fx-side-link:hover .fx-crest {
    are repeated there to keep the accent through a hover. */
 .fx-card-locked,
 .fx-card-simulating { border-left-color: var(--gold); }
-.fx-card-completed { border-left-color: #5fae7a; }
-.fx-card-cancelled { border-left-color: #c0524a; opacity: .72; }
-.fx-card-processed { border-left-color: #5fae7a; }
+.fx-card-completed { border-left-color: var(--success); }
+.fx-card-cancelled { border-left-color: var(--danger); opacity: .72; }
+.fx-card-processed { border-left-color: var(--success); }
 
 .fx-card:hover.fx-card-locked,
 .fx-card:hover.fx-card-simulating { border-left-color: var(--gold); }
 .fx-card:hover.fx-card-completed,
-.fx-card:hover.fx-card-processed { border-left-color: #5fae7a; }
-.fx-card:hover.fx-card-cancelled { border-left-color: #c0524a; }
+.fx-card:hover.fx-card-processed { border-left-color: var(--success); }
+.fx-card:hover.fx-card-cancelled { border-left-color: var(--danger); }
 
 .fx-card .fx-crest {
     width: 44px;

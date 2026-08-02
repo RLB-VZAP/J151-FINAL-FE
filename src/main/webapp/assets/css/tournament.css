@@ -47,7 +47,7 @@
 .tn-panel {
     border: 1px solid var(--line);
     border-radius: 14px;
-    background: #091810;
+    background: var(--surface);
     padding: 26px;
     margin-top: 26px;
 }
@@ -89,7 +89,7 @@
 .tn-summary {
     border: 1px solid var(--line);
     border-radius: 14px;
-    background: linear-gradient(155deg, #10241a, #091810);
+    background: linear-gradient(155deg, #10241a, var(--surface));
     padding: 22px 24px;
     margin-top: 26px;
 }
@@ -172,8 +172,8 @@
 .tn-pill-locked,
 .tn-pill-simulating { color: var(--gold-bright); border-color: var(--gold-deep); }
 .tn-pill-completed,
-.tn-pill-processed { color: #5fae7a; border-color: rgba(95, 174, 122, .45); }
-.tn-pill-cancelled { color: #c0524a; border-color: rgba(192, 82, 74, .45); }
+.tn-pill-processed { color: var(--success); border-color: rgba(95, 174, 122, .45); }
+.tn-pill-cancelled { color: var(--danger); border-color: rgba(192, 82, 74, .45); }
 
 /* ---------- Sections --------------------------------------------------------- */
 .tn-section {
@@ -212,7 +212,7 @@
     gap: 14px;
     border: 1px solid var(--line);
     border-radius: 14px;
-    background: #091810;
+    background: var(--surface);
     padding: 24px 20px 0;
 }
 
@@ -410,7 +410,7 @@
 .tn-tie {
     border: 1px solid var(--line);
     border-radius: 10px;
-    background: #091810;
+    background: var(--surface);
     padding: 10px 12px;
 }
 
@@ -502,7 +502,7 @@
     gap: 10px;
     border: 1px solid var(--line);
     border-radius: 10px;
-    background: #091810;
+    background: var(--surface);
     padding: 10px 14px;
 }
 
@@ -559,7 +559,7 @@
 .tn-round-block {
     border: 1px solid var(--line);
     border-radius: 14px;
-    background: #091810;
+    background: var(--surface);
     padding: 18px 20px;
     margin-top: 14px;
 }
@@ -644,5 +644,51 @@
     .tn-podium {
         padding: 20px 12px 0;
         gap: 8px;
+    }
+}
+
+/* ---------- Match-day editor ---------------------------------------------------
+   One row per round card, shown only to whoever may actually move that round
+   (an administrator, or a private league's own manager). ------------------------- */
+.tn-matchday-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0 4px;
+    padding: 10px 12px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+    border-radius: 10px;
+}
+
+.tn-matchday-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    opacity: 0.75;
+}
+
+.tn-matchday-input {
+    padding: 6px 10px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.18));
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+}
+
+.tn-matchday-save {
+    padding: 6px 16px;
+}
+
+.tn-matchday-hint {
+    font-size: 0.82rem;
+    opacity: 0.65;
+}
+
+@media (max-width: 900px) {
+    .tn-matchday-hint {
+        flex-basis: 100%;
     }
 }
