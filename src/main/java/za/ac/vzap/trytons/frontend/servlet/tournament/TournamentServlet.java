@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -199,6 +200,7 @@ public class TournamentServlet extends AbstractServlet {
                 first.getStage(),
                 stageLabel(group),
                 matchDayIso(group),
+                kickoffIso(group),
                 isEditable(group),
                 hasMixedStages(group),
                 group,
@@ -281,6 +283,16 @@ public class TournamentServlet extends AbstractServlet {
         return distinctStageLabels(group).size() > 1;
     }
 
+    /** The round's kickoff as HH:mm, for the time input. */
+    private String kickoffIso(List<FixtureResponse> group) {
+        for (FixtureResponse fixture : group) {
+            if (fixture.getFixtureTime() != null) {
+                return fixture.getFixtureTime().format(DateTimeFormatter.ofPattern("HH:mm"));
+            }
+        }
+        return null;
+    }
+
     /** The round's match day as yyyy-MM-dd, for the date input. */
     private String matchDayIso(List<FixtureResponse> group) {
         for (FixtureResponse fixture : group) {
@@ -340,6 +352,7 @@ public class TournamentServlet extends AbstractServlet {
         private final String stage;
         private final String stageLabel;
         private final String matchDayIso;
+        private final String kickoffIso;
         private final boolean editable;
         private final List<FixtureResponse> fixtures;
         private final boolean current;
@@ -351,6 +364,7 @@ public class TournamentServlet extends AbstractServlet {
                           String stage,
                           String stageLabel,
                           String matchDayIso,
+                          String kickoffIso,
                           boolean editable,
                           boolean mixedStages,
                           List<FixtureResponse> fixtures,
@@ -361,6 +375,7 @@ public class TournamentServlet extends AbstractServlet {
             this.stage = stage;
             this.stageLabel = stageLabel;
             this.matchDayIso = matchDayIso;
+            this.kickoffIso = kickoffIso;
             this.editable = editable;
             this.mixedStages = mixedStages;
             this.fixtures = fixtures;
@@ -378,6 +393,7 @@ public class TournamentServlet extends AbstractServlet {
         public boolean isMixedStages() { return mixedStages; }
         /** yyyy-MM-dd, for &lt;input type="date"&gt;. */
         public String getMatchDayIso() { return matchDayIso; }
+        public String getKickoffIso() { return kickoffIso; }
         public boolean isEditable() { return editable; }
         public List<FixtureResponse> getFixtures() { return fixtures; }
         public boolean isCurrent() { return current; }
@@ -431,6 +447,7 @@ public class TournamentServlet extends AbstractServlet {
         String leagueId = request.getParameter("leagueId");
         String roundId = request.getParameter("roundId");
         String matchDayParam = request.getParameter("matchDay");
+        String kickoffParam = request.getParameter("kickoff");
 
         if (leagueId == null || leagueId.isBlank()) {
             flashError(request, "A league id is required to move a match day.");
@@ -450,17 +467,33 @@ public class TournamentServlet extends AbstractServlet {
         try {
             matchDay = LocalDate.parse(matchDayParam, DateTimeFormatter.ISO_LOCAL_DATE);
         } catch (RuntimeException e) {
-            flashError(request, "Pick a match day first — Wednesday, Saturday or Sunday.");
+            flashError(request,
+                    "Pick a match day first — Monday, Wednesday, Friday, Saturday or Sunday.");
             redirectTo(response, request, back);
             return;
         }
 
+        // Kickoff is optional: an empty field means "keep the time it has".
+        // <input type="time"> sends HH:mm, but HH:mm:ss is accepted too.
+        LocalTime kickoff = null;
+        if (kickoffParam != null && !kickoffParam.isBlank()) {
+            try {
+                kickoff = LocalTime.parse(kickoffParam.trim());
+            } catch (RuntimeException e) {
+                flashError(request, "Enter a kick-off time as HH:mm.");
+                redirectTo(response, request, back);
+                return;
+            }
+        }
+
         Optional<MatchDayResponse> moved =
-                tournamentRestClient.updateMatchDay(leagueId, roundId, matchDay);
+                tournamentRestClient.updateMatchDay(leagueId, roundId, matchDay, kickoff);
         if (moved.isPresent()) {
             MatchDayResponse result = moved.get();
             flashSuccess(request, "Match day moved to "
-                    + result.getMatchDay().format(FIXTURE_DATE) + ". "
+                    + result.getMatchDay().format(FIXTURE_DATE)
+                    + (result.getKickoff() == null ? ""
+                        : " at " + result.getKickoff().format(FIXTURE_TIME)) + ". "
                     + result.getFixturesMoved() + " fixture"
                     + (result.getFixturesMoved() == 1 ? "" : "s") + " moved with it.");
             redirectTo(response, request, back);

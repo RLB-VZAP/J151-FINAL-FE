@@ -305,8 +305,14 @@
                                        name="matchDay"
                                        value="${fn:escapeXml(group.matchDayIso)}"
                                        required>
+                                <label class="tn-matchday-label" for="kickoff-${fn:escapeXml(group.roundId)}">Kick-off</label>
+                                <input class="tn-matchday-input"
+                                       id="kickoff-${fn:escapeXml(group.roundId)}"
+                                       type="time"
+                                       name="kickoff"
+                                       value="${fn:escapeXml(group.kickoffIso)}">
                                 <button type="submit" class="btn-outline tn-matchday-save">Move</button>
-                                <span class="tn-matchday-hint">Wednesday, Saturday or Sunday only.</span>
+                                <span class="tn-matchday-hint">Monday, Wednesday, Friday, Saturday or Sunday. Every fixture in the round moves together.</span>
                             </form>
                         </c:if>
 

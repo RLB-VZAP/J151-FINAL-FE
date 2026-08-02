@@ -7,6 +7,7 @@ import za.ac.vzap.trytons.frontend.client.shared.APIClient;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -97,7 +98,8 @@ public class TournamentRestClient {
      * league's calendar. A 403 comes back as an empty Optional with the reason
      * on ApiCallStatus, per the APIClient contract.
      */
-    public Optional<MatchDayResponse> updateMatchDay(String leagueId, String roundId, LocalDate matchDay) {
+    public Optional<MatchDayResponse> updateMatchDay(String leagueId, String roundId,
+                                                    LocalDate matchDay, LocalTime kickoff) {
         if (isBlank(leagueId) || isBlank(roundId) || matchDay == null) {
             LOG.log(Level.WARNING, "A league, a round and a match day are required to reschedule a round.");
             return Optional.empty();
@@ -105,7 +107,7 @@ public class TournamentRestClient {
         String path = TOURNAMENTS_PATH + "/leagues/" + encode(leagueId)
                 + "/rounds/" + encode(roundId) + "/match-day";
         Optional<MatchDayResponse> response =
-                apiClient.put(path, new MatchDayUpdateRequest(matchDay), MatchDayResponse.class);
+                apiClient.put(path, new MatchDayUpdateRequest(matchDay, kickoff), MatchDayResponse.class);
         if (response.isEmpty()) {
             LOG.log(Level.WARNING, "Unable to reschedule the round''s match day.");
         }
