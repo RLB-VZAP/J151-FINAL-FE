@@ -692,3 +692,20 @@
         flex-basis: 100%;
     }
 }
+
+/* Stage tag on a fixture card, shown only when a matchday mixes stages
+   (final + bronze final share a day) so each match names its own. */
+.fx-stage-tag {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.75rem;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  background: rgba(201, 162, 39, 0.12);
+  border: 1px solid var(--gold-deep);
+  border-radius: var(--radius-pill);
+  padding: 0.1rem 0.5rem;
+}

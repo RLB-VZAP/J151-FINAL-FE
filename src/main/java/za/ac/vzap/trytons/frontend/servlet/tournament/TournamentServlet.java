@@ -200,6 +200,7 @@ public class TournamentServlet extends AbstractServlet {
                 stageLabel(group),
                 matchDayIso(group),
                 isEditable(group),
+                hasMixedStages(group),
                 group,
                 roundNumber != null && roundNumber.equals(currentRound));
     }
@@ -210,7 +211,30 @@ public class TournamentServlet extends AbstractServlet {
      * for a response that predates the field — one label, decided in one place,
      * rather than the frontend quietly inventing a second vocabulary.
      */
+    /**
+     * Stage precedence, most important first. Used only to order a heading that
+     * has to name more than one stage.
+     */
+    private static final List<String> STAGE_ORDER = List.of(
+            "FINAL", "THIRD_PLACE", "SEMI_FINAL", "QUARTER_FINAL",
+            "ROUND_OF_16", "ROUND_OF_32", "POOL");
+
+    /**
+     * A matchday can legitimately hold two different stages: the beaten
+     * semi-finalists play the bronze final on the same day as the final, so
+     * that round contains both FINAL and THIRD_PLACE fixtures.
+     *
+     * <p>This used to label the whole group from {@code group.get(0)}, which
+     * meant the championship final was silently filed under a "Bronze Final"
+     * heading and a reader of this list would never know a final had been
+     * played. Name every distinct stage present instead, most important first.
+     */
     private String stageLabel(List<FixtureResponse> group) {
+        List<String> distinct = distinctStageLabels(group);
+        if (distinct.size() > 1) {
+            return String.join(" & ", distinct);
+        }
+
         FixtureResponse first = group.isEmpty() ? null : group.get(0);
         if (first == null) return "Fixtures";
 
@@ -221,6 +245,40 @@ public class TournamentServlet extends AbstractServlet {
         if (stage == null) return "Fixtures";
         if ("POOL".equalsIgnoreCase(stage)) return "Pool Stage";
         return KNOCKOUT_STAGES.getOrDefault(stage.toUpperCase(Locale.ROOT), stage);
+    }
+
+    /**
+     * Distinct stage labels in a group, most important stage first. Empty when
+     * the group carries no stage at all (ordinary non-tournament fixtures).
+     */
+    private List<String> distinctStageLabels(List<FixtureResponse> group) {
+        Map<String, String> byStage = new LinkedHashMap<>();
+        for (FixtureResponse fixture : group) {
+            if (fixture == null || fixture.getStage() == null) continue;
+            String stage = fixture.getStage().toUpperCase(Locale.ROOT);
+            String label = fixture.getStageLabel();
+            if (label == null || label.isBlank()) {
+                label = "POOL".equals(stage) ? "Pool Stage" : KNOCKOUT_STAGES.getOrDefault(stage, stage);
+            }
+            byStage.putIfAbsent(stage, label);
+        }
+
+        List<String> ordered = new ArrayList<>(byStage.keySet());
+        ordered.sort(Comparator.comparingInt(stage -> {
+            int index = STAGE_ORDER.indexOf(stage);
+            return index < 0 ? STAGE_ORDER.size() : index;
+        }));
+
+        List<String> labels = new ArrayList<>();
+        for (String stage : ordered) {
+            labels.add(byStage.get(stage));
+        }
+        return labels;
+    }
+
+    /** True when this round holds fixtures from more than one stage. */
+    private boolean hasMixedStages(List<FixtureResponse> group) {
+        return distinctStageLabels(group).size() > 1;
     }
 
     /** The round's match day as yyyy-MM-dd, for the date input. */
@@ -285,6 +343,7 @@ public class TournamentServlet extends AbstractServlet {
         private final boolean editable;
         private final List<FixtureResponse> fixtures;
         private final boolean current;
+        private final boolean mixedStages;
 
         RoundFixtureGroup(String roundId,
                           Integer roundNumber,
@@ -293,6 +352,7 @@ public class TournamentServlet extends AbstractServlet {
                           String stageLabel,
                           String matchDayIso,
                           boolean editable,
+                          boolean mixedStages,
                           List<FixtureResponse> fixtures,
                           boolean current) {
             this.roundId = roundId;
@@ -302,6 +362,7 @@ public class TournamentServlet extends AbstractServlet {
             this.stageLabel = stageLabel;
             this.matchDayIso = matchDayIso;
             this.editable = editable;
+            this.mixedStages = mixedStages;
             this.fixtures = fixtures;
             this.current = current;
         }
@@ -313,6 +374,8 @@ public class TournamentServlet extends AbstractServlet {
         public Integer getMatchdayNumber() { return matchdayNumber; }
         public String getStage() { return stage; }
         public String getStageLabel() { return stageLabel; }
+        /** True when this round mixes stages (final + bronze final share a day). */
+        public boolean isMixedStages() { return mixedStages; }
         /** yyyy-MM-dd, for &lt;input type="date"&gt;. */
         public String getMatchDayIso() { return matchDayIso; }
         public boolean isEditable() { return editable; }

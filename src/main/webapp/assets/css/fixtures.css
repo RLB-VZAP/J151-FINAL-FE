@@ -442,3 +442,21 @@ a.fx-side-link:hover .fx-crest {
         font-size: .85rem;
     }
 }
+
+/* Stage tag on a fixture card, shown only when a matchday holds more than one
+   stage -- the bronze final is played on the same day as the final, so each
+   match has to say which it is. Spans the card's columns as its own row rather
+   than being positioned absolutely, since .fx-card is a grid with no
+   positioning context of its own. */
+.fx-stage-tag {
+    grid-column: 1 / -1;
+    justify-self: start;
+    font-size: var(--fs-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold-bright);
+    border: 1px solid var(--gold-deep);
+    border-radius: var(--radius-pill);
+    padding: 0.1rem 0.5rem;
+    background: rgba(201, 162, 39, 0.08);
+}

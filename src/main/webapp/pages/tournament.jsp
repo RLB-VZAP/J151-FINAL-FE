@@ -316,6 +316,13 @@
                                 <c:set var="fxHasScore" value="${fixture.teamAScore != null and fixture.teamBScore != null}" />
 
                                 <article class="fx-card fx-card-${fn:toLowerCase(fxStatus)}">
+                                    <%-- A matchday can hold two stages: the bronze final is
+                                         played on the same day as the final. When that happens
+                                         the round heading names both, so each match has to say
+                                         which one it is. --%>
+                                    <c:if test="${group.mixedStages and not empty fixture.stageLabel}">
+                                        <span class="fx-stage-tag">${fn:escapeXml(fixture.stageLabel)}</span>
+                                    </c:if>
                                     <span class="fx-side fx-side-home">
                                         <p class="fx-team-name ${not empty myTeamId and myTeamId == fixture.teamAId ? 'is-mine' : ''}">${fn:escapeXml(fixture.teamAName)}</p>
                                     </span>
