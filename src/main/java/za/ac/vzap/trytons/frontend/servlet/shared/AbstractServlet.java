@@ -47,7 +47,8 @@ public class AbstractServlet extends HttpServlet {
         }
         if(!authContext.isAdmin()) {
             LOG.warning("Non-admin access attempt to " + req.getRequestURI());
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "You are not authorised to view this page.");
+            flashError(req, "You are not authorised to view that page.");
+            redirectTo(resp, req, "/dashboard");
             return false;
         }
         return true;

@@ -32,7 +32,7 @@
             <h2>Trending</h2>
             <p class="card-sub">Highest net transfers in</p>
             <c:choose>
-                <c:when test="${empty dashboard.trending}"><p class="empty-state">No data yet.</p></c:when>
+                <c:when test="${empty dashboard.trending}"><p class="empty-state">No data yet &#8212; trending picks appear once managers start buying and selling.</p></c:when>
                 <c:otherwise>
                     <table><thead><tr><th>Player</th><th>Net</th><th>In</th><th>Out</th></tr></thead><tbody>
                         <c:forEach var="p" items="${dashboard.trending}">
@@ -53,7 +53,7 @@
             <h2>Most transferred in</h2>
             <p class="card-sub">Confirmed transfers in</p>
             <c:choose>
-                <c:when test="${empty dashboard.mostTransferredIn}"><p class="empty-state">No data yet.</p></c:when>
+                <c:when test="${empty dashboard.mostTransferredIn}"><p class="empty-state">No data yet &#8212; this fills in once managers start buying players.</p></c:when>
                 <c:otherwise>
                     <table><thead><tr><th>Player</th><th>In</th></tr></thead><tbody>
                         <c:forEach var="p" items="${dashboard.mostTransferredIn}">
@@ -72,7 +72,7 @@
             <h2>Most transferred out</h2>
             <p class="card-sub">Confirmed transfers out</p>
             <c:choose>
-                <c:when test="${empty dashboard.mostTransferredOut}"><p class="empty-state">No data yet.</p></c:when>
+                <c:when test="${empty dashboard.mostTransferredOut}"><p class="empty-state">No data yet &#8212; this fills in once managers start selling players.</p></c:when>
                 <c:otherwise>
                     <table><thead><tr><th>Player</th><th>Out</th></tr></thead><tbody>
                         <c:forEach var="p" items="${dashboard.mostTransferredOut}">
@@ -91,7 +91,7 @@
             <h2>Hidden gems</h2>
             <p class="card-sub">High points per value, low ownership</p>
             <c:choose>
-                <c:when test="${empty dashboard.hiddenGems}"><p class="empty-state">No data yet.</p></c:when>
+                <c:when test="${empty dashboard.hiddenGems}"><p class="empty-state">No data yet &#8212; value picks appear once transfers and match points start coming in.</p></c:when>
                 <c:otherwise>
                     <table><thead><tr><th>Player</th><th>Value</th><th>Pts</th><th>Pts/Val</th></tr></thead><tbody>
                         <c:forEach var="p" items="${dashboard.hiddenGems}">
@@ -112,7 +112,7 @@
             <h2>Overpriced</h2>
             <p class="card-sub">High value, low points per value</p>
             <c:choose>
-                <c:when test="${empty dashboard.overpriced}"><p class="empty-state">No data yet.</p></c:when>
+                <c:when test="${empty dashboard.overpriced}"><p class="empty-state">No data yet &#8212; value picks appear once transfers and match points start coming in.</p></c:when>
                 <c:otherwise>
                     <table><thead><tr><th>Player</th><th>Value</th><th>Pts</th><th>Pts/Val</th></tr></thead><tbody>
                         <c:forEach var="p" items="${dashboard.overpriced}">
@@ -133,7 +133,7 @@
             <h2>Popular captains</h2>
             <p class="card-sub">Most chosen as captain</p>
             <c:choose>
-                <c:when test="${empty dashboard.popularCaptains}"><p class="empty-state">No data yet.</p></c:when>
+                <c:when test="${empty dashboard.popularCaptains}"><p class="empty-state">No data yet &#8212; captain picks appear once managers start setting their squads.</p></c:when>
                 <c:otherwise>
                     <table><thead><tr><th>Player</th><th>Captains</th></tr></thead><tbody>
                         <c:forEach var="p" items="${dashboard.popularCaptains}">
