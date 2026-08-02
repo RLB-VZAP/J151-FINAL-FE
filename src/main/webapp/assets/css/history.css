@@ -16,7 +16,7 @@
 .hs-alert {
     margin: 18px 0 0;
     border: 1px solid var(--line);
-    border-left: 3px solid #c0524a;
+    border-left: 3px solid var(--danger);
     border-radius: 10px;
     padding: .7rem .95rem;
     color: var(--silver-bright);
@@ -35,7 +35,7 @@
     padding: 18px 20px;
     border: 1px solid var(--line);
     border-radius: 14px;
-    background: #091810;
+    background: var(--surface);
 }
 
 /* The headline figure gets the gold treatment. */
@@ -80,7 +80,7 @@
     padding: 22px 24px;
     border: 1px solid var(--line);
     border-radius: 16px;
-    background: #091810;
+    background: var(--surface);
 }
 
 .panel + .panel {
@@ -127,9 +127,9 @@
     display: inline-block;
 }
 
-.hs-swatch-win { background: linear-gradient(180deg, #8fd0a5, #5fae7a); }
+.hs-swatch-win { background: linear-gradient(180deg, var(--success-bright), var(--success)); }
 .hs-swatch-draw { background: linear-gradient(180deg, #c7d1c9, #7f9187); }
-.hs-swatch-loss { background: linear-gradient(180deg, #e08279, #c0524a); }
+.hs-swatch-loss { background: linear-gradient(180deg, var(--danger-bright), var(--danger)); }
 
 /* ---------- Chart ------------------------------------------------------------------------ */
 .hs-chart {
@@ -188,9 +188,9 @@
     flex-shrink: 0;
 }
 
-.hs-bar-win { background: linear-gradient(180deg, #8fd0a5, #5fae7a); }
+.hs-bar-win { background: linear-gradient(180deg, var(--success-bright), var(--success)); }
 .hs-bar-draw { background: linear-gradient(180deg, #c7d1c9, #7f9187); }
-.hs-bar-loss { background: linear-gradient(180deg, #e08279, #c0524a); }
+.hs-bar-loss { background: linear-gradient(180deg, var(--danger-bright), var(--danger)); }
 
 .hs-col-label {
     color: var(--silver-dim);
@@ -236,7 +236,7 @@
     justify-self: start;
     padding: .25rem .6rem;
     border-radius: 8px;
-    background: #0c1c13;
+    background: var(--surface-raised);
     color: var(--silver-bright);
     font-family: "Space Grotesk", system-ui, sans-serif;
     font-size: .82rem;
@@ -298,16 +298,16 @@ a.hs-fixture-link:hover {
     background: currentColor;
 }
 
-.result-win { background: rgba(95, 174, 122, .14); color: #8fd0a5; }
+.result-win { background: rgba(95, 174, 122, .14); color: var(--success-bright); }
 .result-draw { background: rgba(199, 209, 201, .1); color: var(--silver); }
-.result-loss { background: rgba(192, 82, 74, .14); color: #e08279; }
+.result-loss { background: rgba(192, 82, 74, .14); color: var(--danger-bright); }
 
 /* ---------- Empty cards ---------------------------------------------------------------------- */
 .hs-empty {
     padding: 34px 24px;
     border: 1px solid var(--line);
     border-radius: 16px;
-    background: #091810;
+    background: var(--surface);
     text-align: center;
 }
 

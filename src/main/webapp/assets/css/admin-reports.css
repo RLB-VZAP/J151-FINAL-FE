@@ -21,8 +21,8 @@
     font-size: .85rem;
 }
 
-.arep-alert-success { border-left-color: #5fae7a; }
-.arep-alert-error { border-left-color: #c0524a; }
+.arep-alert-success { border-left-color: var(--success); }
+.arep-alert-error { border-left-color: var(--danger); }
 
 /* ---------- Section header ----------------------------------------------------------- */
 .arep-section-head {
@@ -74,7 +74,7 @@
     padding: 20px 22px;
     border: 1px solid var(--line);
     border-radius: 16px;
-    background: #091810;
+    background: var(--surface);
 }
 
 .arep-panel-title {
@@ -103,7 +103,7 @@
     width: 100%;
     box-sizing: border-box;
     padding: 0 .8rem;
-    background: #0c1c13;
+    background: var(--surface-raised);
     border: 1px solid var(--line);
     border-radius: 9px;
     color: var(--silver-bright);
@@ -130,7 +130,7 @@
 }
 
 .arep-input::placeholder,
-.arep-textarea::placeholder { color: #5c6e64; }
+.arep-textarea::placeholder { color: var(--silver-faint); }
 
 .arep-select-wrap { position: relative; }
 
@@ -181,7 +181,7 @@
 .ltbl {
     border: 1px solid var(--line);
     border-radius: 14px;
-    background: #091810;
+    background: var(--surface);
     overflow: hidden;
 }
 

@@ -42,14 +42,18 @@ public class UserHistoryServlet extends AbstractServlet {
         if (pointsHistory.isPresent()) {
             request.setAttribute("pointsHistory", pointsHistory.get());
         } else {
-            request.setAttribute("pointsHistoryError", "Unable to load user points history");
+            if (handleEmptyResult(request, response, "Unable to load user points history", "pointsHistoryError") == ApiFailure.REDIRECTED) {
+                return;
+            }
         }
 
         Optional<List<WeeklyPerformanceResponse>> weeklyPerformance = userHistoryRestClient.getWeeklyPerformance();
         if (weeklyPerformance.isPresent()){
             request.setAttribute("weeklyPerformance", weeklyPerformance.get());
         } else {
-            request.setAttribute("weeklyPerformanceError", "Unable to load user weekly performance");
+            if (handleEmptyResult(request, response, "Unable to load user weekly performance", "weeklyPerformanceError") == ApiFailure.REDIRECTED) {
+                return;
+            }
         }
 
         decorateHistory(request, weeklyPerformance.orElseGet(List::of),

@@ -271,8 +271,14 @@
                 <c:forEach var="group" items="${roundGroups}">
                     <details class="tn-round-block" ${group.current ? 'open' : ''}>
                         <summary class="fx-group-head tn-round-summary">
+                            <%-- The league's own matchday, not the season-wide round
+                                 number: rounds are minted per league now, so the global
+                                 number means nothing to a manager (it once read "Round 19"
+                                 for a league's first matchday). A non-tournament fixture
+                                 has no matchday, so it falls back to the round number. --%>
                             <h3 class="fx-group-title">
                                 <c:choose>
+                                    <c:when test="${not empty group.matchdayNumber}">Matchday ${group.matchdayNumber}</c:when>
                                     <c:when test="${not empty group.roundNumber}">Round ${group.roundNumber}</c:when>
                                     <c:otherwise>Fixtures</c:otherwise>
                                 </c:choose>
@@ -282,12 +288,47 @@
                             <span class="tn-round-count">${group.count} fixture<c:if test="${group.count != 1}">s</c:if></span>
                         </summary>
 
+                        <%-- Match-day editor. Shown only to someone the backend would
+                             actually let through (canEditMatchDays mirrors
+                             requireMatchDayEditor) and only for a round that has not
+                             started; the backend re-checks both regardless. --%>
+                        <c:if test="${canEditMatchDays and group.editable and not empty group.roundId}">
+                            <form class="tn-matchday-form" action="${pageContext.request.contextPath}/tournament" method="post">
+                                <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
+                                <input type="hidden" name="action" value="matchday">
+                                <input type="hidden" name="leagueId" value="${fn:escapeXml(leagueId)}">
+                                <input type="hidden" name="roundId" value="${fn:escapeXml(group.roundId)}">
+                                <label class="tn-matchday-label" for="matchDay-${fn:escapeXml(group.roundId)}">Match day</label>
+                                <input class="tn-matchday-input"
+                                       id="matchDay-${fn:escapeXml(group.roundId)}"
+                                       type="date"
+                                       name="matchDay"
+                                       value="${fn:escapeXml(group.matchDayIso)}"
+                                       required>
+                                <label class="tn-matchday-label" for="kickoff-${fn:escapeXml(group.roundId)}">Kick-off</label>
+                                <input class="tn-matchday-input"
+                                       id="kickoff-${fn:escapeXml(group.roundId)}"
+                                       type="time"
+                                       name="kickoff"
+                                       value="${fn:escapeXml(group.kickoffIso)}">
+                                <button type="submit" class="btn-outline tn-matchday-save">Move</button>
+                                <span class="tn-matchday-hint">Monday, Wednesday, Friday, Saturday or Sunday. Every fixture in the round moves together.</span>
+                            </form>
+                        </c:if>
+
                         <div class="fx-list tn-round-list-fixtures">
                             <c:forEach var="fixture" items="${group.fixtures}">
                                 <c:set var="fxStatus" value="${empty fixture.fixtureStatus ? 'UPCOMING' : fn:toUpperCase(fixture.fixtureStatus)}" />
                                 <c:set var="fxHasScore" value="${fixture.teamAScore != null and fixture.teamBScore != null}" />
 
                                 <article class="fx-card fx-card-${fn:toLowerCase(fxStatus)}">
+                                    <%-- A matchday can hold two stages: the bronze final is
+                                         played on the same day as the final. When that happens
+                                         the round heading names both, so each match has to say
+                                         which one it is. --%>
+                                    <c:if test="${group.mixedStages and not empty fixture.stageLabel}">
+                                        <span class="fx-stage-tag">${fn:escapeXml(fixture.stageLabel)}</span>
+                                    </c:if>
                                     <span class="fx-side fx-side-home">
                                         <p class="fx-team-name ${not empty myTeamId and myTeamId == fixture.teamAId ? 'is-mine' : ''}">${fn:escapeXml(fixture.teamAName)}</p>
                                     </span>

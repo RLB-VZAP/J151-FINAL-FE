@@ -41,8 +41,17 @@ public class FantasyTeamServlet extends AbstractServlet{
                 // The "My Team" nav link carries no teamId, so fall back to the signed-in
                 // user's own team. uk_fantasyTeam_owner makes that unambiguous. Same pattern
                 // as transfers and fixtures; an explicit ?teamId= still wins.
+                // getMyTeam() answers 404 for a genuine "no team yet", which must still
+                // fall through to the friendly empty state below rather than the failure path.
+                Optional<FantasyTeamResponse> myTeam = fantasyTeamRestClient.getMyTeam();
+                if (myTeam.isEmpty() && !apiCallStatus.isNotFound()) {
+                    if (handleEmptyResult(request, response, "Unable to load your team") == ApiFailure.REDIRECTED) {
+                        yield null;
+                    }
+                    yield VIEW_OWN_TEAM_JSP;
+                }
                 Optional<UUID> teamId = parseUuid(request.getParameter("teamId"))
-                        .or(() -> fantasyTeamRestClient.getMyTeam().map(FantasyTeamResponse::getTeamId));
+                        .or(() -> myTeam.map(FantasyTeamResponse::getTeamId));
                 if(teamId.isEmpty()){
                     request.setAttribute("error","You don't have a team yet. Create one to see it here.");
                     yield VIEW_OWN_TEAM_JSP;
@@ -51,7 +60,9 @@ public class FantasyTeamServlet extends AbstractServlet{
                 if(team.isPresent()){
                     request.setAttribute("team",team.get());
                 }else{
-                    request.setAttribute("error","Unable to load your team");
+                    if (handleEmptyResult(request, response, "Unable to load your team") == ApiFailure.REDIRECTED) {
+                        yield null;
+                    }
                 }
                 yield VIEW_OWN_TEAM_JSP;
             }
@@ -65,7 +76,9 @@ public class FantasyTeamServlet extends AbstractServlet{
                 if(team.isPresent()){
                     request.setAttribute("team",team.get());
                 }else{
-                    request.setAttribute("error","Unable to load that team");
+                    if (handleEmptyResult(request, response, "Unable to load that team") == ApiFailure.REDIRECTED) {
+                        yield null;
+                    }
                 }
                 yield VIEW_OPPONENT_TEAM_JSP;
             }
@@ -80,17 +93,22 @@ public class FantasyTeamServlet extends AbstractServlet{
                     // existing squad/team name, so every "edit" actually submitted as a
                     // brand new create — which then failed on the one-team-per-user
                     // constraint with a generic, unhelpful error.
-                    fantasyTeamRestClient.viewOwnTeam(teamId.get()).ifPresentOrElse(team -> {
-                        request.setAttribute("teamId", team.getTeamId());
-                        request.setAttribute("teamName", team.getTeamName());
+                    Optional<ViewOwnTeamResponse> team = fantasyTeamRestClient.viewOwnTeam(teamId.get());
+                    if (team.isPresent()) {
+                        request.setAttribute("teamId", team.get().getTeamId());
+                        request.setAttribute("teamName", team.get().getTeamName());
                         List<UUID> ownedPlayerIds = new ArrayList<>();
-                        if(team.getPlayers() != null){
-                            for(FantasyTeamPlayerSelectionResponse player : team.getPlayers()){
+                        if(team.get().getPlayers() != null){
+                            for(FantasyTeamPlayerSelectionResponse player : team.get().getPlayers()){
                                 ownedPlayerIds.add(player.getPlayerId());
                             }
                         }
                         request.setAttribute("selectedPlayerIds", ownedPlayerIds);
-                    }, () -> request.setAttribute("error","Unable to load your team"));
+                    } else {
+                        if (handleEmptyResult(request, response, "Unable to load your team") == ApiFailure.REDIRECTED) {
+                            yield null;
+                        }
+                    }
                 }
                 loadPlayerOptions(request);
                 yield CREATE_TEAM_JSP;
@@ -103,8 +121,15 @@ public class FantasyTeamServlet extends AbstractServlet{
                 }
                 // One team per user (uk_fantasyTeam_owner): an existing owner is sent
                 // straight to the edit view rather than shown a create-form dead end.
-                Optional<UUID> existingTeamId = fantasyTeamRestClient.getMyTeam()
-                        .map(FantasyTeamResponse::getTeamId);
+                // getMyTeam() answers 404 for "no team yet", which is the normal case
+                // here and must fall through to the create form, not the failure path.
+                Optional<FantasyTeamResponse> myTeam = fantasyTeamRestClient.getMyTeam();
+                if (myTeam.isEmpty() && !apiCallStatus.isNotFound()) {
+                    if (handleEmptyResult(request, response, "Unable to load your team") == ApiFailure.REDIRECTED) {
+                        yield null;
+                    }
+                }
+                Optional<UUID> existingTeamId = myTeam.map(FantasyTeamResponse::getTeamId);
                 if (existingTeamId.isPresent()) {
                     redirectTo(response, request, "/fantasy-team/update?teamId=" + existingTeamId.get());
                     yield null;

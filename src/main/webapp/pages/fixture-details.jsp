@@ -21,7 +21,7 @@
 <main class="catalog-main">
     <div class="catalog-content">
 
-        <a class="fxd-back" href="${pageContext.request.contextPath}/fixtures?submit=fixtures">&larr; Back to fixtures</a>
+        <a class="fxd-back" href="${pageContext.request.contextPath}/leagues">&larr; Back to leagues</a>
 
         <c:if test="${not empty error}">
             <p class="fxd-alert" role="alert"><c:out value="${error}" /></p>

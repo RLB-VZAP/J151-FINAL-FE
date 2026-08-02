@@ -1,20 +1,18 @@
 /* User points history page - Fantasy TryTons */
 
 .user-history-page {
-    --trytons-navy: #0c1712;
+    /* --trytons-panel has no shared equivalent in theme.css (it's a
+       page-specific gradient stop) and --trytons-line carries an alpha
+       channel --line doesn't, so both stay local. Everything else here was
+       an exact-value duplicate of a theme.css token and has been removed in
+       favour of the shared one. */
     --trytons-panel: #132a1f;
-    --trytons-gold: #c9a227;
-    --trytons-cream: #eef3ef;
-    --trytons-muted: #7f9187;
     --trytons-line: rgba(44, 68, 55, 0.5);
-    --trytons-win: #3fb27f;
-    --trytons-draw: #7f9187;
-    --trytons-loss: #e0596b;
 
     max-width: 1180px;
     margin: 0 auto;
     padding: 2.5rem 1.5rem 4rem;
-    color: var(--trytons-cream);
+    color: var(--silver-bright);
 }
 
 .user-history-hero {
@@ -24,13 +22,13 @@
     padding: 2.25rem;
     border: 1px solid rgba(201, 162, 39, 0.34);
     border-radius: 18px;
-    background: linear-gradient(135deg, var(--trytons-navy), var(--trytons-panel));
+    background: linear-gradient(135deg, var(--bg), var(--trytons-panel));
     box-shadow: 0 16px 32px rgba(12, 23, 18, 0.2);
 }
 
 .user-history-eyebrow {
     margin: 0 0 0.5rem;
-    color: var(--trytons-gold);
+    color: var(--gold);
     font-size: 0.78rem;
     font-weight: 800;
     letter-spacing: 0.12em;
@@ -53,7 +51,7 @@
 .user-history-description {
     max-width: 44rem;
     margin: 0;
-    color: var(--trytons-muted);
+    color: var(--silver-dim);
     font-size: 1.02rem;
     line-height: 1.65;
 }
@@ -87,18 +85,18 @@
     padding: 1.25rem;
     border: 1px solid var(--trytons-line);
     border-radius: 12px;
-    background: var(--trytons-navy);
+    background: var(--bg);
 }
 
 .user-history-summary-label {
-    color: var(--trytons-muted);
+    color: var(--silver-dim);
     font-size: 0.8rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
 }
 
 .user-history-summary-value {
-    color: var(--trytons-gold);
+    color: var(--gold);
     font-size: 2rem;
     font-weight: 800;
 }
@@ -120,7 +118,7 @@
 }
 
 .user-history-table-wrap th {
-    color: var(--trytons-muted);
+    color: var(--silver-dim);
     font-size: 0.78rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -135,32 +133,32 @@
 }
 
 .user-history-badge-win {
-    background: rgba(63, 178, 127, 0.18);
-    color: var(--trytons-win);
+    background: rgba(95, 174, 122, 0.18);
+    color: var(--success);
 }
 
 .user-history-badge-draw {
     background: rgba(127, 145, 135, 0.18);
-    color: var(--trytons-draw);
+    color: var(--silver-dim);
 }
 
 .user-history-badge-loss {
-    background: rgba(224, 89, 107, 0.18);
-    color: var(--trytons-loss);
+    background: rgba(192, 82, 74, 0.18);
+    color: var(--danger);
 }
 
 .user-history-empty {
     padding: 1.5rem;
     border: 1px dashed var(--trytons-line);
     border-radius: 12px;
-    color: var(--trytons-muted);
+    color: var(--silver-dim);
     text-align: center;
 }
 
 .error-message.user-history-error {
     padding: 1rem 1.25rem;
-    border: 1px solid rgba(224, 89, 107, 0.4);
+    border: 1px solid rgba(192, 82, 74, 0.4);
     border-radius: 10px;
-    background: rgba(224, 89, 107, 0.12);
-    color: var(--trytons-loss);
+    background: rgba(192, 82, 74, 0.12);
+    color: var(--danger);
 }

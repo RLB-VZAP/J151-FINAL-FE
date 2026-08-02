@@ -34,7 +34,14 @@ import za.ac.vzap.trytons.frontend.client.scoring.FantasyPointBreakdownResponse;
 import za.ac.vzap.trytons.frontend.client.scoring.FantasyPointsResponse;
 import za.ac.vzap.trytons.frontend.client.scoring.FantasyPointsRestClient;
 
-@WebServlet(name ="FixtureServlet", urlPatterns = {"/fixtures","/fixture"} )
+/**
+ * Single-fixture detail only. The standalone {@code /fixtures} list was removed:
+ * it pooled every league's rounds into one page, so a round number told you
+ * nothing about which competition it belonged to. Fixtures are now reached from
+ * a league's tournament page, which owns that context. This servlet is still
+ * linked to from there, from history and from notifications.
+ */
+@WebServlet(name ="FixtureServlet", urlPatterns = {"/fixture", "/fixtures"} )
 public class FixtureServlet extends AbstractServlet {
     @Inject
     private FixtureRestClient fixtureRestClient;
@@ -54,6 +61,14 @@ public class FixtureServlet extends AbstractServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if(!requireAuthenticated(request, response)) return;
+
+        // /fixtures is retained purely so an old bookmark lands somewhere useful
+        // instead of a raw container 404. Nothing in the UI links here any more.
+        if (request.getServletPath().equals("/fixtures")) {
+            redirectTo(response, request, "/leagues");
+            return;
+        }
+
         String submit = request.getParameter("submit");
         if (submit == null) {
             submit = "";
@@ -62,7 +77,8 @@ public class FixtureServlet extends AbstractServlet {
             case "fixture" -> {
                 String fixtureId = request.getParameter("fixtureId");
                 if (fixtureId == null || fixtureId.isBlank()) {
-                    forwardWithError(request, response, "Invalid or missing fixtureId", "/pages/fixtures.jsp");
+                    flashError(request, "No fixture was specified.");
+                    redirectTo(response, request, "/leagues");
                     return;
                 }
                 Optional<FixtureResponse> fixture = fixtureRestClient.getFixture(fixtureId);
@@ -73,22 +89,14 @@ public class FixtureServlet extends AbstractServlet {
                     request.getRequestDispatcher("/pages/fixture-details.jsp").forward(request, response);
                     return;
                 }
-                forwardWithError(request, response, "Fixture not found", "/pages/fixtures.jsp");
+                flashError(request, "That fixture could not be found.");
+                redirectTo(response, request, "/leagues");
             }
 
-            default -> {
-                String statusFilter = request.getParameter("status");
-                Optional<List<FixtureResponse>> fixtures = fixtureRestClient.listFixtures(statusFilter);
-                request.setAttribute("statusFilter", statusFilter);
-                if (fixtures.isPresent()) {
-                    request.setAttribute("fixtures", fixtures.get());
-                    decorateFixtureList(request, fixtures.get());
-                    request.getRequestDispatcher("/pages/fixtures.jsp").forward(request, response);
-                } else {
-                    request.setAttribute("fixtures", List.of());
-                    forwardWithError(request, response, "Unable to load fixtures", "/pages/fixtures.jsp");
-                }
-            }
+            // The global fixture list is gone; a bare /fixture with no id has
+            // nothing to show, so send the caller to their leagues, where every
+            // fixture now lives in the context of its own competition.
+            default -> redirectTo(response, request, "/leagues");
         }
     }
 

@@ -29,8 +29,8 @@
     font-size: .85rem;
 }
 
-.asr-alert-success { border-left-color: #5fae7a; }
-.asr-alert-error { border-left-color: #c0524a; }
+.asr-alert-success { border-left-color: var(--success); }
+.asr-alert-error { border-left-color: var(--danger); }
 
 /* ---------- Season-locked banner ---------------------------------------------------- */
 .asr-lock-banner {
@@ -39,7 +39,7 @@
     gap: 12px;
     margin: 0 0 20px;
     border: 1px solid rgba(192, 82, 74, .55);
-    border-left: 4px solid #c0524a;
+    border-left: 4px solid var(--danger);
     border-radius: 12px;
     padding: .9rem 1.1rem;
     background: rgba(192, 82, 74, .1);
@@ -106,7 +106,7 @@
     padding: 20px 22px;
     border: 1px solid var(--line);
     border-radius: 16px;
-    background: #091810;
+    background: var(--surface);
 }
 
 #seasonSelection { margin-top: 20px; }
@@ -139,7 +139,7 @@
     height: 42px;
     box-sizing: border-box;
     padding: 0 .8rem;
-    background: #0c1c13;
+    background: var(--surface-raised);
     border: 1px solid var(--line);
     border-radius: 9px;
     color: var(--silver-bright);
@@ -153,7 +153,7 @@
     border-color: var(--gold);
 }
 
-.asr-input::placeholder { color: #5c6e64; }
+.asr-input::placeholder { color: var(--silver-faint); }
 
 /* ---------- Season selector ---------------------------------------------------------- */
 .asr-season-form {
@@ -234,7 +234,7 @@
 .srtbl {
     border: 1px solid var(--line);
     border-radius: 14px;
-    background: #091810;
+    background: var(--surface);
     overflow: hidden;
 }
 
@@ -287,8 +287,8 @@
     font-variant-numeric: tabular-nums;
 }
 
-.srtbl-pts.is-award { color: #8fd0a5; }
-.srtbl-pts.is-ded { color: #e08279; }
+.srtbl-pts.is-award { color: var(--success-bright); }
+.srtbl-pts.is-ded { color: var(--danger-bright); }
 
 .srtbl-desc {
     color: var(--silver-dim);
@@ -317,7 +317,7 @@
     font-weight: 600;
 }
 
-.asr-flag.is-yes { background: rgba(95, 174, 122, .16); color: #8fd0a5; }
+.asr-flag.is-yes { background: rgba(95, 174, 122, .16); color: var(--success-bright); }
 .asr-flag.is-no { background: rgba(255, 255, 255, .04); color: var(--silver-dim); }
 
 /* ---------- Checkboxes ---------------------------------------------------------------- */

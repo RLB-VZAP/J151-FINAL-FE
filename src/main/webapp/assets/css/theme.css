@@ -19,6 +19,50 @@
   --gold-bright: #e8c765;
   --gold-deep: #8a6a15;
 
+  /* Status palette — was an informal, hex-duplicated second palette (dozens
+     of files repeating the same six colours by literal value). This is now
+     the one source of truth; every feature file should reference these
+     instead of its own hex or a private alias. */
+  --success: #5fae7a;
+  --success-bright: #8fd0a5;
+
+  --danger: #c0524a;
+  --danger-bright: #e08279;
+
+  --warning: #e0a54a;
+
+  --silver-faint: #5c6e64;
+
+  /* Surface fills — the near-black panel/card backgrounds layered on top of
+     --bg. Four distinct shades were being repeated by hex across the app;
+     these are their names now. */
+  --surface: #091810;
+  --surface-raised: #0c1c13;
+  --surface-deep: #08120d;
+  --surface-card: #12211a;
+  --surface-hover: #1b3026;
+
+  --card-gradient: linear-gradient(155deg, #1c3527, #0d1c13);
+
+  /* Type scale — the five most-used font-size values already in the
+     0.6–0.95rem band feature files cluster around (30+ distinct values were
+     in use). Definitions only for now: adopt these in new/touched CSS
+     instead of picking another one-off decimal; no mass migration in this
+     pass. */
+  --fs-xs: 0.78rem;
+  --fs-sm: 0.8rem;
+  --fs-md: 0.85rem;
+  --fs-lg: 0.875rem;
+  --fs-xl: 0.9rem;
+
+  /* Radius scale — the three most-used border-radius values plus the
+     existing pill shape. Definitions only, same reasoning as the type
+     scale above. */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
   --bs-body-bg: var(--bg);
   --bs-body-color: var(--silver);
   --bs-body-font-family: "Inter", system-ui, -apple-system, sans-serif;
@@ -103,7 +147,7 @@ input:focus, select:focus, textarea:focus {
 label {
   color: var(--silver-dim);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: var(--fs-xl);
 }
 
 button {
@@ -144,7 +188,7 @@ a:hover {
   border: none;
   color: #141f0e;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: var(--fs-md);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   border-radius: 8px;
@@ -220,7 +264,7 @@ a:hover {
 
 .auth-subtext {
   color: var(--silver-dim);
-  font-size: 0.85rem;
+  font-size: var(--fs-md);
 }
 
 .auth-footer-text {
@@ -234,13 +278,13 @@ a:hover {
   border-left: 2px solid var(--gold);
   padding: 0.65rem 0.9rem;
   color: var(--silver-bright);
-  font-size: 0.85rem;
+  font-size: var(--fs-md);
   background: transparent;
 }
 
 .auth-alert-success { border-left-color: var(--gold); }
 .auth-alert-notice { border-left-color: #c9832b; }
-.auth-alert-danger { border-left-color: #c0524a; }
+.auth-alert-danger { border-left-color: var(--danger); }
 
 /* ---------- Form fields: underline style, no boxed inputs -------------------- */
 .field-label {
@@ -257,7 +301,7 @@ a:hover {
   display: flex;
   align-items: center;
   gap: 10px;
-  border-bottom: 1px solid #33493c;
+  border-bottom: 1px solid var(--line);
   padding-bottom: 9px;
   transition: border-color 0.15s ease;
 }
@@ -288,7 +332,7 @@ a:hover {
 }
 
 .field-input::placeholder {
-  color: #5c6e64;
+  color: var(--silver-faint);
 }
 
 .field-help {
@@ -311,7 +355,7 @@ a:hover {
 }
 
 .forgot-link {
-  font-size: 0.78rem;
+  font-size: var(--fs-xs);
 }
 
 /* ---------- Right pane: hero photo + overlay + glow --------------------------- */
@@ -368,5 +412,5 @@ a:hover {
 
 .auth-visual-support {
   color: var(--silver);
-  font-size: 0.85rem;
+  font-size: var(--fs-md);
 }

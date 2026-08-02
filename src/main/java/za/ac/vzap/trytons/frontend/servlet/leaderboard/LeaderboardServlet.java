@@ -51,7 +51,9 @@ public class LeaderboardServlet extends AbstractServlet {
                             .map(LeagueResponse::getLeagueName)
                             .ifPresent(name -> request.setAttribute("leagueName", name));
                 } else {
-                    request.setAttribute("error", "No leaderboard found");
+                    if (handleEmptyResult(request, response, "No leaderboard found") == ApiFailure.REDIRECTED) {
+                        return;
+                    }
                 }
             }
             //Request contains 'teamId':
@@ -68,7 +70,9 @@ public class LeaderboardServlet extends AbstractServlet {
                     if (result.isPresent()) {
                         request.setAttribute("ranking", result.get());
                     } else {
-                        request.setAttribute("error", "No ranking found");
+                        if (handleEmptyResult(request, response, "No ranking found") == ApiFailure.REDIRECTED) {
+                            return;
+                        }
                     }
                 }
             }
@@ -79,7 +83,9 @@ public class LeaderboardServlet extends AbstractServlet {
             if (result.isPresent()) {
                 request.setAttribute("leaderboard", result.get());
             } else {
-                request.setAttribute("error", "No leaderboard found");
+                if (handleEmptyResult(request, response, "No leaderboard found") == ApiFailure.REDIRECTED) {
+                    return;
+                }
             }
         }
         request.getRequestDispatcher(dispatchPath).forward(request, response);

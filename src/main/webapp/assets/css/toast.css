@@ -26,7 +26,7 @@
   border: 1px solid var(--line, #2c4437);
   border-left: 3px solid var(--silver-dim, #7f9187);
   border-radius: 11px;
-  background: #0c1c13;
+  background: var(--surface-raised);
   color: var(--silver-bright, #eef3ef);
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   font-size: .85rem;
@@ -60,7 +60,7 @@
 .toast-success { border-left-color: #3fb46b; }
 .toast-success::before { content: "\2713"; color: #3fb46b; }   /* checkmark */
 
-.toast-error { border-left-color: #c0524a; }
+.toast-error { border-left-color: var(--danger); }
 .toast-error::before { content: "\0021"; color: #d9736b; }     /* exclamation */
 
 .toast-info { border-left-color: var(--gold, #c9a227); }

@@ -10,10 +10,6 @@ body.admin-message-moderation {
     display: flex;
     min-height: 100vh;
     margin: 0;
-    /* Surfaces are lifted off the near-black page ground rather than being a
-       different hue, matching the pattern set by market-dashboard.css. */
-    --amm-surface: #12211a;
-    --amm-surface-hover: #1b3026;
     --amm-sp-2: 8px;
     --amm-sp-3: 12px;
     --amm-sp-4: 16px;
@@ -49,7 +45,7 @@ body.admin-message-moderation {
    they read as lifted material rather than the page ground. */
 #pendingQueue,
 #blocklistManager {
-    --bs-card-bg: var(--amm-surface, #12211a);
+    --bs-card-bg: var(--surface-card);
     --bs-card-border-color: var(--line, #2c4437);
     padding: 1.25rem;
     margin-bottom: 1.5rem;
@@ -66,9 +62,9 @@ body.admin-message-moderation {
    page's own surface tones instead of Bootstrap's generic dark-grey defaults.
    ------------------------------------------------------------------------- */
 .moderation-table {
-    --bs-table-bg: var(--amm-surface, #12211a);
+    --bs-table-bg: var(--surface-card);
     --bs-table-border-color: var(--line, #2c4437);
-    --bs-table-hover-bg: var(--amm-surface-hover, #1b3026);
+    --bs-table-hover-bg: var(--surface-hover);
     --bs-table-color: var(--silver, #c7d1c9);
 }
 
@@ -116,7 +112,7 @@ body.admin-message-moderation {
     display: flex;
     align-items: center;
     gap: var(--amm-sp-2);
-    background: var(--amm-surface-hover);
+    background: var(--surface-hover);
     border: 1px solid var(--line, #2c4437);
     border-radius: 999px;
     padding: var(--amm-sp-2) var(--amm-sp-3);

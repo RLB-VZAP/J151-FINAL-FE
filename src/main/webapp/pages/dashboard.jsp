@@ -31,7 +31,7 @@
                 </c:otherwise>
             </c:choose>
             <p class="dashboard-hero-sub">Jump back into your league from here.</p>
-            <a class="btn-gold" href="${pageContext.request.contextPath}/fixtures?submit=fixtures">View Fixtures &rarr;</a>
+            <a class="btn-gold" href="${pageContext.request.contextPath}/leagues">View Leagues &rarr;</a>
         </div>
     </section>
 
@@ -71,13 +71,9 @@
             <p class="dashboard-card-desc">Browse, create or join a fantasy league.</p>
         </a>
 
-        <a class="dashboard-card card-fixtures" href="${pageContext.request.contextPath}/fixtures?submit=fixtures">
-            <span class="dashboard-card-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
-            </span>
-            <span class="dashboard-card-title brand-font">Fixtures <span class="dashboard-card-arrow">&rarr;</span></span>
-            <p class="dashboard-card-desc">See upcoming and completed fixtures.</p>
-        </a>
+        <%-- The Fixtures card pointed at the standalone global list, which mixed
+             every competition together. Fixtures now live on their league's
+             tournament page, reached from the Leagues card above. --%>
 
         <a class="dashboard-card card-transfers" href="${pageContext.request.contextPath}/transfers">
             <span class="dashboard-card-icon">

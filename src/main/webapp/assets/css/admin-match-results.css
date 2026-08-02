@@ -35,8 +35,8 @@
     font-size: .85rem;
 }
 
-.amr-alert-success { border-left-color: #5fae7a; }
-.amr-alert-error { border-left-color: #c0524a; }
+.amr-alert-success { border-left-color: var(--success); }
+.amr-alert-error { border-left-color: var(--danger); }
 
 /* An alert inside a panel sits above the form it relates to. */
 .amr-panel .amr-alert { margin: 0 0 16px; }
@@ -47,7 +47,7 @@
     padding: 20px 22px;
     border: 1px solid var(--line);
     border-radius: 16px;
-    background: #091810;
+    background: var(--surface);
 }
 
 .amr-panel-title {
@@ -83,7 +83,7 @@
     height: 42px;
     box-sizing: border-box;
     padding: 0 .8rem;
-    background: #0c1c13;
+    background: var(--surface-raised);
     border: 1px solid var(--line);
     border-radius: 9px;
     color: var(--silver-bright);
@@ -98,7 +98,7 @@
     border-color: var(--gold);
 }
 
-.amr-input::placeholder { color: #5c6e64; }
+.amr-input::placeholder { color: var(--silver-faint); }
 
 /* Native select with a custom caret so it matches the inputs. */
 .amr-select-wrap { position: relative; }
@@ -172,7 +172,7 @@
     height: 52px;
     margin-bottom: 14px;
     border-radius: 14px;
-    background: #0c1c13;
+    background: var(--surface-raised);
     color: var(--gold);
 }
 
@@ -230,7 +230,7 @@
     font-weight: 600;
 }
 
-.amr-flag.is-yes { background: rgba(95, 174, 122, .16); color: #8fd0a5; }
+.amr-flag.is-yes { background: rgba(95, 174, 122, .16); color: var(--success-bright); }
 .amr-flag.is-no { background: rgba(255, 255, 255, .04); color: var(--silver-dim); }
 
 .amr-hint {
@@ -249,7 +249,7 @@
     padding: 14px 16px;
     border: 1px solid var(--line);
     border-radius: 12px;
-    background: #0c1c13;
+    background: var(--surface-raised);
 }
 
 .amr-preview[hidden] { display: none; }

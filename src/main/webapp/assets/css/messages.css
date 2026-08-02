@@ -47,8 +47,8 @@
     font-size: .85rem;
 }
 
-.msg-alert-error { border-left-color: #c0524a; }
-.msg-alert-info { border-left-color: #5fae7a; }
+.msg-alert-error { border-left-color: var(--danger); }
+.msg-alert-info { border-left-color: var(--success); }
 
 /* ---------- Header cross-link -------------------------------------------------------- */
 .msg-page-link {
@@ -92,7 +92,7 @@
 
 .msg-tab.is-active {
     border-color: var(--line);
-    background: #091810;
+    background: var(--surface);
     color: var(--gold-bright);
 }
 
@@ -140,7 +140,7 @@
     padding: 20px 22px;
     border: 1px solid var(--line);
     border-radius: 16px;
-    background: #091810;
+    background: var(--surface);
 }
 
 .msg-panel-title {
@@ -201,7 +201,7 @@
 }
 
 .msg-btn-danger:hover {
-    border-color: #c0524a;
+    border-color: var(--danger);
     color: #e08079;
 }
 
@@ -224,7 +224,7 @@
     height: 42px;
     box-sizing: border-box;
     padding: 0 .8rem;
-    background: #0c1c13;
+    background: var(--surface-raised);
     border: 1px solid var(--line);
     border-radius: 9px;
     color: var(--silver-bright);
@@ -238,7 +238,7 @@
     border-color: var(--gold);
 }
 
-.msg-input::placeholder { color: #5c6e64; }
+.msg-input::placeholder { color: var(--silver-faint); }
 
 .msg-input-sm {
     height: 34px;
@@ -299,7 +299,7 @@
     white-space: nowrap;
 }
 
-.msg-state-pending { background: rgba(224, 165, 74, .12); color: #e0a54a; }
+.msg-state-pending { background: rgba(224, 165, 74, .12); color: var(--warning); }
 .msg-state-blocked { background: rgba(192, 82, 74, .12); color: #e08079; }
 
 /* ---------- Request + contact lists -------------------------------------------------- */
@@ -318,7 +318,7 @@
     gap: 12px;
     padding: 12px 18px;
     border: 1px solid var(--line);
-    background: #091810;
+    background: var(--surface);
 }
 
 .msg-request:first-child,

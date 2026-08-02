@@ -1,0 +1,38 @@
+<%--
+    The action row of a league card. Included by BOTH the league detail card and the
+    "Your leagues" card on the leagues hub, because those two drifted apart before:
+    the hub card offered only "View standings", so a manager whose league was still
+    FORMING had no way to start it without first opening the detail page.
+
+    Callers must <c:set> these first:
+      cardLeague          the LeagueResponse being rendered
+      cardIsManager       true when the signed-in user manages this league
+      cardCanViewFixtures true when the caller may open this league's fixtures
+                          (must agree with FixtureServiceImpl.assertCanViewLeagueFixtures)
+
+    ${isAdmin} comes from sidebar.jspf, included by both host pages.
+--%>
+<c:set var="cardStatus" value="${empty cardLeague.status ? 'FORMING' : fn:toUpperCase(cardLeague.status)}" />
+<%-- Mirrors TournamentServiceImpl.requireCanStartLeague: the manager may start their own
+     league whatever its type, but an administrator may start PUBLIC leagues only -- a
+     private league is started by its own manager. Admins still VIEW everything. --%>
+<c:set var="cardCanStart" value="${cardStatus == 'FORMING' and (cardIsManager or (isAdmin and cardLeague.leagueType == 'PUBLIC'))}" />
+
+<div class="lg-card-footer">
+    <a class="lg-link" href="${pageContext.request.contextPath}/league/members?leagueId=${cardLeague.leagueId}">View members &rarr;</a>
+    <c:if test="${cardCanViewFixtures}">
+        <a class="lg-link" href="${pageContext.request.contextPath}/tournament?leagueId=${cardLeague.leagueId}#rounds-fixtures">View fixtures &rarr;</a>
+    </c:if>
+    <a class="lg-link" href="${pageContext.request.contextPath}/leaderboard?leagueId=${cardLeague.leagueId}">View standings &rarr;</a>
+    <%-- The tournament only exists once the league has been started. --%>
+    <c:if test="${cardStatus != 'FORMING'}">
+        <a class="lg-link" href="${pageContext.request.contextPath}/tournament?leagueId=${cardLeague.leagueId}">View tournament &rarr;</a>
+    </c:if>
+    <c:if test="${cardCanStart}">
+        <form class="lg-start-form" action="${pageContext.request.contextPath}/league/start" method="post">
+            <%@ include file="/WEB-INF/jspf/csrf-field.jspf" %>
+            <input type="hidden" name="leagueId" value="${fn:escapeXml(cardLeague.leagueId)}">
+            <button type="submit" class="btn-gold lg-start">Start league</button>
+        </form>
+    </c:if>
+</div>

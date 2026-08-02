@@ -29,7 +29,7 @@
     display: flex;
     flex-direction: column;
     padding: 20px 14px 16px;
-    background: linear-gradient(180deg, #091810 0%, #091810 62%, rgba(201, 162, 39, .22) 100%);
+    background: linear-gradient(180deg, var(--surface) 0%, var(--surface) 62%, rgba(201, 162, 39, .22) 100%);
     border-right: 1px solid var(--line);
     position: sticky;
     top: 0;

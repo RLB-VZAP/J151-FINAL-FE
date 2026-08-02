@@ -24,6 +24,8 @@ public class TournamentFixtureResponse {
     private UUID fixtureId;
     private UUID tournamentId;
     private String stage;
+    /** The backend's own name for the stage, e.g. "Quarter-Finals". */
+    private String stageLabel;
     private UUID poolId;
     private String poolName;
     private Integer bracketSlot;

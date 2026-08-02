@@ -94,23 +94,10 @@
     /* ---------- Pitch ---------- */
     var pitch = document.getElementById("mtPitch");
     var usedSlots = {};      // per-group index of the next free slot
-    var fallbackY = 60;      // where unmappable/overflow starters stack
+    var overflow = [];       // starters with no FORMATION slot (unknown position, or more
+                              // starters in a group than the formation has room for)
 
-    starters.forEach(function (player) {
-        var group = FORMATION[norm(player.position)];
-        var slot;
-        if (group) {
-            var i = usedSlots[player.position] || 0;
-            slot = group[i];
-            usedSlots[player.position] = i + 1;
-        }
-        // Unknown position, or more starters in a group than slots: stack along a
-        // fallback row rather than dropping the player.
-        if (!slot) {
-            slot = { n: "", x: 8 + (fallbackY % 90), y: 96 };
-            fallbackY += 22;
-        }
-
+    function renderPitchNode(player, slot) {
         var node = document.createElement("div");
         node.className = "mt-node";
         node.style.left = slot.x + "%";
@@ -129,7 +116,40 @@
         node.addEventListener("click", function () { select(player, node); });
         pitch.appendChild(node);
         player._node = node;
+    }
+
+    starters.forEach(function (player) {
+        var group = FORMATION[norm(player.position)];
+        var slot;
+        if (group) {
+            var i = usedSlots[player.position] || 0;
+            slot = group[i];
+            usedSlots[player.position] = i + 1;
+        }
+        if (slot) {
+            renderPitchNode(player, slot);
+        } else {
+            // Unknown position, or more starters in a group than slots: queue for
+            // the fallback row below rather than dropping the player.
+            overflow.push(player);
+        }
     });
+
+    // Lay any overflow starters out in a tidy row that sits inside the pitch's
+    // try line (92%), evenly spaced across the width so tokens never collide
+    // regardless of how many end up here. A jersey number is meaningless for
+    // an unmapped position, so show a clear placeholder instead of blank.
+    if (overflow.length) {
+        var OVERFLOW_Y = 90;
+        var OVERFLOW_MARGIN = 12;
+        var span = 100 - (OVERFLOW_MARGIN * 2);
+        overflow.forEach(function (player, index) {
+            var x = overflow.length === 1
+                ? 50
+                : OVERFLOW_MARGIN + (span * index / (overflow.length - 1));
+            renderPitchNode(player, { n: "?", x: x, y: OVERFLOW_Y });
+        });
+    }
 
     /* ---------- Bench ---------- */
     var benchWrap = document.getElementById("mtBench");

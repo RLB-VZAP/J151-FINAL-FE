@@ -23,7 +23,7 @@
 .fxd-alert {
     margin: 0 0 18px;
     border: 1px solid var(--line);
-    border-left: 3px solid #c0524a;
+    border-left: 3px solid var(--danger);
     border-radius: 10px;
     padding: .7rem .95rem;
     color: var(--silver-bright);
@@ -88,7 +88,7 @@
     font-weight: 600;
 }
 .fxd-pill-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-.fxd-pill-ft { background: rgba(95, 174, 122, .16); color: #8fd0a5; }
+.fxd-pill-ft { background: rgba(95, 174, 122, .16); color: var(--success-bright); }
 .fxd-pill-live { background: rgba(201, 162, 39, .16); color: var(--gold-bright); }
 
 /* Matchup: name · crest · score · crest · name */
@@ -134,7 +134,7 @@
     flex-shrink: 0;
     border-radius: 16px;
     border: 1px solid var(--line);
-    background: linear-gradient(155deg, #1c3527, #0d1c13);
+    background: var(--card-gradient);
     color: var(--silver-bright);
     font-family: "Space Grotesk", system-ui, sans-serif;
     font-size: 1.15rem;
@@ -175,7 +175,7 @@
     padding: 18px 20px;
     border: 1px solid var(--line);
     border-radius: 16px;
-    background: #091810;
+    background: var(--surface);
 }
 
 .fxd-card-head {
@@ -221,7 +221,7 @@
     font-weight: 600;
     color: var(--silver-bright);
 }
-.fxd-line-val.is-neg { color: #e08279; }
+.fxd-line-val.is-neg { color: var(--danger-bright); }
 
 /* Per-event composition, indented under the player-points line it sums to. */
 .fxd-events {
@@ -267,7 +267,7 @@
 }
 
 /* Deductions read as negative: red figure and a dimmed label. */
-.fxd-event-pts.is-neg { color: #e08279; }
+.fxd-event-pts.is-neg { color: var(--danger-bright); }
 .fxd-event.is-deduction .fxd-event-label { color: #c98d86; }
 
 .fxd-line-total {
@@ -314,7 +314,7 @@
     padding: 3px;
     border: 1px solid var(--line);
     border-radius: 10px;
-    background: #0c1c13;
+    background: var(--surface-raised);
     max-width: 100%;
 }
 
@@ -347,7 +347,7 @@
 .stbl {
     border: 1px solid var(--line);
     border-radius: 14px;
-    background: #091810;
+    background: var(--surface);
     overflow: hidden;
 }
 
@@ -410,7 +410,7 @@
     height: 30px;
     flex-shrink: 0;
     border-radius: 50%;
-    background: #0c1c13;
+    background: var(--surface-raised);
     border: 1px solid var(--line);
     color: var(--silver-dim);
     font-size: .8rem;
@@ -439,7 +439,7 @@
     border-radius: 2px;
 }
 .stbl-card.is-yellow { background: #d9b23a; }
-.stbl-card.is-red { background: #e08279; }
+.stbl-card.is-red { background: var(--danger-bright); }
 .stbl-dash { color: var(--silver-dim); }
 
 .stbl-chev {
@@ -454,7 +454,7 @@
 .stbl-breakdown {
     min-width: 680px;
     padding: 14px 18px 16px;
-    background: #0c1c13;
+    background: var(--surface-raised);
     border-top: 1px solid var(--line);
 }
 
@@ -487,7 +487,7 @@
     color: var(--silver-bright);
     font-variant-numeric: tabular-nums;
 }
-.stbl-bd-pts.is-neg { color: #e08279; }
+.stbl-bd-pts.is-neg { color: var(--danger-bright); }
 
 .stbl-bd-total {
     display: flex;
